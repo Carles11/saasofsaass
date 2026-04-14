@@ -1,8 +1,9 @@
 'use server'
+import { tenants } from '@/5-shared/lib/db/schema'
 
 import { db } from '@/5-shared/lib/db'
 import { blocks } from '@/5-shared/lib/db/schema'
-import { eq, asc, sql } from 'drizzle-orm'
+import { asc, sql, eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import type { BlockKind } from '@/5-shared/types/tenants/blocks'
 import type { SupportedLocaleType } from '@/5-shared/types'
@@ -131,5 +132,23 @@ export async function deleteBlock(blockId: string, tenantId: string) {
 
   await db.delete(blocks).where(eq(blocks.id, blockId))
 
+  revalidateSiteBuilder(tenantId)
+}
+
+// ── Tenant language management ───────────────────────────────────────────────
+
+/**
+ * Update the enabled locales for a tenant (languages shown on public site)
+ * FSD-compliant server action
+ */
+export async function updateTenantLocales(
+  tenantId: string,
+  locales: string[],
+) {
+  await assertTenantOwner(tenantId)
+  await db
+    .update(tenants)
+    .set({ locales, updatedAt: new Date() })
+    .where(eq(tenants.id, tenantId))
   revalidateSiteBuilder(tenantId)
 }

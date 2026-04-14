@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter, usePathname, useParams } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LanguageSelector } from './LanguageSelector'
@@ -8,6 +8,9 @@ import { BlockList } from './BlockList'
 import { BlockEditSheet } from './BlockEditSheet'
 import { CollectionManager } from './CollectionManager'
 import { AutoTranslateButton } from './AutoTranslateButton'
+import { Badge } from '@/components/ui/badge'
+import { SUPPORTED_LOCALES } from '@/5-shared/config/languages/supportedLanguages'
+import { updateTenantLocales } from '@/3-features/manage-site-blocks/actions/blockActions'
 import type { Block, Tenant, TenantEntity, TenantTranslation } from '@/5-shared/lib/db/schema'
 import type { SupportedLocaleType } from '@/5-shared/types'
 
@@ -27,6 +30,8 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
   const pathname = usePathname();
   const params = useParams();
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
+  const [locales, setLocales] = useState<string[]>(tenant.locales)
+  const [isSaving, startTransition] = useTransition()
 
   const selectedBlock = blocks.find(b => b.id === selectedBlockId) ?? null
 
@@ -63,6 +68,7 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
         <TabsList>
           <TabsTrigger value="blocks">Blocks</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="blocks" className="mt-4">
@@ -79,6 +85,39 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
             activeLocale={activeLocale}
             initialEntities={initialEntities}
           />
+        </TabsContent>
+
+        <TabsContent value="settings" className="mt-4">
+          <div className="mb-6">
+            <h3 className="font-semibold mb-2">Enabled Languages</h3>
+            <div className="flex flex-wrap gap-2">
+              {SUPPORTED_LOCALES.map(locale => (
+                <Badge
+                  key={locale}
+                  variant={locales.includes(locale) ? 'default' : 'outline'}
+                  className={
+                    'cursor-pointer select-none' + (isSaving ? ' opacity-60 pointer-events-none' : '')
+                  }
+                  onClick={() => {
+                    const next = locales.includes(locale)
+                      ? locales.filter(x => x !== locale)
+                      : [...locales, locale]
+                    setLocales(next)
+                    startTransition(() => {
+                      updateTenantLocales(tenant.id, next)
+                    })
+                  }}
+                >
+                  {locale}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-zinc-500 mt-2">
+              Click to enable/disable languages for your public site.
+              {isSaving && <span className="ml-2 text-blue-500">Saving…</span>}
+            </p>
+          </div>
+          {/* Future: dark mode, subdomain, custom domain, etc. */}
         </TabsContent>
       </Tabs>
 

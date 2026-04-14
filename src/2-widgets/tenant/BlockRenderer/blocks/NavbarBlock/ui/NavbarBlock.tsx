@@ -1,6 +1,6 @@
 
 import type { BlockProps } from '../../../config/types'
-import { SUPPORTED_LOCALES } from '@/5-shared/config/languages/supportedLanguages'
+// import { SUPPORTED_LOCALES } from '@/5-shared/config/languages/supportedLanguages'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface NavbarConfig {
@@ -28,7 +28,7 @@ export function NavbarBlock({ config, t, tenant, locale }: BlockProps & { locale
         {/* Language Selector Tabs */}
         <Tabs value={locale}>
           <TabsList>
-            {SUPPORTED_LOCALES.map(l => (
+            {tenant.locales.map(l => (
               <TabsTrigger
                 key={l}
                 value={l}
