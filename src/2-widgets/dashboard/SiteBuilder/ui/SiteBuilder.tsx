@@ -6,6 +6,7 @@ import { LanguageSelector } from './LanguageSelector'
 import { BlockList } from './BlockList'
 import { BlockEditSheet } from './BlockEditSheet'
 import { CollectionManager } from './CollectionManager'
+import { AutoTranslateButton } from './AutoTranslateButton'
 import type { Block, Tenant, TenantEntity, TenantTranslation } from '@/5-shared/lib/db/schema'
 import type { SupportedLocaleType } from '@/5-shared/types'
 
@@ -33,11 +34,14 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
           <h2 className="text-2xl font-bold text-zinc-900">{tenant.name}</h2>
           <p className="text-sm text-zinc-500">Site Builder</p>
         </div>
-        <LanguageSelector
-          locales={tenant.locales}
-          activeLocale={activeLocale}
-          onChange={setActiveLocale}
-        />
+        <div className="flex items-center gap-2">
+          <AutoTranslateButton tenantId={tenant.id} />
+          <LanguageSelector
+            locales={tenant.locales}
+            activeLocale={activeLocale}
+            onChange={setActiveLocale}
+          />
+        </div>
       </div>
 
       {/* ── Main tabs ───────────────────────────────────────────────── */}

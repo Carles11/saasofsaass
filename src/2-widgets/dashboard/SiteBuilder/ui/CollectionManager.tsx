@@ -156,7 +156,7 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
             {entity.status}
           </Badge>
           {translation ? (
-            <span className="text-xs text-zinc-400">{translation.translationStatus}</span>
+            <TranslationStatusBadge status={translation.translationStatus} />
           ) : (
             <span className="text-xs text-amber-500">no translation for {activeLocale}</span>
           )}
@@ -294,5 +294,34 @@ function TranslationForm({
         </Button>
       </DialogClose>
     </form>
+  )
+}
+
+// ── Translation Status Badge ───────────────────────────────────────────────────
+
+import { Badge } from '@/components/ui/badge'
+
+type TranslationStatus = 'pending' | 'translated' | 'failed' | 'locked'
+
+const STATUS_CONFIG: Record<
+  TranslationStatus,
+  { label: string; icon: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+> = {
+  pending:    { label: 'pending',    icon: '⏳', variant: 'secondary' },
+  translated: { label: 'translated', icon: '✓',  variant: 'default' },
+  failed:     { label: 'failed',     icon: '✗',  variant: 'destructive' },
+  locked:     { label: 'locked',     icon: '🔒', variant: 'outline' },
+}
+
+function TranslationStatusBadge({ status }: { status: string }) {
+  const cfg = STATUS_CONFIG[status as TranslationStatus] ?? {
+    label: status,
+    icon: '?',
+    variant: 'outline' as const,
+  }
+  return (
+    <Badge variant={cfg.variant} className="gap-1 text-xs">
+      {cfg.icon} {cfg.label}
+    </Badge>
   )
 }
