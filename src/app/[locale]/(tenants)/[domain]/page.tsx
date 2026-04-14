@@ -1,5 +1,5 @@
 import { TenantPage } from "@/1-pages/tenants";
-import { getServerParams, Params, SearchParams } from "@/5-shared/lib/next/params";
+import { getServerParams, Params, SearchParams } from "@/5-shared/lib/next/params.server";
 
 export default async function Page({
   params,
