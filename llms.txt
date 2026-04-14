@@ -1,0 +1,18 @@
+**SaaSofSaaSs (SoSS) Engine - AI Index**
+This file provides a map for AI crawlers and search engines to understand the SoSS multi-tenant factory.
+
+**Project Metadata**
+- Framework: Next.js 16.2
+- Architecture: Feature-Sliced Design (FSD)
+- Primary Domain: saasofsaass.com
+- Pilot Project: Àgora (Charity/Social Work)
+
+**Documentation Roots**
+- Master Context: Vision and Core AI Rules. (aiContexts\0-global\.ai-context.md)
+- Routing Manual: DNS Matrix and Middleware Logic. (/aiContexts/1-architechture/.routing.md)
+- Feature: Paywall: Monetization logic.(aiContexts/3-features/paywall/.ai-paywall.md)
+- Feature: Translations: 11-language engine.(aiContexts/src/3-features/translations/.ai-translations.md)
+
+**Code Standards**
+- See AGENTS.md for internal coding protocols. (./AGENTS.md)
+- See Block Contract for data structures. (./4-entities/block/model/types.ts)
