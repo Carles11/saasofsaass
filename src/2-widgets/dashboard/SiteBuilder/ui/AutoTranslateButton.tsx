@@ -15,7 +15,12 @@ export function AutoTranslateButton({ tenantId }: AutoTranslateButtonProps) {
   function handleClick() {
     startTransition(async () => {
       try {
-        const { succeeded, failed, remaining } = await triggerTenantTranslation(tenantId)
+        const { succeeded, failed, remaining, rateLimitRetryAfter } = await triggerTenantTranslation(tenantId)
+
+        if (rateLimitRetryAfter) {
+          toast.warning(`⏱ Gemini rate limit — retry in ${rateLimitRetryAfter}s. ${succeeded > 0 ? `(${succeeded} row${succeeded !== 1 ? 's' : ''} saved before limit)` : ''}`)
+          return
+        }
 
         if (failed === 0 && remaining === 0) {
           toast.success(`✨ ${succeeded} row${succeeded !== 1 ? 's' : ''} translated successfully.`)
@@ -31,7 +36,8 @@ export function AutoTranslateButton({ tenantId }: AutoTranslateButtonProps) {
       } catch {
         toast.error('Translation worker failed to start. Check your GEMINI_API_KEY.')
       }
-    })
+      }
+    )
   }
 
   return (

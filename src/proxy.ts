@@ -62,23 +62,32 @@ export default async function middleware(req: NextRequest) {
   }
 
   // ── Step 2: Strip locale prefix for clean path rewriting ──────────────────
-  // e.g. /en/dashboard → /dashboard
+  // e.g. /en/dashboard → /dashboard, /ca/about → /about
   const strippedPath = pathname.replace(localePattern, '/') || '/'
   const headers = intlResponse.headers
 
-  // ── Step 3: Classify hostname → route to correct app section ──────────────
+  // ── Step 3: Resolve locale from pathname (reliable: we only reach here if
+  //    intlMiddleware did not 307/308, meaning the locale prefix is present) ──
+  const localeMatch = pathname.match(localePattern)
+  const locale = localeMatch?.[1] ?? routing.defaultLocale
+
+  // ── Step 4: Classify hostname → route to correct app section ──────────────
+  // Route groups (marketing), (dashboard), (tenants) are transparent to URLs —
+  // Next.js resolves them from the filesystem. Do NOT include them in rewrites.
   const parsed = parseDomain(rawHostname, rootDomain, appDomain, devRootDomain)
 
   switch (parsed.type) {
     case 'MARKETING': {
       const url = req.nextUrl.clone()
-      url.pathname = `/(marketing)${strippedPath === '/' ? '' : strippedPath}`
+      url.pathname = `/${locale}${strippedPath === '/' ? '' : strippedPath}`
       return NextResponse.rewrite(url, { headers })
     }
 
     case 'DASHBOARD': {
       const url = req.nextUrl.clone()
-      url.pathname = `/(dashboard)${strippedPath}`
+      // Bare root '/' has no page — dashboard home lives at /{locale}/dashboard.
+      // All other sub-paths (e.g. /dashboard/site-builder/123) pass through as-is.
+      url.pathname = `/${locale}${strippedPath === '/' ? '/dashboard' : strippedPath}`
       return NextResponse.rewrite(url, { headers })
     }
 
@@ -97,7 +106,7 @@ export default async function middleware(req: NextRequest) {
       // params.domain in Server Components always receives the real value.
       const normalizedHost = normalizeHostname(rawHostname)
       const url = req.nextUrl.clone()
-      url.pathname = `/(tenants)/${normalizedHost}${strippedPath === '/' ? '' : strippedPath}`
+      url.pathname = `/${locale}/${normalizedHost}${strippedPath === '/' ? '' : strippedPath}`
       return NextResponse.rewrite(url, { headers })
     }
   }

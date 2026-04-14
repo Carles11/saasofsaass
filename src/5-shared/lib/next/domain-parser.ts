@@ -57,6 +57,13 @@ export function parseDomain(
     return { type: 'MARKETING', tenantKey: null }
   }
 
+  // ── Dev tenant subdomain: <slug>.localhost ─────────────────────────────────
+  // Handles local dev where devRootDomain may not cover bare 'localhost' subdomains.
+  const localhostSubMatch = hostname.match(/^([a-z0-9][a-z0-9-]{0,61}[a-z0-9]?)\.localhost$/)
+  if (localhostSubMatch) {
+    return { type: 'TENANT_SUBDOMAIN', tenantKey: localhostSubMatch[1] }
+  }
+
   // ── Production tenant subdomain: <slug>.saasofsaass.com ───────────────────
   // Allows single-label subdomains only (no nested: app.acme.saasofsaass.com)
   const subdomainPattern = new RegExp(

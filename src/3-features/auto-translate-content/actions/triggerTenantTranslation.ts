@@ -4,7 +4,7 @@ import { db } from '@/5-shared/lib/db'
 import { tenants, blocks, tenantEntities, tenantTranslations } from '@/5-shared/lib/db/schema'
 import { eq, inArray, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
-import { translatePayload, TranslationError } from '../api/translateWithGemini'
+import { translatePayload, TranslationError, RateLimitError } from '../api/translateWithGemini'
 
 const BATCH_LIMIT = 30
 const RATE_LIMIT_DELAY_MS = 150
@@ -25,12 +25,15 @@ export interface TranslationResult {
   succeeded: number
   failed: number
   remaining: number
+  /** Set when Gemini returned 429. Client should wait this many seconds and retry. */
+  rateLimitRetryAfter?: number
 }
 
 type EntityJob = {
   kind: 'entity'
   translationId: string
   entityId: string
+  sourceLocale: string
   targetLocale: string
   sourcePayload: Record<string, string>
   entityKind: string
@@ -40,6 +43,7 @@ type BlockJob = {
   kind: 'block'
   blockId: string
   blockType: string
+  sourceLocale: string
   targetLocale: string
   sourcePayload: Record<string, string>
   allTranslations: Record<string, Record<string, string>>
@@ -69,6 +73,8 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
 
   if (!tenant) throw new Error('Tenant not found')
 
+  console.log(`[AutoTranslate] Tenant: "${tenant.name}" | defaultLocale: ${tenant.defaultLocale} | locales: [${tenant.locales.join(', ')}]`)
+
   const jobs: Job[] = []
 
   // ── Collect entity jobs ──────────────────────────────────────────────────────
@@ -89,28 +95,54 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
       )
     )
 
-  // For each pending row, fetch the source locale payload
+  console.log(`[AutoTranslate] Found ${pendingRows.length} pending/failed entity translation rows`)
+
+  // For each pending row, find the best source: prefer defaultLocale, fall back to
+  // any locale that actually has content. This handles the case where a user writes
+  // content in a non-default locale first.
   for (const row of pendingRows) {
-    const [sourceRow] = await db
+    // Fetch all translation rows for this entity so we can pick the richest source
+    const allEntityRows = await db
       .select({
+        locale: tenantTranslations.locale,
         payload: tenantTranslations.payload,
         kind: tenantEntities.kind,
       })
       .from(tenantTranslations)
       .innerJoin(tenantEntities, eq(tenantTranslations.entityId, tenantEntities.id))
-      .where(
-        and(
-          eq(tenantTranslations.entityId, row.entityId),
-          eq(tenantTranslations.locale, tenant.defaultLocale),
-        )
-      )
-      .limit(1)
+      .where(eq(tenantTranslations.entityId, row.entityId))
 
-    if (!sourceRow) continue
+    // Pick source: defaultLocale first, then any locale with content
+    const localeOrder = [
+      tenant.defaultLocale,
+      ...tenant.locales.filter(l => l !== tenant.defaultLocale),
+    ]
+    let sourceRow: (typeof allEntityRows)[number] | undefined
+    for (const candidateLocale of localeOrder) {
+      const candidate = allEntityRows.find(r => r.locale === candidateLocale)
+      if (!candidate) continue
+      const p = candidate.payload as Record<string, string>
+      if (Object.values(p).some(v => typeof v === 'string' && v.trim().length > 0)) {
+        sourceRow = candidate
+        break
+      }
+    }
+
+    if (!sourceRow) {
+      console.log(`[AutoTranslate] Entity ${row.entityId} → locale ${row.locale}: SKIP (no source locale has content)`)
+      continue
+    }
 
     const sourcePayload = sourceRow.payload as Record<string, string>
-    const hasContent = Object.values(sourcePayload).some(v => typeof v === 'string' && v.trim().length > 0)
-    if (!hasContent) continue // source not written yet — skip
+    const sourceLocale = sourceRow.locale
+
+    // Don't translate a row into its own source locale
+    if (row.locale === sourceLocale) {
+      console.log(`[AutoTranslate] Entity ${row.entityId} → locale ${row.locale}: SKIP (is the source locale)`)
+      continue
+    }
+
+    console.log(`[AutoTranslate] Entity ${row.entityId} → ${sourceLocale} ➜ ${row.locale} (kind: ${sourceRow.kind})`)
 
     jobs.push({
       kind: 'entity',
@@ -119,6 +151,7 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
       targetLocale: row.locale,
       sourcePayload,
       entityKind: sourceRow.kind,
+      sourceLocale,
     })
   }
 
@@ -129,25 +162,51 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
     .from(blocks)
     .where(eq(blocks.tenantId, tenantId))
 
+  console.log(`[AutoTranslate] Found ${tenantBlocks.length} blocks`)
+
   for (const block of tenantBlocks) {
     const allTrans = (block.translations ?? {}) as Record<string, Record<string, string>>
-    const sourcePayload = allTrans[tenant.defaultLocale] ?? {}
-    const hasContent = Object.values(sourcePayload).some(v => typeof v === 'string' && v.trim().length > 0)
-    if (!hasContent) continue
+
+    // Pick best source locale: defaultLocale first, then any locale with content
+    const localeOrder = [
+      tenant.defaultLocale,
+      ...tenant.locales.filter(l => l !== tenant.defaultLocale),
+    ]
+    let sourceLocale: string | undefined
+    let sourcePayload: Record<string, string> = {}
+    for (const candidate of localeOrder) {
+      const p = allTrans[candidate] ?? {}
+      if (Object.values(p).some(v => typeof v === 'string' && v.trim().length > 0)) {
+        sourceLocale = candidate
+        sourcePayload = p
+        break
+      }
+    }
+
+    if (!sourceLocale) {
+      console.log(`[AutoTranslate] Block ${block.id} (${block.type}): SKIP (no locale has content)`)
+      continue
+    }
 
     for (const targetLocale of tenant.locales) {
-      if (targetLocale === tenant.defaultLocale) continue
+      if (targetLocale === sourceLocale) continue
 
       const existing = allTrans[targetLocale] ?? {}
       const hasAllFields = Object.keys(sourcePayload).every(
         k => typeof existing[k] === 'string' && existing[k].trim().length > 0,
       )
-      if (hasAllFields) continue // already translated
+      if (hasAllFields) {
+        console.log(`[AutoTranslate] Block ${block.id} (${block.type}) ${sourceLocale} ➜ ${targetLocale}: SKIP (already has all fields)`)
+        continue
+      }
+
+      console.log(`[AutoTranslate] Block ${block.id} (${block.type}) ${sourceLocale} ➜ ${targetLocale}: QUEUED`)
 
       jobs.push({
         kind: 'block',
         blockId: block.id,
         blockType: block.type,
+        sourceLocale,
         targetLocale,
         sourcePayload,
         allTranslations: allTrans,
@@ -168,13 +227,15 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
       : `${job.blockType} block on a ${tenant.category} website called "${tenant.name}"`
 
     try {
+      console.log(`[AutoTranslate] Calling Gemini: ${job.sourceLocale} ➜ ${job.targetLocale} | payload keys: [${Object.keys(job.sourcePayload).join(', ')}]`)
       const translated = await translatePayload({
         payload: job.sourcePayload,
-        sourceLocale: tenant.defaultLocale,
+        sourceLocale: job.sourceLocale,
         targetLocale: job.targetLocale,
         context,
         category: tenant.category,
       })
+      console.log(`[AutoTranslate] Gemini result: ${JSON.stringify(translated)}`)
 
       if (job.kind === 'entity') {
         await db
@@ -199,7 +260,16 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
       }
 
       succeeded++
+      console.log(`[AutoTranslate] ✓ succeeded (total so far: ${succeeded})`)
     } catch (err) {
+      console.error(`[AutoTranslate] ✗ failed:`, err)
+      if (err instanceof RateLimitError) {
+        // Abort the rest of the batch — all subsequent calls will also 429.
+        // Return as data, NOT re-throw: Server Actions can't serialize custom classes.
+        console.log(`[AutoTranslate] Rate limited (retry in ${err.retryAfterSeconds}s) — aborting batch early`)
+        revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, 'page')
+        return { succeeded, failed, remaining: totalJobs - succeeded, rateLimitRetryAfter: err.retryAfterSeconds }
+      }
       if (err instanceof TranslationError) {
         if (job.kind === 'entity') {
           await db

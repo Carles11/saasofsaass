@@ -30,6 +30,13 @@ export class TranslationError extends Error {
   }
 }
 
+export class RateLimitError extends Error {
+  constructor(public readonly retryAfterSeconds: number) {
+    super(`Gemini rate limit hit — retry in ${retryAfterSeconds}s`)
+    this.name = 'RateLimitError'
+  }
+}
+
 /**
  * Translate a payload object from sourceLocale to targetLocale using Gemini Flash 2.0.
  * Returns an object with the SAME keys but translated values.
@@ -65,7 +72,7 @@ export async function translatePayload({
 
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-2.5-flash',
     systemInstruction,
     generationConfig: {
       responseMimeType: 'application/json',
@@ -77,6 +84,15 @@ export async function translatePayload({
     const result = await model.generateContent(userPrompt)
     responseText = result.response.text()
   } catch (err) {
+    // Surface 429 rate-limit errors with the retry delay included
+    const errAny = err as Record<string, unknown>
+    if (errAny?.status === 429) {
+      const details = errAny?.errorDetails as Array<Record<string, unknown>> | undefined
+      const retryInfo = details?.find(d => d['@type'] === 'type.googleapis.com/google.rpc.RetryInfo')
+      const retryDelayStr = retryInfo?.['retryDelay'] as string | undefined  // e.g. "12s"
+      const retrySeconds = retryDelayStr ? parseInt(retryDelayStr, 10) : 60
+      throw new RateLimitError(isNaN(retrySeconds) ? 60 : retrySeconds)
+    }
     throw new TranslationError(`Gemini API call failed: ${String(err)}`, err)
   }
 

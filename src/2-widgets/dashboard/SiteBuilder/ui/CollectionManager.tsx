@@ -299,8 +299,6 @@ function TranslationForm({
 
 // ── Translation Status Badge ───────────────────────────────────────────────────
 
-import { Badge } from '@/components/ui/badge'
-
 type TranslationStatus = 'pending' | 'translated' | 'failed' | 'locked'
 
 const STATUS_CONFIG: Record<

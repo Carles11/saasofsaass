@@ -14,7 +14,13 @@ export async function getServerParams(
   const domain = params.domain || 'localhost:3000'
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'saasofsaass.com'
 
-  const isSubdomain = domain.endsWith(rootDomain) && domain !== rootDomain
+  // Mirror the same subdomain detection logic as domain-parser.ts:
+  // a) production:  <slug>.saasofsaass.com
+  // b) dev:         <slug>.localhost
+  const isSubdomain =
+    (domain.endsWith(`.${rootDomain}`) && domain !== rootDomain) ||
+    /^[a-z0-9][a-z0-9-]*\.localhost$/.test(domain)
+
   const tenant = isSubdomain ? domain.split('.')[0] : domain
   const locale = (await getLocale()) as SupportedLocaleType
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { LanguageSelector } from './LanguageSelector'
 import { BlockList } from './BlockList'
@@ -22,6 +23,9 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType,
   )
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams();
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
 
   const selectedBlock = blocks.find(b => b.id === selectedBlockId) ?? null
@@ -39,7 +43,17 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
           <LanguageSelector
             locales={tenant.locales}
             activeLocale={activeLocale}
-            onChange={setActiveLocale}
+            onChange={(locale) => {
+              setActiveLocale(locale);
+              // Replace the locale in the URL and navigate
+              // Path: /[locale]/(dashboard)/dashboard/site-builder/[tenantId]
+              // params: { locale, tenantId }
+              const segments = pathname.split('/');
+              if (segments[1] && tenant.locales.includes(locale)) {
+                segments[1] = locale;
+                router.push(segments.join('/'));
+              }
+            }}
           />
         </div>
       </div>

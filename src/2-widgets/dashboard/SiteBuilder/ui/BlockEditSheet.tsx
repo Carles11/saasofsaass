@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { updateBlockTranslations, updateBlockConfig } from '@/3-features/manage-site-blocks'
-import { blockRegistry } from '@/2-widgets/tenant/BlockRenderer/config/registry'
+import { blockFields } from '@/2-widgets/tenant/BlockRenderer/config/block-fields'
 import { isRtl } from '@/5-shared/lib/next/rtl'
 import type { Block, Tenant } from '@/5-shared/lib/db/schema'
 import type { SupportedLocaleType } from '@/5-shared/types'
@@ -40,8 +40,8 @@ export function BlockEditSheet({
 }: BlockEditSheetProps) {
   if (!block) return null
 
-  const entry    = blockRegistry[block.type as BlockKind]
-  const fields   = entry?.fields ?? []
+  const entry    = blockFields[block.type as BlockKind]
+  const fields   = entry ?? []
   const cfFields = CONFIG_FIELDS[block.type as BlockKind] ?? []
 
   const translations = (block.translations ?? {}) as Record<string, Record<string, string>>
