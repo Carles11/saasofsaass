@@ -22,7 +22,7 @@ export async function TenantPage({ context }: TenantPageProps) {
     <>
       {cssVars && <style>{`:root { ${cssVars} }`}</style>}
       <main>
-        <BlockRenderer blocks={tenantBlocks} locale={locale} />
+        <BlockRenderer blocks={tenantBlocks} locale={locale} tenant={tenantData} />
       </main>
     </>
   )
