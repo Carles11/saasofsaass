@@ -22,6 +22,10 @@ export type BlockComponent =
 export interface BlockRegistryEntry {
   component: BlockComponent
   defaultConfig: Record<string, unknown>
+  /** Translatable fields rendered by the FocusedLanguageEditor in the dashboard.
+   * Collection blocks (e.g. blog-feed) leave this empty — their content
+   * lives in tenant_entities and is managed via CollectionManager. */
+  fields?: Array<{ key: string; label: string; inputType: 'input' | 'textarea' }>
 }
 
 export type BlockRegistry = Partial<Record<BlockKind, BlockRegistryEntry>>

@@ -9,8 +9,8 @@ interface GetEntitiesByTenantOptions {
   locale: SupportedLocaleType
   /** Optionally filter by a single kind */
   kind?: EntityKind
-  /** Defaults to 'published'. Pass undefined to return all statuses. */
-  status?: 'draft' | 'published' | 'archived'
+  /** Pass null or omit to return all statuses (dashboard). Default is 'published' for public pages. */
+  status?: 'draft' | 'published' | 'archived' | null
 }
 
 /**
@@ -22,11 +22,11 @@ export async function getEntitiesByTenant({
   tenantId,
   locale,
   kind,
-  status = 'published',
+  status,
 }: GetEntitiesByTenantOptions) {
   const conditions = [eq(tenantEntities.tenantId, tenantId)]
   if (kind)   conditions.push(eq(tenantEntities.kind, kind))
-  if (status) conditions.push(eq(tenantEntities.status, status))
+  if (status != null) conditions.push(eq(tenantEntities.status, status))
 
   return db
     .select({
