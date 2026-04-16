@@ -118,6 +118,40 @@
 }
 
 @layer base {
+  /* Bentley Hybrid Template Themes */
+  .theme-bentley-default {
+    --radius: 0.75rem;
+    --font-heading: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --section-gap: 3rem;
+    --tracking: 0em;
+    font-family: var(--font-heading);
+  }
+  .theme-bentley-modern {
+    --radius: 0rem;
+    --font-heading: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+    --section-gap: 0rem;
+    --tracking: -0.05em;
+    font-family: var(--font-heading);
+  }
+  .theme-bentley-classic {
+    --radius: 2.5rem;
+    --font-heading: "Georgia", ui-serif, serif;
+    --section-gap: 5rem;
+    --tracking: 0.04em;
+    font-family: var(--font-heading);
+  }
+
+  /* Bentley container utility */
+  .bentley-container {
+    border-radius: var(--radius);
+    letter-spacing: var(--tracking);
+    font-family: var(--font-heading);
+    max-width: 100vw;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem; /* theme(spacing.4) = 1rem */
+    padding-right: 1rem;
+  }
   * {
     @apply border-border outline-ring/50;
   }

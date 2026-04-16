@@ -1,9 +1,9 @@
 'use server'
-import { tenants } from '@/5-shared/lib/db/schema'
 
+import { tenants, tenantEntities, tenantTranslations } from '@/5-shared/lib/db/schema'
 import { db } from '@/5-shared/lib/db'
 import { blocks } from '@/5-shared/lib/db/schema'
-import { asc, sql, eq } from 'drizzle-orm'
+import { asc, sql, eq, inArray, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import type { BlockKind } from '@/5-shared/types/tenants/blocks'
 import type { SupportedLocaleType } from '@/5-shared/types'
@@ -146,9 +146,63 @@ export async function updateTenantLocales(
   locales: string[],
 ) {
   await assertTenantOwner(tenantId)
+
+  // Get previous locales before update
+  const [tenant] = await db.select({ locales: tenants.locales }).from(tenants).where(eq(tenants.id, tenantId)).limit(1)
+  const prevLocales: string[] = tenant?.locales ?? []
+
+  // Update locales
   await db
     .update(tenants)
     .set({ locales, updatedAt: new Date() })
     .where(eq(tenants.id, tenantId))
+
+  // Compute added and removed locales
+  const added = locales.filter(l => !prevLocales.includes(l))
+  const removed = prevLocales.filter(l => !locales.includes(l))
+
+  // Backfill missing translation rows for added locales
+  if (added.length > 0) {
+    // Get all entity IDs for this tenant
+    const entities = await db.select({ id: tenantEntities.id })
+      .from(tenantEntities)
+      .where(eq(tenantEntities.tenantId, tenantId))
+    const entityIds = entities.map(e => e.id)
+
+    for (const locale of added) {
+      // Find existing translations for this locale
+      const existing = await db.select({ entityId: tenantTranslations.entityId })
+        .from(tenantTranslations)
+        .where(and(
+          eq(tenantTranslations.tenantId, tenantId),
+          eq(tenantTranslations.locale, locale),
+          inArray(tenantTranslations.entityId, entityIds)
+        ))
+      const existingIds = new Set(existing.map(e => e.entityId))
+      const missing = entityIds.filter(id => !existingIds.has(id))
+      if (missing.length > 0) {
+        await db.insert(tenantTranslations).values(
+          missing.map(entityId => ({
+            tenantId,
+            entityId,
+            locale,
+            payload: {},
+            translationStatus: 'pending',
+            isLocked: false,
+          }))
+        )
+      }
+    }
+  }
+
+  // Remove translation rows for removed locales
+  if (removed.length > 0) {
+    await db.delete(tenantTranslations)
+      .where(and(
+        eq(tenantTranslations.tenantId, tenantId),
+        inArray(tenantTranslations.locale, removed)
+      ))
+  }
+
   revalidateSiteBuilder(tenantId)
 }

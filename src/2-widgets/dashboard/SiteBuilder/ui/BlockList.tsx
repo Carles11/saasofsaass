@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/tenant/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -61,7 +61,7 @@ export function BlockList({ blocks, tenantId, onEdit }: BlockListProps) {
 
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline" className="mt-2">
+          <Button tenantVariant="outline" className="mt-2">
             + Add Block
           </Button>
         </DialogTrigger>

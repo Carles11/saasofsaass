@@ -1,15 +1,35 @@
-import { useStore } from "@/5-shared/store";
+import { useTranslations } from "next-intl";
 
-function getNestedValue(obj: Record<string, any>, key: string): string | undefined {
-  if (obj[key]) return obj[key];
-  // Support dot notation for nested keys
-  return key.split('.').reduce((acc, part) => (acc && acc[part] ? acc[part] : undefined), obj);
-}
+/**
+ * HOOK: useTranslation
+ * Refactored for the "Bentley" Engine.
+ * * Since platform translations (UI labels, etc.) are now handled by next-intl 
+ * and fetched from the platform_translations table, we no longer store 
+ * the dictionary in Zustand.
+ * * This hook bridges the gap, providing the 't' function with native 
+ * dot-notation support and server-side optimization.
+ */
+export function useTranslation(namespace?: string) {
+  // next-intl's useTranslations is our new source of truth.
+  // It handles the cache and the Neon DB handshake automatically.
+  const t = useTranslations(namespace);
 
-export function useTranslation() {
-  const dictionary = useStore((state) => state.dictionary);
-  function t(key: string): string {
-    return getNestedValue(dictionary, key) ?? key;
-  }
-  return { t };
+  /**
+   * Translates a key using next-intl.
+   * next-intl natively supports dot notation (e.g., 'dashboard.nav.home'),
+   * so the old getNestedValue utility is no longer required.
+   */
+  const translate = (key: string): string => {
+    try {
+      return t(key);
+    } catch {
+      // Fallback to the key itself if the translation is missing
+      return key;
+    }
+  };
+
+  return { 
+    t: translate,
+    // You can also expose the raw next-intl hook features if needed
+  };
 }

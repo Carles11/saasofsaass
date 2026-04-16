@@ -1,39 +1,45 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { useRouter, usePathname, useParams } from 'next/navigation'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { LanguageSelector } from './LanguageSelector'
-import { BlockList } from './BlockList'
-import { BlockEditSheet } from './BlockEditSheet'
-import { CollectionManager } from './CollectionManager'
-import { AutoTranslateButton } from './AutoTranslateButton'
-import { Badge } from '@/components/ui/badge'
-import { SUPPORTED_LOCALES } from '@/5-shared/config/languages/supportedLanguages'
-import { updateTenantLocales } from '@/3-features/manage-site-blocks/actions/blockActions'
-import type { Block, Tenant, TenantEntity, TenantTranslation } from '@/5-shared/lib/db/schema'
-import type { SupportedLocaleType } from '@/5-shared/types'
+import TenantLayoutResolver from "@/2-widgets/tenant/ui/TenantLayoutResolver";
+import { updateTenantLocales } from "@/3-features/manage-site-blocks/actions/blockActions";
+import { TemplatePicker } from "@/3-features/manage-site-blocks/ui/TemplatePicker";
+import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
+import type { Block, Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
+import type { SupportedLocaleType } from "@/5-shared/types";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { AutoTranslateButton } from "./AutoTranslateButton";
+import { BlockEditSheet } from "./BlockEditSheet";
+import { BlockList } from "./BlockList";
+import { CollectionManager } from "./CollectionManager";
+import { LanguageSelector } from "./LanguageSelector";
 
-type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null }
+type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 
 interface SiteBuilderProps {
-  tenant: Tenant
-  blocks: Block[]
-  initialEntities: EntityRow[]
+  tenant: Tenant;
+  blocks: Block[];
+  initialEntities: EntityRow[];
 }
 
 export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProps) {
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
-    tenant.defaultLocale as SupportedLocaleType,
-  )
+    tenant.defaultLocale as SupportedLocaleType
+  );
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
-  const [locales, setLocales] = useState<string[]>(tenant.locales)
-  const [isSaving, startTransition] = useTransition()
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [locales, setLocales] = useState<string[]>(tenant.locales);
+  const [isSaving, startTransition] = useTransition();
+  // Live preview state (fix type)
+  const [previewTemplateId, setPreviewTemplateId] = useState<import("@/5-shared/config/templates").TenantTemplateId>(
+    (tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId)
+  );
 
-  const selectedBlock = blocks.find(b => b.id === selectedBlockId) ?? null
+  const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,10 +59,10 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
               // Replace the locale in the URL and navigate
               // Path: /[locale]/(dashboard)/dashboard/site-builder/[tenantId]
               // params: { locale, tenantId }
-              const segments = pathname.split('/');
+              const segments = pathname.split("/");
               if (segments[1] && tenant.locales.includes(locale)) {
                 segments[1] = locale;
-                router.push(segments.join('/'));
+                router.push(segments.join("/"));
               }
             }}
           />
@@ -72,11 +78,12 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
         </TabsList>
 
         <TabsContent value="blocks" className="mt-4">
-          <BlockList
-            blocks={blocks}
-            tenantId={tenant.id}
-            onEdit={setSelectedBlockId}
-          />
+          {/* Only the block preview area uses the tenant template styles */}
+          <div className="rounded-2xl border border-zinc-200 bg-white p-4">
+            <TenantLayoutResolver templateId={previewTemplateId}>
+              <BlockList blocks={blocks} tenantId={tenant.id} onEdit={setSelectedBlockId} />
+            </TenantLayoutResolver>
+          </div>
         </TabsContent>
 
         <TabsContent value="content" className="mt-4">
@@ -91,21 +98,22 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
           <div className="mb-6">
             <h3 className="font-semibold mb-2">Enabled Languages</h3>
             <div className="flex flex-wrap gap-2">
-              {SUPPORTED_LOCALES.map(locale => (
+              {SUPPORTED_LOCALES.map((locale) => (
                 <Badge
                   key={locale}
-                  variant={locales.includes(locale) ? 'default' : 'outline'}
+                  variant={locales.includes(locale) ? "default" : "outline"}
                   className={
-                    'cursor-pointer select-none' + (isSaving ? ' opacity-60 pointer-events-none' : '')
+                    "cursor-pointer select-none" +
+                    (isSaving ? " opacity-60 pointer-events-none" : "")
                   }
                   onClick={() => {
                     const next = locales.includes(locale)
-                      ? locales.filter(x => x !== locale)
-                      : [...locales, locale]
-                    setLocales(next)
+                      ? locales.filter((x) => x !== locale)
+                      : [...locales, locale];
+                    setLocales(next);
                     startTransition(() => {
-                      updateTenantLocales(tenant.id, next)
-                    })
+                      updateTenantLocales(tenant.id, next);
+                    });
                   }}
                 >
                   {locale}
@@ -116,6 +124,10 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
               Click to enable/disable languages for your public site.
               {isSaving && <span className="ml-2 text-blue-500">Saving…</span>}
             </p>
+          </div>
+          <div className="mb-8">
+            <h3 className="font-semibold mb-2">Site Template</h3>
+            <TemplatePicker previewTemplateId={previewTemplateId} setPreviewTemplateId={setPreviewTemplateId} />
           </div>
           {/* Future: dark mode, subdomain, custom domain, etc. */}
         </TabsContent>
@@ -130,5 +142,5 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
         onClose={() => setSelectedBlockId(null)}
       />
     </div>
-  )
+  );
 }

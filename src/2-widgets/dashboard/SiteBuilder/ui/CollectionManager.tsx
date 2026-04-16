@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/tenant/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -91,7 +91,7 @@ export function CollectionManager({
               title="lowercase letters, numbers and hyphens only"
             />
           </div>
-          <Button type="submit" disabled={isPending || !newSlug.trim()}>
+          <Button type="submit" tenantVariant="default" disabled={isPending || !newSlug.trim()}>
             Create
           </Button>
         </div>

@@ -1,9 +1,9 @@
-import type { ComponentType } from "react";
 import type { Block, Tenant } from "@/5-shared/lib/db/schema";
+import { SupportedLocaleType } from "@/5-shared/types/languages/supportedLocales";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
+import type { ComponentType } from "react";
 import { blockRegistry, resolveBlockT } from "../config/registry";
 import type { BlockProps } from "../config/types";
-import { SupportedLocaleType } from "@/5-shared/types/languages/supportedLocales";
 
 interface BlockRendererProps {
   blocks: Block[];
@@ -33,11 +33,12 @@ export function BlockRenderer({ blocks, locale, tenant }: BlockRendererProps) {
   return (
     <div className="flex flex-col w-full">
       {visibleBlocks.map((block) => (
-        <RegistryBlock 
-          key={block.id} 
-          block={block} 
-          locale={locale} 
-          tenant={tenant} 
+        <RegistryBlock
+          key={block.id}
+          block={block}
+          locale={locale}
+          tenant={tenant}
+          templateId={tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId}
         />
       ))}
     </div>
@@ -52,10 +53,12 @@ function RegistryBlock({
   block,
   locale,
   tenant,
+  templateId,
 }: {
   block: Block;
   locale: SupportedLocaleType;
   tenant: Tenant;
+  templateId: import("@/5-shared/config/templates").TenantTemplateId;
 }) {
   const entry = blockRegistry[block.type as BlockKind];
 
@@ -64,34 +67,36 @@ function RegistryBlock({
     return (
       <section className="py-12 px-6 text-center border-b border-zinc-50 bg-zinc-50/30">
         <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
-          Engine Warning: Block <span className="text-zinc-800 font-bold">{block.type}</span> is not registered.
+          Engine Warning: Block <span className="text-zinc-800 font-bold">{block.type}</span> is not
+          registered.
         </p>
       </section>
     );
   }
 
   // 2. Merge default config with tenant-specific overrides
-  const config = { 
-    ...entry.defaultConfig, 
-    ...(block.config as Record<string, unknown>) 
+  const config = {
+    ...entry.defaultConfig,
+    ...(block.config as Record<string, unknown>),
   };
 
   // 3. Resolve translations (Primary Locale -> Tenant Default -> Registry Default)
   const t = resolveBlockT(
-    block.translations as Record<string, any>, 
-    locale, 
+    block.translations as Record<string, any>,
+    locale,
     tenant.defaultLocale as SupportedLocaleType
   );
 
   const Component = entry.component as ComponentType<BlockProps>;
 
   return (
-    <Component 
-      block={block} 
-      config={config} 
-      t={t} 
-      locale={locale} 
-      tenant={tenant} 
+    <Component
+      block={block}
+      config={config}
+      t={t}
+      locale={locale}
+      tenant={tenant}
+      templateId={templateId}
     />
   );
 }

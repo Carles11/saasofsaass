@@ -2,7 +2,7 @@
 
 import { useTransition } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/tenant/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -47,7 +47,7 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
       <div className="flex items-center gap-1">
         {/* Visibility toggle */}
         <Button
-          variant="ghost"
+          tenantVariant="ghost"
           size="sm"
           disabled={isPending}
           aria-label="Toggle visibility"
@@ -61,7 +61,7 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
         {/* Reorder up */}
         {!isFirst && (
           <Button
-            variant="ghost"
+            tenantVariant="ghost"
             size="sm"
             disabled={isPending}
             aria-label="Move up"
@@ -74,7 +74,7 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
         {/* Reorder down */}
         {!isLast && (
           <Button
-            variant="ghost"
+            tenantVariant="ghost"
             size="sm"
             disabled={isPending}
             aria-label="Move down"
@@ -86,7 +86,7 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
 
         {/* Edit */}
         <Button
-          variant="outline"
+          tenantVariant="outline"
           size="sm"
           disabled={isPending}
           onClick={() => onEdit(block.id)}
@@ -97,7 +97,7 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
         {/* Delete */}
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="destructive" size="sm" disabled={isPending}>
+            <Button tenantVariant="destructive" size="sm" disabled={isPending}>
               Delete
             </Button>
           </DialogTrigger>
@@ -108,11 +108,11 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
             <p className="text-sm text-zinc-500 mb-4">This action cannot be undone.</p>
             <div className="flex gap-2 justify-end">
               <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button tenantVariant="outline">Cancel</Button>
               </DialogClose>
               <DialogClose asChild>
                 <Button
-                  variant="destructive"
+                  tenantVariant="destructive"
                   onClick={() => startTransition(() => deleteBlock(block.id, tenantId))}
                 >
                   Confirm Delete

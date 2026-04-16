@@ -1,12 +1,26 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import {  createI18nSlice } from "./slices/i18n-slice";
-import { I18nSlice } from "@/5-shared/types";
+import { createTenantSlice } from "@/4-entities/tenant/model/tenant-slice";
+import { createUISlice } from "./slices/ui-slice";
+import type { TenantSlice } from "@/5-shared/types";
 
-export type RootState = I18nSlice;
+/**
+ * SOOS ROOT STORE
+ * Combines entity logic (Tenant) with UI logic.
+ * Note: We removed the i18n dictionary here because next-intl handles it.
+ */
+
+export type RootState = TenantSlice & {
+  isSidebarOpen: boolean;
+  toggleSidebar: () => void;
+};
 
 export const useStore = create<RootState>()(
-  devtools((...a) => ({
-    ...createI18nSlice(a[0]),
-  }), { name: 'SoSSStore' })
+  devtools(
+    (set, get, store) => ({
+      ...createTenantSlice(set, get, store),
+      ...createUISlice(set, get, store),
+    }),
+    { name: "SoSS_Engine_Store" }
+  )
 );
