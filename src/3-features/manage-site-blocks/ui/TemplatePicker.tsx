@@ -87,7 +87,7 @@ export function TemplatePicker({
                       </button>
                     </div>
                     <div className="flex-1 h-full flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-tr from-primary/40 to-zinc-200 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-lg bg-linear-to-tr from-primary/40 to-zinc-200 flex items-center justify-center">
                         <span className="text-[10px] text-zinc-400">IMG</span>
                       </div>
                     </div>

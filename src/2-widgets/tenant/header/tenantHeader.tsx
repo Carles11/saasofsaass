@@ -15,7 +15,7 @@ export const TenantHeader = () => {
   // Bentley Standard: Using DB-driven branding from the store
   const branding = (tenant.branding as { logoUrl?: string; primaryColor?: string }) || {};
   const templateId = tenant.templateId || "default";
-
+  console.log("Tenant branding and templateId:", tenant, branding, templateId);
   // Polymorphic layout logic
   if (templateId === "classic") {
     // Classic: Center logo, nav below

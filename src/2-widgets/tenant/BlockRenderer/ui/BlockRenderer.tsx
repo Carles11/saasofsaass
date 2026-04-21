@@ -2,8 +2,9 @@ import type { Block, Tenant } from "@/5-shared/lib/db/schema";
 import { SupportedLocaleType } from "@/5-shared/types/languages/supportedLocales";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import type { ComponentType } from "react";
-import { blockRegistry, resolveBlockT } from "../config/registry";
+import { blockRegistry } from "../config/registry";
 import type { BlockProps } from "../config/types";
+import { resolveBlockT } from "../config/utils/block";
 
 interface BlockRendererProps {
   blocks: Block[];
@@ -90,13 +91,15 @@ function RegistryBlock({
   const Component = entry.component as ComponentType<BlockProps>;
 
   return (
-    <Component
-      block={block}
-      config={config}
-      t={t}
-      locale={locale}
-      tenant={tenant}
-      templateId={templateId}
-    />
+    <>
+      <Component
+        block={block}
+        config={config}
+        t={t}
+        locale={locale}
+        tenant={tenant}
+        templateId={templateId}
+      />
+    </>
   );
 }

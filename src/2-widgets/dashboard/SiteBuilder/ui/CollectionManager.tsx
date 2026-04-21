@@ -1,19 +1,12 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { Button } from '@/components/tenant/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { createEntity, publishEntity, updateEntityTranslation } from "@/3-features/manage-entities";
+import type { Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
+import { isRtl } from "@/5-shared/lib/next/rtl";
+import type { SupportedLocaleType } from "@/5-shared/types";
+import type { EntityKind } from "@/5-shared/types/tenants/entities";
+import { Button } from "@/components/tenant/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogClose,
@@ -21,71 +14,105 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import { createEntity, publishEntity, updateEntityTranslation } from '@/3-features/manage-entities'
-import { isRtl } from '@/5-shared/lib/next/rtl'
-import type { Tenant, TenantEntity, TenantTranslation } from '@/5-shared/lib/db/schema'
-import type { EntityKind } from '@/5-shared/types/tenants/entities'
-import type { SupportedLocaleType } from '@/5-shared/types'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { useEffect, useState, useTransition } from "react";
 
-type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null }
+type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 
 interface CollectionManagerProps {
-  tenant: Tenant
-  activeLocale: SupportedLocaleType
-  initialEntities: EntityRow[]
+  tenant: Tenant;
+  activeLocale: SupportedLocaleType;
+  initialEntities: EntityRow[];
+  blockType?: string;
+  blockId?: string;
 }
-
-const ENTITY_KINDS: EntityKind[] = ['blog_post', 'podcast_episode', 'award_item']
 
 export function CollectionManager({
   tenant,
   activeLocale,
   initialEntities,
+  blockType,
+  blockId,
 }: CollectionManagerProps) {
-  const [isPending, startTransition] = useTransition()
-  const [newKind, setNewKind] = useState<EntityKind>('blog_post')
-  const [newSlug, setNewSlug] = useState('')
-  const dir = isRtl(activeLocale) ? 'rtl' : 'ltr'
+  const [isPending, startTransition] = useTransition();
+  // Always set newKind to the only valid kind for the block when blockType changes
+  let entityKinds: EntityKind[] = ["blog_post", "podcast_episode", "award_item"];
+  if (blockType === "blog-feed") entityKinds = ["blog_post"];
+  else if (blockType === "podcast-feed") entityKinds = ["podcast_episode"];
+  else if (blockType === "awards") entityKinds = ["award_item"];
+
+  const [newKind, setNewKind] = useState<EntityKind>(entityKinds[0]);
+
+  // Keep newKind in sync with entityKinds if blockType changes
+  useEffect(() => {
+    setNewKind(entityKinds[0]);
+  }, [blockType]);
+  const [newSlug, setNewSlug] = useState("");
+  const dir = isRtl(activeLocale) ? "rtl" : "ltr";
+
+  // Filter entities by blockId and kind (if blockId is provided)
+  let filteredEntities = initialEntities;
+  if (blockId) {
+    filteredEntities = initialEntities.filter(
+      (row) => row.entity.blockId === blockId && entityKinds.includes(row.entity.kind as EntityKind)
+    );
+  } else {
+    filteredEntities = initialEntities.filter((row) =>
+      entityKinds.includes(row.entity.kind as EntityKind)
+    );
+  }
 
   async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    if (!newSlug.trim()) return
-    await createEntity({ tenantId: tenant.id, kind: newKind, slug: newSlug.trim() })
-    setNewSlug('')
+    e.preventDefault();
+    if (!newSlug.trim()) return;
+    await createEntity({ tenantId: tenant.id, kind: newKind, slug: newSlug.trim(), blockId });
+    setNewSlug("");
   }
 
   return (
     <div className="flex flex-col gap-6">
       {/* ── Create new entity ──────────────────────────────────────── */}
+
+      {/* Only show the Kind dropdown if more than one kind is possible */}
       <form
         onSubmit={handleCreate}
         className="flex flex-col gap-3 p-4 bg-zinc-50 rounded-xl border border-dashed border-zinc-300"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          New Item
-        </p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">New Item</p>
         <div className="flex flex-wrap gap-3 items-end">
-          <div className="flex flex-col gap-1 min-w-35">
-            <Label>Kind</Label>
-            <Select value={newKind} onValueChange={v => setNewKind(v as EntityKind)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ENTITY_KINDS.map(k => (
-                  <SelectItem key={k} value={k}>
-                    {k.replace('_', ' ')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {entityKinds.length > 1 && (
+            <div className="flex flex-col gap-1 min-w-35">
+              <Label>Kind</Label>
+              <Select value={newKind} onValueChange={(v) => setNewKind(v as EntityKind)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {entityKinds.map((k) => (
+                    <SelectItem key={k} value={k}>
+                      {k.replace("_", " ")}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="flex flex-col gap-1 flex-1 min-w-40">
             <Label>Slug</Label>
             <Input
               value={newSlug}
-              onChange={e => setNewSlug(e.target.value)}
+              onChange={(e) => setNewSlug(e.target.value)}
               placeholder="my-first-post"
               pattern="[a-z0-9-]+"
               title="lowercase letters, numbers and hyphens only"
@@ -100,14 +127,14 @@ export function CollectionManager({
       <Separator />
 
       {/* ── Entity list ────────────────────────────────────────────── */}
-      {initialEntities.length === 0 && (
+      {filteredEntities.length === 0 && (
         <p className="text-sm text-zinc-400 text-center py-8">
           No content yet. Create your first item above.
         </p>
       )}
 
       <div className="flex flex-col gap-3">
-        {initialEntities.map(({ entity, translation }) => (
+        {filteredEntities.map(({ entity, translation }) => (
           <EntityRow
             key={entity.id}
             entity={entity}
@@ -119,23 +146,23 @@ export function CollectionManager({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 // ── EntityRow ──────────────────────────────────────────────────────────────────
 
 interface EntityRowProps {
-  entity: TenantEntity
-  translation: TenantTranslation | null
-  tenantId: string
-  activeLocale: SupportedLocaleType
-  dir: 'ltr' | 'rtl'
+  entity: TenantEntity;
+  translation: TenantTranslation | null;
+  tenantId: string;
+  activeLocale: SupportedLocaleType;
+  dir: "ltr" | "rtl";
 }
 
 function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityRowProps) {
-  const [isPending, startTransition] = useTransition()
-  const payload = (translation?.payload ?? {}) as Record<string, string>
-  const displayTitle = payload.title ?? entity.slug ?? entity.id
+  const [isPending, startTransition] = useTransition();
+  const payload = (translation?.payload ?? {}) as Record<string, string>;
+  const displayTitle = payload.title ?? entity.slug ?? entity.id;
 
   return (
     <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-zinc-200">
@@ -150,7 +177,7 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
         </div>
         <div className="flex items-center gap-2">
           <Badge
-            variant={entity.status === 'published' ? 'default' : 'secondary'}
+            variant={entity.status === "published" ? "default" : "secondary"}
             className="text-xs"
           >
             {entity.status}
@@ -174,9 +201,7 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
           <DialogContent>
             <div dir={dir}>
               <DialogHeader>
-                <DialogTitle>
-                  Edit Translation &mdash; {activeLocale.toUpperCase()}
-                </DialogTitle>
+                <DialogTitle>Edit Translation &mdash; {activeLocale.toUpperCase()}</DialogTitle>
               </DialogHeader>
               <TranslationForm
                 entity={entity}
@@ -190,7 +215,7 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
         </Dialog>
 
         {/* Publish */}
-        {entity.status !== 'published' && (
+        {entity.status !== "published" && (
           <Button
             size="sm"
             disabled={isPending}
@@ -201,17 +226,17 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
         )}
       </div>
     </div>
-  )
+  );
 }
 
 // ── TranslationForm ──────────────────────────────────────────────────────────
 
 interface TranslationFormProps {
-  entity: TenantEntity
-  tenantId: string
-  activeLocale: SupportedLocaleType
-  currentPayload: Record<string, string>
-  dir: 'ltr' | 'rtl'
+  entity: TenantEntity;
+  tenantId: string;
+  activeLocale: SupportedLocaleType;
+  currentPayload: Record<string, string>;
+  dir: "ltr" | "rtl";
 }
 
 function TranslationForm({
@@ -221,17 +246,17 @@ function TranslationForm({
   currentPayload,
   dir,
 }: TranslationFormProps) {
-  const isBlog    = entity.kind === 'blog_post'
-  const isPodcast = entity.kind === 'podcast_episode'
+  const isBlog = entity.kind === "blog_post";
+  const isPodcast = entity.kind === "podcast_episode";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    const fd = new FormData(e.currentTarget)
-    const payload: Record<string, string> = {}
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const payload: Record<string, string> = {};
     for (const [k, v] of fd.entries()) {
-      payload[k] = v as string
+      payload[k] = v as string;
     }
-    await updateEntityTranslation(entity.id, tenantId, activeLocale, payload)
+    await updateEntityTranslation(entity.id, tenantId, activeLocale, payload);
   }
 
   return (
@@ -241,7 +266,7 @@ function TranslationForm({
         <Input
           id="et-title"
           name="title"
-          defaultValue={currentPayload.title ?? ''}
+          defaultValue={currentPayload.title ?? ""}
           dir={dir}
           required
         />
@@ -249,14 +274,12 @@ function TranslationForm({
 
       {(isBlog || isPodcast) && (
         <div className="flex flex-col gap-1">
-          <Label htmlFor="et-excerpt">
-            {isBlog ? 'Excerpt' : 'Description'}
-          </Label>
+          <Label htmlFor="et-excerpt">{isBlog ? "Excerpt" : "Description"}</Label>
           <Textarea
             id="et-excerpt"
-            name={isBlog ? 'excerpt' : 'description'}
+            name={isBlog ? "excerpt" : "description"}
             defaultValue={
-              isBlog ? (currentPayload.excerpt ?? '') : (currentPayload.description ?? '')
+              isBlog ? (currentPayload.excerpt ?? "") : (currentPayload.description ?? "")
             }
             rows={3}
             dir={dir}
@@ -270,7 +293,7 @@ function TranslationForm({
           <Textarea
             id="et-desc"
             name="description"
-            defaultValue={currentPayload.description ?? ''}
+            defaultValue={currentPayload.description ?? ""}
             rows={3}
             dir={dir}
           />
@@ -283,7 +306,7 @@ function TranslationForm({
           <Input
             id="et-slug"
             name="localizedSlug"
-            defaultValue={currentPayload.localizedSlug ?? ''}
+            defaultValue={currentPayload.localizedSlug ?? ""}
           />
         </div>
       )}
@@ -294,32 +317,32 @@ function TranslationForm({
         </Button>
       </DialogClose>
     </form>
-  )
+  );
 }
 
 // ── Translation Status Badge ───────────────────────────────────────────────────
 
-type TranslationStatus = 'pending' | 'translated' | 'failed' | 'locked'
+type TranslationStatus = "pending" | "translated" | "failed" | "locked";
 
 const STATUS_CONFIG: Record<
   TranslationStatus,
-  { label: string; icon: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+  { label: string; icon: string; variant: "default" | "secondary" | "destructive" | "outline" }
 > = {
-  pending:    { label: 'pending',    icon: '⏳', variant: 'secondary' },
-  translated: { label: 'translated', icon: '✓',  variant: 'default' },
-  failed:     { label: 'failed',     icon: '✗',  variant: 'destructive' },
-  locked:     { label: 'locked',     icon: '🔒', variant: 'outline' },
-}
+  pending: { label: "pending", icon: "⏳", variant: "secondary" },
+  translated: { label: "translated", icon: "✓", variant: "default" },
+  failed: { label: "failed", icon: "✗", variant: "destructive" },
+  locked: { label: "locked", icon: "🔒", variant: "outline" },
+};
 
 function TranslationStatusBadge({ status }: { status: string }) {
   const cfg = STATUS_CONFIG[status as TranslationStatus] ?? {
     label: status,
-    icon: '?',
-    variant: 'outline' as const,
-  }
+    icon: "?",
+    variant: "outline" as const,
+  };
   return (
     <Badge variant={cfg.variant} className="gap-1 text-xs">
       {cfg.icon} {cfg.label}
     </Badge>
-  )
+  );
 }

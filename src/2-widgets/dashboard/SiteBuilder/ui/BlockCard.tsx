@@ -1,8 +1,9 @@
-'use client'
+"use client";
 
-import { useTransition } from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/tenant/ui/button'
+import { deleteBlock, reorderBlock, toggleBlockVisibility } from "@/3-features/manage-site-blocks";
+import type { Block } from "@/5-shared/lib/db/schema";
+import { Button } from "@/components/tenant/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogClose,
@@ -10,38 +11,39 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  toggleBlockVisibility,
-  reorderBlock,
-  deleteBlock,
-} from '@/3-features/manage-site-blocks'
-import type { Block } from '@/5-shared/lib/db/schema'
+} from "@/components/ui/dialog";
+import { useTransition } from "react";
 
 interface BlockCardProps {
-  block: Block
-  tenantId: string
-  isFirst: boolean
-  isLast: boolean
-  onEdit: (blockId: string) => void
+  block: Block;
+  tenantId: string;
+  isFirst: boolean;
+  isLast: boolean;
+  onEdit: (blockId: string) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
-export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCardProps) {
-  const [isPending, startTransition] = useTransition()
+export function BlockCard({
+  block,
+  tenantId,
+  isFirst,
+  isLast,
+  onEdit,
+  setActiveTab,
+}: BlockCardProps) {
+  const [isPending, startTransition] = useTransition();
 
   return (
     <div
       className={`flex items-center justify-between p-4 bg-white rounded-xl border border-zinc-200 transition-opacity ${
-        isPending ? 'opacity-50 pointer-events-none' : ''
+        isPending ? "opacity-50 pointer-events-none" : ""
       }`}
     >
       <div className="flex items-center gap-3">
         <Badge variant="secondary" className="font-mono text-xs">
           {block.type}
         </Badge>
-        {!block.isVisible && (
-          <span className="text-xs text-zinc-400 italic">hidden</span>
-        )}
+        {!block.isVisible && <span className="text-xs text-zinc-400 italic">hidden</span>}
       </div>
 
       <div className="flex items-center gap-1">
@@ -55,7 +57,7 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
             startTransition(() => toggleBlockVisibility(block.id, tenantId, block.isVisible))
           }
         >
-          {block.isVisible ? '👁' : '🙈'}
+          {block.isVisible ? "👁" : "🙈"}
         </Button>
 
         {/* Reorder up */}
@@ -65,7 +67,7 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
             size="sm"
             disabled={isPending}
             aria-label="Move up"
-            onClick={() => startTransition(() => reorderBlock(tenantId, block.id, 'up'))}
+            onClick={() => startTransition(() => reorderBlock(tenantId, block.id, "up"))}
           >
             ↑
           </Button>
@@ -78,23 +80,40 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
             size="sm"
             disabled={isPending}
             aria-label="Move down"
-            onClick={() => startTransition(() => reorderBlock(tenantId, block.id, 'down'))}
+            onClick={() => startTransition(() => reorderBlock(tenantId, block.id, "down"))}
           >
             ↓
           </Button>
         )}
 
-        {/* Edit */}
-        <Button
-          tenantVariant="outline"
-          size="sm"
-          disabled={isPending}
-          onClick={() => onEdit(block.id)}
-        >
-          Edit
-        </Button>
+        {/* Manage Content for collection blocks */}
+        {block.type === "blog-feed" ||
+        block.type === "awards" ||
+        block.type === "image-gallery" ||
+        block.type === "podcast-feed" ? (
+          <Button
+            tenantVariant="default"
+            size="sm"
+            onClick={() => {
+              onEdit(block.id);
+              if (setActiveTab) setActiveTab("content");
+            }}
+          >
+            Manage Content
+          </Button>
+        ) : (
+          // Edit button only for non-collection blocks
+          <Button
+            tenantVariant="outline"
+            size="sm"
+            disabled={isPending}
+            onClick={() => onEdit(block.id)}
+          >
+            Edit
+          </Button>
+        )}
 
-        {/* Delete */}
+        {/* Delete - always last */}
         <Dialog>
           <DialogTrigger asChild>
             <Button tenantVariant="destructive" size="sm" disabled={isPending}>
@@ -123,5 +142,5 @@ export function BlockCard({ block, tenantId, isFirst, isLast, onEdit }: BlockCar
         </Dialog>
       </div>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
 import type { Block, Tenant } from "@/5-shared/lib/db/schema";
 import type { SupportedLocaleType } from "@/5-shared/types";
-import type { BlockKind } from "@/5-shared/types/tenants/blocks";
+import type { BlockKind, GalleryImage } from "@/5-shared/types/tenants/blocks";
 import type { ReactNode } from "react";
 
 // ── Shared props contract every block component must satisfy ───────────────────
@@ -8,7 +8,11 @@ import type { ReactNode } from "react";
 // level. Each block narrows them internally via its own typed interface.
 export interface BlockProps {
   block: Block;
-  config: Record<string, unknown>;
+  config: {
+    images?: GalleryImage[];
+    lang?: string;
+    [key: string]: unknown;
+  };
   t: Record<string, string>;
   locale: SupportedLocaleType;
   tenant: Tenant;
@@ -30,14 +34,3 @@ export interface BlockRegistryEntry {
 }
 
 export type BlockRegistry = Partial<Record<BlockKind, BlockRegistryEntry>>;
-
-// ── Translation fallback chain ─────────────────────────────────────────────────
-// Priority: requested locale → tenant.defaultLocale → 'en' → {}
-export function resolveBlockT(
-  translations: unknown,
-  locale: SupportedLocaleType,
-  defaultLocale: string
-): Record<string, string> {
-  const map = (translations ?? {}) as Record<string, Record<string, string>>;
-  return map[locale] ?? map[defaultLocale] ?? map["en"] ?? {};
-}

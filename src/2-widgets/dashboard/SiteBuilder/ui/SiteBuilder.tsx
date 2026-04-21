@@ -14,6 +14,7 @@ import { AutoTranslateButton } from "./AutoTranslateButton";
 import { BlockEditSheet } from "./BlockEditSheet";
 import { BlockList } from "./BlockList";
 import { CollectionManager } from "./CollectionManager";
+import { GalleryManager } from "./GalleryManager";
 import { LanguageSelector } from "./LanguageSelector";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
@@ -34,11 +35,13 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [locales, setLocales] = useState<string[]>(tenant.locales);
   const [isSaving, startTransition] = useTransition();
+  const [activeTab, setActiveTab] = useState<string>("blocks");
   // Live preview state (fix type)
-  const [previewTemplateId, setPreviewTemplateId] = useState<import("@/5-shared/config/templates").TenantTemplateId>(
-    (tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId)
-  );
+  const [previewTemplateId, setPreviewTemplateId] = useState<
+    import("@/5-shared/config/templates").TenantTemplateId
+  >(tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId);
 
+  // Restore selectedBlock for BlockEditSheet
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
   return (
@@ -70,7 +73,7 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
       </div>
 
       {/* ── Main tabs ───────────────────────────────────────────────── */}
-      <Tabs defaultValue="blocks">
+      <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="blocks">
         <TabsList>
           <TabsTrigger value="blocks">Blocks</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
@@ -81,17 +84,56 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
           {/* Only the block preview area uses the tenant template styles */}
           <div className="rounded-2xl border border-zinc-200 bg-white p-4">
             <TenantLayoutResolver templateId={previewTemplateId}>
-              <BlockList blocks={blocks} tenantId={tenant.id} onEdit={setSelectedBlockId} />
+              <BlockList
+                blocks={blocks}
+                tenantId={tenant.id}
+                onEdit={setSelectedBlockId}
+                setActiveTab={setActiveTab}
+              />
             </TenantLayoutResolver>
           </div>
         </TabsContent>
 
         <TabsContent value="content" className="mt-4">
-          <CollectionManager
-            tenant={tenant}
-            activeLocale={activeLocale}
-            initialEntities={initialEntities}
-          />
+          {/* Context-sensitive content manager */}
+          {selectedBlockId ? (
+            (() => {
+              const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
+              if (!selectedBlock) {
+                return <div className="text-zinc-400 text-center py-8">Block not found.</div>;
+              }
+              if (selectedBlock.type === "image-gallery") {
+                return (
+                  <GalleryManager
+                    blockId={selectedBlockId}
+                    tenant={tenant}
+                    activeLocale={activeLocale}
+                    onImagesChange={() => {}}
+                  />
+                );
+              }
+              if (["blog-feed", "podcast-feed", "awards"].includes(selectedBlock.type)) {
+                return (
+                  <CollectionManager
+                    tenant={tenant}
+                    activeLocale={activeLocale}
+                    initialEntities={initialEntities}
+                    blockType={selectedBlock.type}
+                    blockId={selectedBlock.id}
+                  />
+                );
+              }
+              return (
+                <div className="text-zinc-400 text-center py-8">
+                  This block has no content to manage.
+                </div>
+              );
+            })()
+          ) : (
+            <div className="text-zinc-400 text-center py-8">
+              Select a block to manage its content.
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="settings" className="mt-4">
@@ -127,7 +169,10 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
           </div>
           <div className="mb-8">
             <h3 className="font-semibold mb-2">Site Template</h3>
-            <TemplatePicker previewTemplateId={previewTemplateId} setPreviewTemplateId={setPreviewTemplateId} />
+            <TemplatePicker
+              previewTemplateId={previewTemplateId}
+              setPreviewTemplateId={setPreviewTemplateId}
+            />
           </div>
           {/* Future: dark mode, subdomain, custom domain, etc. */}
         </TabsContent>

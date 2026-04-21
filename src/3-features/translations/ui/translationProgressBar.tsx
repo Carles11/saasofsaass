@@ -1,6 +1,6 @@
 "use client";
 
-import { useStore } from "@/5-shared/store/index";
+import { useStore } from "@/5-shared/store";
 
 /**
  * FEATURE: Translation Progress Bar
@@ -16,11 +16,11 @@ export const TranslationProgressBar = () => {
   return (
     <div className="fixed top-0 left-0 w-full h-1 bg-zinc-100 z-9999">
       {/* Dynamic progress fill with Bentley transition curve */}
-      <div 
+      <div
         className="h-full bg-zinc-950 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] shadow-[0_0_10px_rgba(0,0,0,0.2)]"
         style={{ width: `${progress}%` }}
       />
-      
+
       {/* Status Badge */}
       <div className="absolute top-6 right-8 flex items-center gap-3 bg-zinc-950 text-white px-4 py-2 rounded-2xl shadow-2xl animate-in slide-in-from-top-4 duration-500">
         <div className="relative flex h-2 w-2">

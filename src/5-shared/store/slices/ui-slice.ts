@@ -1,5 +1,5 @@
+import { UISlice } from "@/5-shared/types";
 import { StateCreator } from "zustand";
-import { UISlice } from "@/5-shared/types/store";
 
 /**
  * SHARED SLICE: UI
@@ -12,8 +12,8 @@ export const createUISlice: StateCreator<UISlice> = (set) => ({
   /**
    * Toggles the dashboard/builder sidebar.
    */
-  toggleSidebar: () => 
-    set((state: UISlice) => ({ 
-      isSidebarOpen: !state.isSidebarOpen 
+  toggleSidebar: () =>
+    set((state: UISlice) => ({
+      isSidebarOpen: !state.isSidebarOpen,
     })),
 });

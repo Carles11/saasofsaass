@@ -10,6 +10,8 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { galleryImageI18n, galleryImages } from "@/4-entities/gallery/model/image";
+
 // ============================================
 // TENANTS
 // ============================================
@@ -109,6 +111,17 @@ export const tenantTranslations = pgTable(
 );
 
 // ============================================
+// TENANT DOMAINS
+// ============================================
+export const tenantDomains = pgTable("tenant_domains", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "cascade" }),
+  domain: text("domain").notNull().unique(),
+});
+
+// ============================================
 // CONTENT ITEMS (repeatable content inside blocks)
 // ============================================
 export const contentItems = pgTable("content_items", {
@@ -161,6 +174,11 @@ export const platformTranslations = pgTable("platform_translations", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ============================================
+// IMAGES (for image gallery block)
+// ============================================
+export { galleryImageI18n, galleryImages };
 
 // ============================================
 // TYPES (inferred from schema)

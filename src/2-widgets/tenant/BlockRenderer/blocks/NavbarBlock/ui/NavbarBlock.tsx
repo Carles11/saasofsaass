@@ -16,12 +16,26 @@ export function NavbarBlock({ config, t, tenant, locale }: BlockProps & { locale
 
   // SSR-safe: fallback to root for language tab links
   const pathAfterLocale = "";
+  const branding = (tenant.branding as { logoUrl?: string; primaryColor?: string }) || {};
 
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-zinc-100">
-      <span className="font-semibold" style={{ color: "hsl(var(--primary))" }}>
-        {siteTitle}
-      </span>
+      <div className="flex items-center gap-4">
+        {branding.logoUrl ? (
+          <img
+            src={branding.logoUrl}
+            alt={siteTitle}
+            className="h-8 w-auto object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        ) : (
+          <span className="font-black text-xl tracking-tighter uppercase text-zinc-900">
+            {siteTitle}
+          </span>
+        )}
+      </div>
       <div className="flex items-center gap-4">
         {/* Language Selector Tabs (SSR-safe links) */}
         <div className="flex items-center gap-1">

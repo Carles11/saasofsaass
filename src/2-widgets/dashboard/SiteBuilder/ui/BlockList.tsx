@@ -1,44 +1,46 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Button } from '@/components/tenant/ui/button'
+import { addBlock } from "@/3-features/manage-site-blocks";
+import type { Block } from "@/5-shared/lib/db/schema";
+import type { BlockKind } from "@/5-shared/types/tenants/blocks";
+import { Button } from "@/components/tenant/ui/button";
 import {
   Dialog,
-  DialogContent,
   DialogClose,
+  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { BlockCard } from './BlockCard'
-import { addBlock } from '@/3-features/manage-site-blocks'
-import type { Block } from '@/5-shared/lib/db/schema'
-import type { BlockKind } from '@/5-shared/types/tenants/blocks'
+} from "@/components/ui/select";
+import { useState } from "react";
+import { BlockCard } from "./BlockCard";
 
 const AVAILABLE_BLOCK_KINDS: BlockKind[] = [
-  'navbar',
-  'hero',
-  'blog-feed',
-  'podcast-feed',
-  'awards',
-  'contact',
-]
+  "navbar",
+  "hero",
+  "blog-feed",
+  "podcast-feed",
+  "awards",
+  "contact",
+  "image-gallery",
+];
 
 interface BlockListProps {
-  blocks: Block[]
-  tenantId: string
-  onEdit: (blockId: string) => void
+  blocks: Block[];
+  tenantId: string;
+  onEdit: (blockId: string) => void;
+  setActiveTab?: (tab: string) => void;
 }
 
-export function BlockList({ blocks, tenantId, onEdit }: BlockListProps) {
-  const [newKind, setNewKind] = useState<BlockKind>('hero')
+export function BlockList({ blocks, tenantId, onEdit, setActiveTab }: BlockListProps) {
+  const [newKind, setNewKind] = useState<BlockKind>("hero");
 
   return (
     <div className="flex flex-col gap-3">
@@ -50,6 +52,7 @@ export function BlockList({ blocks, tenantId, onEdit }: BlockListProps) {
           isFirst={i === 0}
           isLast={i === blocks.length - 1}
           onEdit={onEdit}
+          setActiveTab={setActiveTab}
         />
       ))}
 
@@ -70,15 +73,12 @@ export function BlockList({ blocks, tenantId, onEdit }: BlockListProps) {
             <DialogTitle>Add a New Block</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-4 pt-2">
-            <Select
-              value={newKind}
-              onValueChange={v => setNewKind(v as BlockKind)}
-            >
+            <Select value={newKind} onValueChange={(v) => setNewKind(v as BlockKind)}>
               <SelectTrigger>
                 <SelectValue placeholder="Select block type" />
               </SelectTrigger>
               <SelectContent>
-                {AVAILABLE_BLOCK_KINDS.map(kind => (
+                {AVAILABLE_BLOCK_KINDS.map((kind) => (
                   <SelectItem key={kind} value={kind}>
                     {kind}
                   </SelectItem>
@@ -94,5 +94,5 @@ export function BlockList({ blocks, tenantId, onEdit }: BlockListProps) {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
