@@ -6,10 +6,8 @@ import { Block, Tenant } from "@/5-shared/lib/db/schema";
 import { toast } from "@/5-shared/lib/ui/toast";
 import { SupportedLocaleType } from "@/5-shared/types";
 import { GalleryImage } from "@/5-shared/types/tenants/blocks";
-import { Button } from "@/components/tenant/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Button, Input, Label, Separator, Spinner } from "@/components/ui";
+
 import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { useState } from "react";
@@ -215,7 +213,16 @@ export function GalleryManager({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 relative">
+      {/* Overlay spinner during upload */}
+      {isUploading && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded-lg">
+          <div className="flex flex-col items-center gap-2">
+            <Spinner className="size-8 text-blue-600" />
+            <span className="text-sm text-blue-700 font-medium mt-2">Uploading image...</span>
+          </div>
+        </div>
+      )}
       <div className="flex flex-col gap-2">
         <Label htmlFor="gallery-name">Gallery Name</Label>
         <Input id="gallery-name" value={galleryName} onChange={handleNameChange} maxLength={64} />
@@ -279,7 +286,13 @@ export function GalleryManager({
               }
             `}
           >
-            {isSaving ? "Saving..." : "Save Captions"}
+            {isSaving ? (
+              <span className="flex items-center gap-2">
+                <Spinner className="size-4" /> Saving...
+              </span>
+            ) : (
+              "Save Captions"
+            )}
           </Button>
         </div>
       </div>

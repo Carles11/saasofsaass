@@ -2,7 +2,7 @@ import { triggerCaptionTranslation } from "@/3-features/auto-translate-content/a
 import { galleryImageI18n, galleryImages } from "@/4-entities/gallery/model/image";
 import { db } from "@/5-shared/lib/db";
 import { blocks, tenants } from "@/5-shared/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 // POST /api/gallery/captions
@@ -39,20 +39,27 @@ export async function POST(req: NextRequest) {
         .limit(1);
       if (!imgArr[0]) continue;
       const imageId = imgArr[0].id;
-      // Construct alt: prefer caption, fallback to filename (from s3Key)
+      // Fetch existing alt for this image/lang
+      const i18nArr = await db
+        .select()
+        .from(galleryImageI18n)
+        .where(and(eq(galleryImageI18n.imageId, imageId), eq(galleryImageI18n.lang, locale)))
+        .limit(1);
+      const existingAlt = i18nArr[0]?.alt;
+      // Only set alt if not present; otherwise, preserve
       let alt =
-        caption && caption.trim()
-          ? caption.trim()
-          : s3Key
-              .split("/")
-              .pop()
-              ?.replace(/\.[^.]+$/, "") || "Image";
+        existingAlt ??
+        (s3Key
+          .split("/")
+          .pop()
+          ?.replace(/\.[^.]+$/, "") ||
+          "Image");
       await db
         .insert(galleryImageI18n)
         .values({ imageId, lang: locale, caption, alt })
         .onConflictDoUpdate({
           target: [galleryImageI18n.imageId, galleryImageI18n.lang],
-          set: { caption, alt },
+          set: { caption }, // Only update caption, not alt
         });
     }
 
