@@ -98,6 +98,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Only fallback to filename if alt is still empty
+  if (!alt || !alt.trim()) {
+    alt = filename.replace(/\.[^.]+$/, "");
+  }
+
   // Upload processed image to S3
   const s3Key = await uploadToS3({
     tenantId,

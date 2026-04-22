@@ -38,6 +38,8 @@ export function GalleryManager({
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pendingCaptions, setPendingCaptions] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -95,12 +97,11 @@ export function GalleryManager({
         const form = new FormData();
         form.append("file", file);
         form.append("lang", activeLocale);
-        form.append("alt", file.name.replace(/\.[^/.]+$/, ""));
         if (block) {
           form.append("blockId", block.id);
         }
-        // Use filename (without extension) as default caption for SEO
-        form.append("caption", file.name.replace(/\.[^/.]+$/, ""));
+        // Do NOT send caption by default; only send if user provided one (future: UI input)
+        // form.append("caption", file.name.replace(/\.[^/.]+$/, ""));
         // Upload to API
         const res = await fetch("/api/gallery/upload", {
           method: "POST",
@@ -177,33 +178,39 @@ export function GalleryManager({
     }
   }
 
-  // Alt/caption change
-  async function handleImageMetaChange(
-    idx: number,
-    lang: string,
-    field: "alt" | "caption",
-    value: string
-  ) {
-    const newImages = [...images];
-    if (!newImages[idx].i18n[lang]) newImages[idx].i18n[lang] = { alt: "", caption: "" };
-    // If editing caption and alt is empty, auto-generate alt from caption
-    if (field === "caption") {
-      newImages[idx].i18n[lang]["caption"] = value;
-      if (!newImages[idx].i18n[lang]["alt"]) {
-        newImages[idx].i18n[lang]["alt"] = value;
+  // Caption change (local only)
+  function handleCaptionChange(idx: number, lang: string, value: string) {
+    const img = images[idx];
+    setPendingCaptions((prev) => ({ ...prev, [img.s3Key]: value }));
+  }
+
+  // Save captions for all images (batch)
+  async function handleSaveCaptions() {
+    setIsSaving(true);
+    setError(null);
+    try {
+      // POST to new API endpoint (to be implemented) with all captions
+      const payload = images.map((img) => ({
+        s3Key: img.s3Key,
+        caption: pendingCaptions[img.s3Key] ?? "",
+      }));
+      const res = await fetch("/api/gallery/captions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blockId, captions: payload, locale: activeLocale }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setError(err.error || "Failed to save captions");
+        return;
       }
-    } else {
-      newImages[idx].i18n[lang][field] = value;
-    }
-    // Enforce alt is always non-empty for SEO
-    if (!newImages[idx].i18n[lang]["alt"]) {
-      newImages[idx].i18n[lang]["alt"] = newImages[idx].i18n[lang]["caption"] || "Image";
-    }
-    setImages(newImages);
-    onImagesChange(newImages);
-    // Persist alt/caption change
-    if (block) {
-      await updateBlockConfig(block.id, tenant.id, { ...config, images: newImages });
+      toast({ title: "Captions saved and translated!", status: "success" });
+      // Optionally reload images from server to get translations
+      // (Or update local state if backend returns updated images)
+    } catch (err: any) {
+      setError(err?.message || "Save failed");
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -243,33 +250,63 @@ export function GalleryManager({
                   idx={idx}
                   lang={activeLocale}
                   onRemove={() => handleRemoveImage(img.s3Key)}
-                  onMetaChange={handleImageMetaChange}
+                  onCaptionChange={handleCaptionChange}
+                  captionValue={
+                    pendingCaptions[img.s3Key] ?? img.i18n?.[activeLocale]?.caption ?? ""
+                  }
+                  deleting={isUploading}
                 />
               ))}
             </div>
           </SortableContext>
         </DndContext>
+        <div className="flex justify-end mt-4">
+          <Button
+            onClick={handleSaveCaptions}
+            disabled={
+              isSaving ||
+              images.length === 0 ||
+              Object.values(pendingCaptions).some((v) => !v.trim())
+            }
+            variant="default"
+            className={`min-w-[140px] transition-colors duration-150
+              ${
+                isSaving ||
+                images.length === 0 ||
+                Object.values(pendingCaptions).some((v) => !v.trim())
+                  ? "bg-gray-400 text-blue-400-900 border-gray-200 cursor-not-allowed hover:bg-gray-200 hover:text-gray-400"
+                  : ""
+              }
+            `}
+          >
+            {isSaving ? "Saving..." : "Save Captions"}
+          </Button>
+        </div>
       </div>
     </div>
   );
 }
 
 // GalleryImageCard: Sortable image card with alt/caption editing
+interface GalleryImageCardProps {
+  img: GalleryImage;
+  idx: number;
+  lang: string;
+  onRemove: () => void;
+  onCaptionChange: (idx: number, lang: string, value: string) => void;
+  captionValue: string;
+  deleting?: boolean;
+}
+
 function GalleryImageCard({
   img,
   idx,
   lang,
   onRemove,
-  onMetaChange,
+  onCaptionChange,
+  captionValue,
   deleting,
-}: {
-  img: GalleryImage;
-  idx: number;
-  lang: string;
-  onRemove: () => void;
-  onMetaChange: (idx: number, lang: string, field: "alt" | "caption", value: string) => void;
-  deleting?: boolean;
-}) {
+}: GalleryImageCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: img.s3Key,
   });
@@ -296,21 +333,17 @@ function GalleryImageCard({
         {...attributes}
         {...listeners}
       />
+      <Label htmlFor={`caption-${img.s3Key}`} className="text-xs font-medium pl-1">
+        Image title*
+      </Label>
       <Input
-        placeholder="Alt text (required)"
-        value={img.i18n[lang]?.alt ?? ""}
-        onChange={(e) => onMetaChange(idx, lang, "alt", e.target.value)}
+        id={`caption-${img.s3Key}`}
+        placeholder="Describe your image"
+        value={captionValue}
+        onChange={(e) => onCaptionChange(idx, lang, e.target.value)}
         className="text-xs"
         maxLength={120}
         required
-        disabled={deleting}
-      />
-      <Input
-        placeholder="Caption"
-        value={img.i18n[lang]?.caption ?? ""}
-        onChange={(e) => onMetaChange(idx, lang, "caption", e.target.value)}
-        className="text-xs"
-        maxLength={120}
         disabled={deleting}
       />
       <Button
