@@ -8,6 +8,14 @@ export interface ImageGalleryBlockProps {
 }
 
 export function ImageGalleryBlock({ images, lang }: ImageGalleryBlockProps) {
+  {
+    images.map((img, idx) =>
+      console.log(
+        `Image ${idx}: meta=${JSON.stringify(img.meta)}, s3Key=${img.s3Key}, alt=${img.i18n[lang]?.alt}, caption=${img.i18n[lang]?.caption}`
+      )
+    );
+  }
+
   return (
     <>
       <Head>
@@ -46,6 +54,8 @@ export function ImageGalleryBlock({ images, lang }: ImageGalleryBlockProps) {
               loading="lazy"
               priority={idx === 0}
               style={{ objectFit: "cover" }}
+              placeholder={img.meta.blurDataUrl ? "blur" : undefined}
+              blurDataURL={img.meta.blurDataUrl}
             />
             <figcaption id={`caption-${img.s3Key}`}>{img.i18n[lang]?.caption}</figcaption>
           </figure>

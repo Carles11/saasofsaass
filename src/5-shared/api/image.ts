@@ -24,10 +24,12 @@ export async function GET(req: NextRequest) {
     .from(galleryImages)
     .where(eq(galleryImages.s3Key, s3Key))
     .limit(1);
+
   if (!image.length) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Get S3 object headers for content-type, etc.
   let contentType = "application/octet-stream";
+
   try {
     const head = await headS3Object(s3Key);
     if (head.ContentType) contentType = head.ContentType;

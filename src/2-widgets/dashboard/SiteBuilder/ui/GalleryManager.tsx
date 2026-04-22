@@ -1,7 +1,9 @@
 "use client";
 
 import { updateBlockConfig } from "@/3-features/manage-site-blocks/actions/blockActions";
+import { getCloudFrontUrl } from "@/5-shared/lib/aws/cloudfront";
 import { Block, Tenant } from "@/5-shared/lib/db/schema";
+import { toast } from "@/5-shared/lib/ui/toast";
 import { SupportedLocaleType } from "@/5-shared/types";
 import { GalleryImage } from "@/5-shared/types/tenants/blocks";
 import { Button } from "@/components/tenant/ui/button";
@@ -38,12 +40,10 @@ export function GalleryManager({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log("GalleryManager blockId:", blockId);
     setLoading(true);
     fetch(`/api/blocks/${blockId}`)
       .then((res) => res.json())
       .then((data) => {
-        console.log("GalleryManager data:", data);
         setBlock(data.block);
         const config = (data.block?.config ?? {}) as {
           galleryName?: string;
@@ -123,6 +123,7 @@ export function GalleryManager({
             },
           },
         });
+        toast({ title: `Image '${file.name}' added to gallery.`, status: "success" });
       }
       if (newImages.length > 0) {
         const allImages = [...images, ...newImages].slice(0, 11);
@@ -151,14 +152,28 @@ export function GalleryManager({
     // Optionally: debounce and persist
   }
 
-  // Remove image
+  // Remove image (calls API to delete from S3/DB, then updates UI)
   async function handleRemoveImage(s3Key: string) {
-    const newImages = images.filter((img) => img.s3Key !== s3Key);
-    setImages(newImages);
-    onImagesChange(newImages);
-    // Persist removal
-    if (block) {
-      await updateBlockConfig(block.id, tenant.id, { ...config, images: newImages });
+    setError(null);
+    try {
+      const res = await fetch(`/api/gallery/delete?s3Key=${encodeURIComponent(s3Key)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setError(err.error || "Failed to delete image");
+        return;
+      }
+      const newImages = images.filter((img) => img.s3Key !== s3Key);
+      setImages(newImages);
+      onImagesChange(newImages);
+      // Persist removal in block config
+      if (block) {
+        await updateBlockConfig(block.id, tenant.id, { ...config, images: newImages });
+      }
+      toast({ title: "Image removed from gallery.", status: "success" });
+    } catch (e) {
+      setError("Failed to delete image (network error)");
     }
   }
 
@@ -246,17 +261,24 @@ function GalleryImageCard({
   lang,
   onRemove,
   onMetaChange,
+  deleting,
 }: {
   img: GalleryImage;
   idx: number;
   lang: string;
   onRemove: () => void;
   onMetaChange: (idx: number, lang: string, field: "alt" | "caption", value: string) => void;
+  deleting?: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: img.s3Key,
   });
-  const cloudfrontDomain = "https://dxkr25c81be58.cloudfront.net";
+  const cloudfrontDomain = getCloudFrontUrl(img.s3Key);
+
+  function handleRemoveClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    onRemove();
+  }
 
   return (
     <div
@@ -266,13 +288,13 @@ function GalleryImageCard({
         transition,
       }}
       className="relative border rounded-lg p-2 bg-white flex flex-col gap-2 shadow-sm"
-      {...attributes}
-      {...listeners}
     >
       <img
-        src={`${cloudfrontDomain}/${img.s3Key}`}
+        src={cloudfrontDomain}
         alt={img.i18n[lang]?.alt ?? ""}
-        className="rounded w-full aspect-video object-cover"
+        className="rounded w-full aspect-video object-cover cursor-move"
+        {...attributes}
+        {...listeners}
       />
       <Input
         placeholder="Alt text (required)"
@@ -281,6 +303,7 @@ function GalleryImageCard({
         className="text-xs"
         maxLength={120}
         required
+        disabled={deleting}
       />
       <Input
         placeholder="Caption"
@@ -288,8 +311,18 @@ function GalleryImageCard({
         onChange={(e) => onMetaChange(idx, lang, "caption", e.target.value)}
         className="text-xs"
         maxLength={120}
+        disabled={deleting}
       />
-      <Button variant="destructive" size="sm" onClick={onRemove} className="absolute top-2 right-2">
+      <Button
+        variant="destructive"
+        size="sm"
+        onClick={handleRemoveClick}
+        className="absolute top-2 right-2 hover:cursor-pointer"
+        disabled={deleting}
+        aria-disabled={deleting}
+        aria-busy={deleting}
+        aria-label={deleting ? "Deleting image" : "Delete image"}
+      >
         ✕
       </Button>
     </div>

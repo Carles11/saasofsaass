@@ -13,14 +13,15 @@ export async function getTenantFromRequest(req: NextRequest) {
   const [subdomain, ...domainParts] = host.split(".");
   const domain = domainParts.join(".");
   // You may want to refine this logic for your SaaS
-  const isSubdomain = subdomain !== "www" && domainParts.length > 1;
-
+  const isSubdomain = subdomain !== "www" && subdomain !== "app" && domainParts.length > 1;
+  console.log("Extracted host info:", { host, subdomain, domain, isSubdomain });
   // Try to resolve tenant by subdomain or domain
   let tenant = await getTenantByDomain({
     tenant: subdomain,
     domain: host,
     isSubdomain,
   });
+
   console.log("Resolved tenant from request:", { host, tenant });
   // DEV fallback: if running on localhost and no tenant found, use the first tenant in DB
   if (!tenant && (/localhost/i.test(host) || /127\.0\.0\.1/.test(host))) {
