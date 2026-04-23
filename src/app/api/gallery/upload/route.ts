@@ -1,11 +1,12 @@
 import { galleryImageI18n, galleryImages } from "@/4-entities/gallery/model/image";
 import { getTenantFromRequest } from "@/5-shared/api/tenant-context";
 import { uploadToS3 } from "@/5-shared/lib/aws/s3";
-import { db } from "@/5-shared/lib/db";
-import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
 
 import { generateImageDescriptionWithGemini } from "@/5-shared/lib/ai/generateImageDescriptionWithGemini";
+import { db } from "@/5-shared/lib/db";
+import { generateSeoImageName } from "@/5-shared/lib/utils";
+import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 
 // POST /api/gallery/upload
 export async function POST(req: NextRequest) {
@@ -69,8 +70,49 @@ export async function POST(req: NextRequest) {
     .toBuffer();
   const blurDataUrl = `data:image/webp;base64,${blurBuffer.toString("base64")}`;
 
-  // Generate unique filename (always .webp)
-  const filename = `${crypto.randomUUID()}.webp`;
+  // Generate SEO-optimized filename (always .webp)
+  // Use alt/caption if available, else fallback to Gemini-generated or filename
+  let filename: string;
+  let blockType = "image-gallery";
+  let tenantCategory = tenant.category || "general";
+  let tenantName = tenant.name || "tenant";
+
+  // If alt/caption are missing or empty, generate them with Gemini
+  if (!alt || !caption || !alt.trim() || !caption.trim()) {
+    try {
+      // If you want to fetch block type from DB, uncomment below:
+      // const block = await db.query.blocks.findFirst({ where: (b) => b.id.eq(blockId) });
+      // if (block?.type) blockType = block.type;
+    } catch {}
+    try {
+      const desc = await generateImageDescriptionWithGemini({
+        filename: "image", // placeholder, not used for name
+        blockType,
+        tenantCategory,
+        extraContext: `Tenant: ${tenantName}`,
+      });
+      if (!alt || !alt.trim()) alt = desc.alt;
+      if (!caption || !caption.trim()) caption = desc.caption;
+    } catch (err) {
+      // Fallback: if Gemini fails, use generic
+      if (!alt || !alt.trim()) alt = "image";
+      if (!caption || !caption.trim()) caption = "image";
+    }
+  }
+
+  // Only fallback to generic if alt is still empty
+  if (!alt || !alt.trim()) {
+    alt = "image";
+  }
+
+  // Generate SEO filename from alt/caption/context
+  filename = generateSeoImageName({
+    title: alt || caption || undefined,
+    blockType,
+    tenantCategory,
+    tenantName,
+    ext: "webp",
+  });
 
   // If alt/caption are missing or empty, generate them with Gemini
   if (!alt || !caption || !alt.trim() || !caption.trim()) {

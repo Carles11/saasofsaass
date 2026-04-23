@@ -1,3 +1,4 @@
+import { getCloudFrontUrl } from "@/5-shared/lib/aws/cloudfront";
 import type { GalleryImage } from "@/5-shared/types/tenants/blocks";
 import Head from "next/head";
 import Image from "next/image";
@@ -11,7 +12,7 @@ export function ImageGalleryBlock({ images, lang }: ImageGalleryBlockProps) {
   {
     images.map((img, idx) =>
       console.log(
-        `Image ${idx}: meta=${JSON.stringify(img.meta)}, s3Key=${img.s3Key}, alt=${img.i18n[lang]?.alt}, caption=${img.i18n[lang]?.caption}`
+        `Image  s3Key=${img.s3Key}, alt=${img.i18n[lang]?.alt}, caption=${img.i18n[lang]?.caption}`
       )
     );
   }
@@ -22,7 +23,7 @@ export function ImageGalleryBlock({ images, lang }: ImageGalleryBlockProps) {
         {/* Open Graph tags */}
         {images[0] && (
           <>
-            <meta property="og:image" content={`/api/image?key=${images[0].s3Key}`} />
+            <meta property="og:image" content={getCloudFrontUrl(images[0].s3Key)} />
             <meta property="og:image:alt" content={images[0].i18n[lang]?.alt} />
           </>
         )}
@@ -35,7 +36,7 @@ export function ImageGalleryBlock({ images, lang }: ImageGalleryBlockProps) {
               "@type": "ImageGallery",
               image: images.map((img) => ({
                 "@type": "ImageObject",
-                contentUrl: `/api/image?key=${img.s3Key}`,
+                contentUrl: getCloudFrontUrl(img.s3Key),
                 caption: img.i18n[lang]?.caption,
                 description: img.i18n[lang]?.alt,
               })),
@@ -47,12 +48,12 @@ export function ImageGalleryBlock({ images, lang }: ImageGalleryBlockProps) {
         {images.map((img, idx) => (
           <figure key={img.s3Key} aria-describedby={`caption-${img.s3Key}`}>
             <Image
-              src={`/api/image?key=${img.s3Key}`}
+              src={getCloudFrontUrl(img.s3Key)}
               alt={img.i18n[lang]?.alt}
               width={img.meta.width}
               height={img.meta.height}
               loading="lazy"
-              priority={idx === 0}
+              // priority={idx === 0}
               style={{ objectFit: "cover" }}
               placeholder={img.meta.blurDataUrl ? "blur" : undefined}
               blurDataURL={img.meta.blurDataUrl}

@@ -6,7 +6,12 @@ const withNextIntl = createNextIntlPlugin("./src/5-shared/lib/i18n/request.ts");
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["agora.lvh.me", "*.lvh.me"],
   images: {
-    domains: ["dxkr25c81be58.cloudfront.net"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "dxkr25c81be58.cloudfront.net",
+      },
+    ],
   },
 };
 
