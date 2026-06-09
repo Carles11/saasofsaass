@@ -1,8 +1,10 @@
 "use client";
 
 import { addBlock } from "@/3-features/manage-site-blocks";
+import { CATEGORY_BLOCKS } from "@/5-shared/config/category-blocks";
 import type { Block } from "@/5-shared/lib/db/schema";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
+import type { TenantCategory } from "@/5-shared/types/tenants/categories";
 import { Button } from "@/components/tenant/ui/button";
 import {
   Dialog,
@@ -22,26 +24,18 @@ import {
 import { useState } from "react";
 import { BlockCard } from "./BlockCard";
 
-const AVAILABLE_BLOCK_KINDS: BlockKind[] = [
-  "navbar",
-  "hero",
-  "blog-feed",
-  "podcast-feed",
-  "awards",
-  "contact",
-  "image-gallery",
-];
-
 interface BlockListProps {
   blocks: Block[];
   tenantId: string;
+  category: TenantCategory;
   onEdit: (blockId: string) => void;
   setActiveTab?: (tab: string) => void;
   userRole?: "owner" | "editor" | null;
 }
 
-export function BlockList({ blocks, tenantId, onEdit, setActiveTab, userRole }: BlockListProps) {
-  const [newKind, setNewKind] = useState<BlockKind>("hero");
+export function BlockList({ blocks, tenantId, category, onEdit, setActiveTab, userRole }: BlockListProps) {
+  const availableKinds = CATEGORY_BLOCKS[category] ?? [];
+  const [newKind, setNewKind] = useState<BlockKind>(availableKinds[0] ?? "hero");
 
   return (
     <div className="flex flex-col gap-3">
@@ -81,7 +75,7 @@ export function BlockList({ blocks, tenantId, onEdit, setActiveTab, userRole }: 
                   <SelectValue placeholder="Select block type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AVAILABLE_BLOCK_KINDS.map((kind) => (
+                  {availableKinds.map((kind) => (
                     <SelectItem key={kind} value={kind}>
                       {kind}
                     </SelectItem>

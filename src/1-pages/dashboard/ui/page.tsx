@@ -1,3 +1,4 @@
+import { CreateTenantDialog } from "@/2-widgets/dashboard/CreateTenantDialog";
 import { db } from "@/5-shared/lib/db";
 import { tenants } from "@/5-shared/lib/db/schema";
 import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
@@ -31,13 +32,16 @@ export async function DashboardPage({ locale }: { locale?: string }) {
               {userTenants.length} tenant{userTenants.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <div className="flex items-center space-x-4 bg-white p-2 pr-6 rounded-full border border-zinc-200 shadow-sm">
-            <div className="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center text-white font-bold text-xs">
-              {profile?.name?.slice(0, 2).toUpperCase() || profile?.email?.slice(0, 2).toUpperCase() || "AD"}
+          <div className="flex items-center gap-4">
+            <CreateTenantDialog />
+            <div className="flex items-center space-x-4 bg-white p-2 pr-6 rounded-full border border-zinc-200 shadow-sm">
+              <div className="h-10 w-10 rounded-full bg-zinc-900 flex items-center justify-center text-white font-bold text-xs">
+                {profile?.name?.slice(0, 2).toUpperCase() || profile?.email?.slice(0, 2).toUpperCase() || "AD"}
+              </div>
+              <span className="text-xs font-bold text-zinc-900 uppercase tracking-tight">
+                {profile?.name || profile?.email || "Admin"}
+              </span>
             </div>
-            <span className="text-xs font-bold text-zinc-900 uppercase tracking-tight">
-              {profile?.name || profile?.email || "Admin"}
-            </span>
           </div>
         </header>
         <section className="grid grid-cols-1 gap-6">

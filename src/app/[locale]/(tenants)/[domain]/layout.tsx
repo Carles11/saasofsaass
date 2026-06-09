@@ -1,14 +1,7 @@
-import { db } from "@/5-shared/lib/db";
-import { tenantDomains, tenants } from "@/5-shared/lib/db/schema";
+import { getTenantByDomain } from "@/4-entities/tenant";
 import { StoreHydrator } from "@/5-shared/store/StoreHydrator";
-import { eq } from "drizzle-orm";
+import { TenantHeader } from "@/2-widgets/tenant/header/tenantHeader";
 
-/**
- * SERVER COMPONENT: Tenant Layout
- * * This layout fetches the tenant data from Neon using the domain param.
- * It hydrates the Zustand store via StoreHydrator to ensure all nested
- * client components have instant access to the "Bentley" context.
- */
 export default async function TenantLayout({
   params,
   children,
@@ -16,20 +9,24 @@ export default async function TenantLayout({
   params: Promise<{ domain: string }>;
   children: React.ReactNode;
 }) {
-  // Next.js 15: params must be awaited
   const { domain } = await params;
 
-  // Fetch tenant by joining tenant_domains for domain match
-  const result = await db
-    .select()
-    .from(tenants)
-    .innerJoin(tenantDomains, eq(tenantDomains.domain, domain))
-    .where(eq(tenantDomains.domain, domain));
-  const tenant = result?.[0]?.tenants ?? null;
-  // If no tenant found, we fall back to null (StoreHydrator handles this)
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com";
+  const isSubdomain =
+    (domain.endsWith(`.${rootDomain}`) && domain !== rootDomain) ||
+    /^[a-z0-9][a-z0-9-]*\.localhost$/.test(domain) ||
+    domain.endsWith(".lvh.me");
+  const tenantKey = isSubdomain ? domain.split(".")[0] : domain;
+
+  const tenant = await getTenantByDomain({
+    tenant: tenantKey,
+    domain,
+    isSubdomain,
+  });
+
   return (
     <StoreHydrator tenant={tenant ?? null}>
-      {/* <TenantHeader /> */}
+      {tenant && <TenantHeader />}
       <div className="min-h-screen selection:bg-zinc-900 selection:text-white">{children}</div>
     </StoreHydrator>
   );

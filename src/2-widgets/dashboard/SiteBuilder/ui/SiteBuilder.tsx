@@ -46,6 +46,13 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
   // Restore selectedBlock for BlockEditSheet
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
+  const previewUrl = (() => {
+    const isDev = typeof window !== "undefined" && window.location.hostname.includes("localhost");
+    const root = isDev ? "localhost" : (process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com");
+    const port = isDev ? `:${window.location.port}` : "";
+    return `http://${tenant.slug}.${root}${port}/${activeLocale}`;
+  })();
+
   return (
     <div className="flex flex-col gap-6">
       {/* ── Header ──────────────────────────────────────────────────── */}
@@ -56,6 +63,14 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
         </div>
         <div className="flex items-center gap-2">
           <AutoTranslateButton tenantId={tenant.id} />
+          <a
+            href={previewUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium text-zinc-500 hover:text-zinc-900 underline underline-offset-4 transition-colors"
+          >
+            Preview
+          </a>
           <LanguageSelector
             locales={tenant.locales}
             activeLocale={activeLocale}
@@ -89,6 +104,7 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
               <BlockList
                 blocks={blocks}
                 tenantId={tenant.id}
+                category={tenant.category as import("@/5-shared/types/tenants/categories").TenantCategory}
                 onEdit={setSelectedBlockId}
                 setActiveTab={setActiveTab}
                 userRole={userRole}
