@@ -7,18 +7,9 @@ import { asc, sql, eq, inArray, and } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import type { BlockKind } from '@/5-shared/types/tenants/blocks'
 import type { SupportedLocaleType } from '@/5-shared/types'
-
-/**
- * SECURITY PLACEHOLDER — Phase 6 hardening.
- * Replace with actual Neon Auth session check: verify the requesting user
- * owns tenantId before allowing any mutation.
- */
-async function assertTenantOwner(_tenantId: string): Promise<void> {
-  // TODO Phase 6: const session = await auth(); assert(session.user.tenantId === _tenantId)
-}
+import { assertCanEditContent, assertCanManageStructure } from '@/5-shared/lib/auth/authorization'
 
 function revalidateSiteBuilder(tenantId: string): void {
-  // Revalidates all locale variants of this tenant's site-builder page
   revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, 'page')
 }
 
@@ -30,7 +21,7 @@ export async function updateBlockTranslations(
   locale: SupportedLocaleType,
   payload: Record<string, string>,
 ) {
-  await assertTenantOwner(tenantId)
+  await assertCanEditContent(tenantId)
 
   const [existing] = await db
     .select({ translations: blocks.translations })
@@ -54,7 +45,7 @@ export async function updateBlockConfig(
   tenantId: string,
   config: Record<string, unknown>,
 ) {
-  await assertTenantOwner(tenantId)
+  await assertCanEditContent(tenantId)
 
   await db
     .update(blocks)
@@ -69,7 +60,7 @@ export async function toggleBlockVisibility(
   tenantId: string,
   currentValue: boolean,
 ) {
-  await assertTenantOwner(tenantId)
+  await assertCanManageStructure(tenantId)
 
   await db
     .update(blocks)
@@ -84,7 +75,7 @@ export async function reorderBlock(
   blockId: string,
   direction: 'up' | 'down',
 ) {
-  await assertTenantOwner(tenantId)
+  await assertCanManageStructure(tenantId)
 
   const ordered = await db
     .select({ id: blocks.id, order: blocks.order })
@@ -108,7 +99,7 @@ export async function reorderBlock(
 }
 
 export async function addBlock(tenantId: string, type: BlockKind) {
-  await assertTenantOwner(tenantId)
+  await assertCanManageStructure(tenantId)
 
   const [{ maxOrder }] = await db
     .select({ maxOrder: sql<number>`coalesce(max(${blocks.order}), -1)` })
@@ -128,7 +119,7 @@ export async function addBlock(tenantId: string, type: BlockKind) {
 }
 
 export async function deleteBlock(blockId: string, tenantId: string) {
-  await assertTenantOwner(tenantId)
+  await assertCanManageStructure(tenantId)
 
   await db.delete(blocks).where(eq(blocks.id, blockId))
 
@@ -137,40 +128,30 @@ export async function deleteBlock(blockId: string, tenantId: string) {
 
 // ── Tenant language management ───────────────────────────────────────────────
 
-/**
- * Update the enabled locales for a tenant (languages shown on public site)
- * FSD-compliant server action
- */
 export async function updateTenantLocales(
   tenantId: string,
   locales: string[],
 ) {
-  await assertTenantOwner(tenantId)
+  await assertCanManageStructure(tenantId)
 
-  // Get previous locales before update
   const [tenant] = await db.select({ locales: tenants.locales }).from(tenants).where(eq(tenants.id, tenantId)).limit(1)
   const prevLocales: string[] = tenant?.locales ?? []
 
-  // Update locales
   await db
     .update(tenants)
     .set({ locales, updatedAt: new Date() })
     .where(eq(tenants.id, tenantId))
 
-  // Compute added and removed locales
   const added = locales.filter(l => !prevLocales.includes(l))
   const removed = prevLocales.filter(l => !locales.includes(l))
 
-  // Backfill missing translation rows for added locales
   if (added.length > 0) {
-    // Get all entity IDs for this tenant
     const entities = await db.select({ id: tenantEntities.id })
       .from(tenantEntities)
       .where(eq(tenantEntities.tenantId, tenantId))
     const entityIds = entities.map(e => e.id)
 
     for (const locale of added) {
-      // Find existing translations for this locale
       const existing = await db.select({ entityId: tenantTranslations.entityId })
         .from(tenantTranslations)
         .where(and(
@@ -195,7 +176,6 @@ export async function updateTenantLocales(
     }
   }
 
-  // Remove translation rows for removed locales
   if (removed.length > 0) {
     await db.delete(tenantTranslations)
       .where(and(

@@ -3,6 +3,7 @@ import { getTenantFromRequest } from "@/5-shared/api/tenant-context";
 import { uploadToS3 } from "@/5-shared/lib/aws/s3";
 
 import { generateImageDescriptionWithGemini } from "@/5-shared/lib/ai/generateImageDescriptionWithGemini";
+import { getCloudFrontUrl } from "@/5-shared/lib/aws/cloudfront";
 import { db } from "@/5-shared/lib/db";
 import { generateSeoImageName } from "@/5-shared/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
@@ -16,14 +17,6 @@ export async function POST(req: NextRequest) {
   const tenantId = tenant.id;
 
   const form = await req.formData();
-  console.log("Received upload request with form data:", {
-    fields: {
-      lang: form.get("lang"),
-      alt: form.get("alt"),
-      caption: form.get("caption"),
-      blockId: form.get("blockId"),
-    },
-  });
 
   const file = form.get("file") as File;
   const lang = form.get("lang") as string;
@@ -178,5 +171,7 @@ export async function POST(req: NextRequest) {
     caption: caption ?? "",
   });
 
-  return NextResponse.json({ success: true, image });
+  // Return the uploaded image info with real CDN URL
+  const imageUrl = getCloudFrontUrl(s3Key);
+  return NextResponse.json({ success: true, image: { ...image, url: imageUrl } });
 }

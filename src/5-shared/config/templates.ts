@@ -12,7 +12,7 @@ export const TEMPLATES: Record<
   default: {
     id: "default",
     themeClass: "theme-bentley-default font-sans",
-    containerClass: "max-w-7xl mx-auto px-6",
+    containerClass: "",
   },
   modern: {
     id: "modern",

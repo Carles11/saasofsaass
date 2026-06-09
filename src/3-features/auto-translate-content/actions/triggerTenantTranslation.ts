@@ -5,17 +5,10 @@ import { blocks, tenantEntities, tenants, tenantTranslations } from "@/5-shared/
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { RateLimitError, translatePayload, TranslationError } from "../api/translateWithGemini";
+import { assertCanEditContent } from "@/5-shared/lib/auth/authorization";
 
 const BATCH_LIMIT = 30;
 const RATE_LIMIT_DELAY_MS = 150;
-
-/**
- * SECURITY PLACEHOLDER — Phase 6 hardening.
- * Replace with Neon Auth session check: verify requesting user owns tenantId.
- */
-async function assertTenantOwner(_tenantId: string): Promise<void> {
-  // TODO Phase 6: const session = await auth(); assert(session.user.tenantId === _tenantId)
-}
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -57,7 +50,7 @@ type Job = EntityJob | BlockJob;
  * Returns { succeeded, failed, remaining }.
  */
 export async function triggerTenantTranslation(tenantId: string): Promise<TranslationResult> {
-  await assertTenantOwner(tenantId);
+  await assertCanEditContent(tenantId);
 
   const [tenant] = await db
     .select({

@@ -2,16 +2,28 @@
 
 import { useStore } from "@/5-shared/store/index";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import type { AuthSession } from "@/5-shared/lib/auth/server";
+
+interface DashboardSidebarProps {
+  session: AuthSession;
+}
 
 /**
  * WIDGET: Dashboard Sidebar
- * Demonstrates consuming and modifying the Global UI Slice.
- * * Uses explicit index import to ensure resolution across all build environments.
+ * Collapsible navigation with user info and team management.
  */
-export const DashboardSidebar = () => {
-  // Select only the needed state to prevent unnecessary re-renders
+export const DashboardSidebar = ({ session }: DashboardSidebarProps) => {
   const isOpen = useStore((state) => state.isSidebarOpen);
   const toggle = useStore((state) => state.toggleSidebar);
+  const params = useParams();
+  const locale = (params.locale as string) || "en";
+
+  const user = session?.user;
+  const initials = user?.name
+    ? user.name.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2)
+    : user?.email?.slice(0, 2).toUpperCase() ?? "?";
 
   return (
     <motion.aside 
@@ -20,15 +32,18 @@ export const DashboardSidebar = () => {
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="h-screen bg-zinc-950 text-white p-4 border-r border-white/10 flex flex-col overflow-hidden"
     >
+      {/* ── Logo + Toggle ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-8 px-2">
         {isOpen && (
-          <motion.span 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="font-black tracking-tighter text-xl"
-          >
-            SoSs
-          </motion.span>
+          <Link href={`/${locale}/dashboard`}>
+            <motion.span 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="font-black tracking-tighter text-xl cursor-pointer"
+            >
+              SoSs
+            </motion.span>
+          </Link>
         )}
         <button 
           onClick={toggle}
@@ -47,16 +62,30 @@ export const DashboardSidebar = () => {
         </button>
       </div>
 
+      {/* ── User Info ─────────────────────────────────────────────────── */}
+      {isOpen && user && (
+        <div className="flex items-center gap-3 px-2 mb-6">
+          <div className="h-9 w-9 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+            {initials}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium truncate">{user.name || user.email}</p>
+            <p className="text-[10px] text-zinc-500 truncate">{user.email}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Navigation ────────────────────────────────────────────────── */}
       <nav className="flex-1 space-y-2">
-        {/* Navigation items - placeholders for the Bentley Factory */}
         {[
-          { icon: "⊞", label: "Dashboard" },
-          { icon: "◎", label: "Sites" },
-          { icon: "✦", label: "AI Tools" },
-          { icon: "⚙", label: "Settings" }
+          { icon: "⊞", label: "Dashboard", href: `/${locale}/dashboard` },
+          { icon: "◎", label: "Sites", href: `/${locale}/dashboard` },
+          { icon: "✦", label: "AI Tools", href: `/${locale}/dashboard` },
+          { icon: "👥", label: "Team", href: `/${locale}/dashboard/team` },
         ].map((item) => (
-          <button
+          <Link
             key={item.label}
+            href={item.href}
             className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-colors group"
           >
             <span className="text-xl w-6 flex justify-center group-hover:scale-110 transition-transform font-mono">
@@ -71,10 +100,11 @@ export const DashboardSidebar = () => {
                 {item.label}
               </motion.span>
             )}
-          </button>
+          </Link>
         ))}
       </nav>
 
+      {/* ── Footer ────────────────────────────────────────────────────── */}
       {isOpen && (
         <div className="p-4 bg-white/5 rounded-3xl border border-white/10">
           <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-bold mb-1">

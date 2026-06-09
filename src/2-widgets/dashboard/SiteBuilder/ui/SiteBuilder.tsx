@@ -18,14 +18,16 @@ import { GalleryManager } from "./GalleryManager";
 import { LanguageSelector } from "./LanguageSelector";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
+type UserRole = "owner" | "editor" | null;
 
 interface SiteBuilderProps {
   tenant: Tenant;
   blocks: Block[];
   initialEntities: EntityRow[];
+  userRole?: UserRole;
 }
 
-export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProps) {
+export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteBuilderProps) {
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType
   );
@@ -77,7 +79,7 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
         <TabsList>
           <TabsTrigger value="blocks">Blocks</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          {userRole === "owner" && <TabsTrigger value="settings">Settings</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="blocks" className="mt-4">
@@ -89,6 +91,7 @@ export function SiteBuilder({ tenant, blocks, initialEntities }: SiteBuilderProp
                 tenantId={tenant.id}
                 onEdit={setSelectedBlockId}
                 setActiveTab={setActiveTab}
+                userRole={userRole}
               />
             </TenantLayoutResolver>
           </div>

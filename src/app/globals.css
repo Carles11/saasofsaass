@@ -146,11 +146,6 @@
     border-radius: var(--radius);
     letter-spacing: var(--tracking);
     font-family: var(--font-heading);
-    max-width: 100vw;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem; /* theme(spacing.4) = 1rem */
-    padding-right: 1rem;
   }
   * {
     @apply border-border outline-ring/50;

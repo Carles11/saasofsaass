@@ -9,14 +9,6 @@ export interface ImageGalleryBlockProps {
 }
 
 export function ImageGalleryBlock({ images, lang }: ImageGalleryBlockProps) {
-  {
-    images.map((img, idx) =>
-      console.log(
-        `Image  s3Key=${img.s3Key}, alt=${img.i18n[lang]?.alt}, caption=${img.i18n[lang]?.caption}`
-      )
-    );
-  }
-
   return (
     <>
       <Head>

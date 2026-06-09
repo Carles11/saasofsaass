@@ -30,7 +30,7 @@ export interface BlockRegistryEntry {
   /** Translatable fields rendered by the FocusedLanguageEditor in the dashboard.
    * Collection blocks (e.g. blog-feed) leave this empty — their content
    * lives in tenant_entities and is managed via CollectionManager. */
-  fields?: Array<{ key: string; label: string; inputType: "input" | "textarea" }>;
+  fields?: Array<{ key: string; label: string; inputType: "input" | "textarea" | "image" }>;
 }
 
 export type BlockRegistry = Partial<Record<BlockKind, BlockRegistryEntry>>;

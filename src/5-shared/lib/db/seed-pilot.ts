@@ -21,10 +21,11 @@ import {
   tenantEntities,
   tenantTranslations,
 } from './schema'
+import { profiles, tenantMemberships } from './schema/auth'
 
 const sql = neon(process.env.DATABASE_URL!)
 const db = drizzle(sql, {
-  schema: { tenants, blocks, tenantEntities, tenantTranslations },
+  schema: { tenants, blocks, tenantEntities, tenantTranslations, profiles, tenantMemberships },
 })
 
 async function main() {
@@ -68,9 +69,7 @@ async function main() {
 
   if (existingBlocks.length > 0) {
     console.log(`  ✓ ${existingBlocks.length} block(s) already exist — skipping block inserts.`)
-    console.log('\n🎉  Seed complete. Start the dev server and visit agora.localhost:3000')
-    return
-  }
+  } else {
 
   // Navbar
   const [navbarBlock] = await db
@@ -111,6 +110,29 @@ async function main() {
     .returning({ id: blocks.id })
 
   console.log(`  ✓ Hero block inserted (id: ${heroBlock.id})`)
+
+  // Contact
+  const [contactBlock] = await db
+    .insert(blocks)
+    .values({
+      tenantId,
+      type:      'contact',
+      order:     3,
+      isVisible: true,
+      config:    {
+        email:   'info@agora-association.org',
+        phone:   '+34 123 456 789',
+        address: 'Carrer de la Pau, 12, Barcelona, Spain',
+      },
+      translations: {
+        en: { title: 'Get in Touch', description: 'We would love to hear from you. Reach out to us.' },
+        es: { title: 'Contacto', description: 'Nos encantaría saber de ti. Ponte en contacto.' },
+        ca: { title: 'Contacta', description: 'Ens encantaria saber de tu. Posa\'t en contacte.' },
+      },
+    })
+    .returning({ id: blocks.id })
+
+  console.log(`  ✓ Contact block inserted (id: ${contactBlock.id})`)
 
   // Blog feed
   const [blogBlock] = await db
@@ -178,6 +200,59 @@ async function main() {
   ])
 
   console.log('  ✓ Translation rows seeded (en: translated, es/ca: pending)')
+  }
+
+  // ── 4. Profiles + Memberships ───────────────────────────────────────────────
+
+  const ownerEmail = 'admin@agora-association.org'
+  const [ownerProfile] = await db
+    .insert(profiles)
+    .values({ email: ownerEmail, name: 'Àgora Admin', role: 'user' })
+    .onConflictDoNothing({ target: profiles.email })
+    .returning()
+
+  const ownerProfileId = ownerProfile?.id ?? (
+    await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.email, ownerEmail)).limit(1)
+  )[0]?.id
+
+  if (ownerProfileId) {
+    await db.insert(tenantMemberships).values({
+      tenantId,
+      profileId: ownerProfileId,
+      role: 'owner',
+    }).onConflictDoNothing({ target: [tenantMemberships.tenantId, tenantMemberships.profileId] })
+    console.log(`  ✓ Owner profile ready (admin@agora-association.org)`)
+  }
+
+  // 3 Editors
+  const editorEmails = [
+    'worker1@agora-association.org',
+    'worker2@agora-association.org',
+    'worker3@agora-association.org',
+  ]
+
+  for (const email of editorEmails) {
+    const [editorProfile] = await db
+      .insert(profiles)
+      .values({ email, name: email.split('@')[0], role: 'user' })
+      .onConflictDoNothing({ target: profiles.email })
+      .returning()
+
+    const editorProfileId = editorProfile?.id ?? (
+      await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.email, email)).limit(1)
+    )[0]?.id
+
+    if (editorProfileId) {
+      await db.insert(tenantMemberships).values({
+        tenantId,
+        profileId: editorProfileId,
+        role: 'editor',
+      }).onConflictDoNothing({ target: [tenantMemberships.tenantId, tenantMemberships.profileId] })
+    }
+  }
+
+  console.log('  ✓ 3 editor profiles ready (worker[1-3]@agora-association.org)')
+
   console.log('\n🎉  Seed complete. Start the dev server and visit agora.localhost:3000')
 }
 

@@ -21,6 +21,7 @@ interface BlockCardProps {
   isLast: boolean;
   onEdit: (blockId: string) => void;
   setActiveTab?: (tab: string) => void;
+  userRole?: "owner" | "editor" | null;
 }
 
 export function BlockCard({
@@ -30,6 +31,7 @@ export function BlockCard({
   isLast,
   onEdit,
   setActiveTab,
+  userRole,
 }: BlockCardProps) {
   const [isPending, startTransition] = useTransition();
 
@@ -60,8 +62,8 @@ export function BlockCard({
           {block.isVisible ? "👁" : "🙈"}
         </Button>
 
-        {/* Reorder up */}
-        {!isFirst && (
+        {/* Reorder up — owner only */}
+        {userRole === "owner" && !isFirst && (
           <Button
             tenantVariant="ghost"
             size="sm"
@@ -73,8 +75,8 @@ export function BlockCard({
           </Button>
         )}
 
-        {/* Reorder down */}
-        {!isLast && (
+        {/* Reorder down — owner only */}
+        {userRole === "owner" && !isLast && (
           <Button
             tenantVariant="ghost"
             size="sm"
@@ -102,7 +104,6 @@ export function BlockCard({
             Manage Content
           </Button>
         ) : (
-          // Edit button only for non-collection blocks
           <Button
             tenantVariant="outline"
             size="sm"
@@ -113,33 +114,35 @@ export function BlockCard({
           </Button>
         )}
 
-        {/* Delete - always last */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button tenantVariant="destructive" size="sm" disabled={isPending}>
-              Delete
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Delete &ldquo;{block.type}&rdquo; block?</DialogTitle>
-            </DialogHeader>
-            <p className="text-sm text-zinc-500 mb-4">This action cannot be undone.</p>
-            <div className="flex gap-2 justify-end">
-              <DialogClose asChild>
-                <Button tenantVariant="outline">Cancel</Button>
-              </DialogClose>
-              <DialogClose asChild>
-                <Button
-                  tenantVariant="destructive"
-                  onClick={() => startTransition(() => deleteBlock(block.id, tenantId))}
-                >
-                  Confirm Delete
-                </Button>
-              </DialogClose>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Delete — owner only */}
+        {userRole === "owner" && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button tenantVariant="destructive" size="sm" disabled={isPending}>
+                Delete
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Delete &ldquo;{block.type}&rdquo; block?</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-zinc-500 mb-4">This action cannot be undone.</p>
+              <div className="flex gap-2 justify-end">
+                <DialogClose asChild>
+                  <Button tenantVariant="outline">Cancel</Button>
+                </DialogClose>
+                <DialogClose asChild>
+                  <Button
+                    tenantVariant="destructive"
+                    onClick={() => startTransition(() => deleteBlock(block.id, tenantId))}
+                  >
+                    Confirm Delete
+                  </Button>
+                </DialogClose>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

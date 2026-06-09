@@ -114,6 +114,7 @@ export function GalleryManager({
         // Compose GalleryImage object for UI
         newImages.push({
           s3Key: image.s3Key,
+          url: image.url,
           meta: image.meta || {},
           i18n: {
             [activeLocale]: {
@@ -340,7 +341,7 @@ function GalleryImageCard({
       className="relative border rounded-lg p-2 bg-white flex flex-col gap-2 shadow-sm"
     >
       <img
-        src={cloudfrontDomain}
+        src={img.url}
         alt={img.i18n[lang]?.alt ?? ""}
         className="rounded w-full aspect-video object-cover cursor-move"
         {...attributes}

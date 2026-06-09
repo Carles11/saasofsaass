@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { galleryImageI18n, galleryImages } from "@/4-entities/gallery/model/image";
+import { heroImageI18n, heroImages } from "@/4-entities/hero/model/image";
 
 // ============================================
 // TENANTS
@@ -176,9 +177,14 @@ export const platformTranslations = pgTable("platform_translations", {
 });
 
 // ============================================
-// IMAGES (for image gallery block)
+// AUTH (profiles + tenant memberships)
 // ============================================
-export { galleryImageI18n, galleryImages };
+export { profiles, tenantMemberships } from "./schema/auth";
+
+// ============================================
+// IMAGES (for image gallery block and HeroImages)
+// ============================================
+export { galleryImageI18n, galleryImages, heroImageI18n, heroImages };
 
 // ============================================
 // TYPES (inferred from schema)
@@ -195,3 +201,4 @@ export type TenantEntity = typeof tenantEntities.$inferSelect;
 export type NewTenantEntity = typeof tenantEntities.$inferInsert;
 export type TenantTranslation = typeof tenantTranslations.$inferSelect;
 export type NewTenantTranslation = typeof tenantTranslations.$inferInsert;
+export type { Profile, NewProfile, TenantMembership, NewTenantMembership } from "./schema/auth";

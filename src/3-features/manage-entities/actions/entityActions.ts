@@ -5,15 +5,7 @@ import { tenants, tenantEntities, tenantTranslations } from '@/5-shared/lib/db/s
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import type { EntityKind } from '@/5-shared/types/tenants/entities'
-
-/**
- * SECURITY PLACEHOLDER — Phase 6 hardening.
- * Replace with actual Neon Auth session check: verify the requesting user
- * owns tenantId before allowing any mutation.
- */
-async function assertTenantOwner(_tenantId: string): Promise<void> {
-  // TODO Phase 6: const session = await auth(); assert(session.user.tenantId === _tenantId)
-}
+import { assertCanEditContent } from '@/5-shared/lib/auth/authorization'
 
 function revalidateSiteBuilder(tenantId: string): void {
   revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, 'page')
@@ -28,13 +20,8 @@ interface CreateEntityParams {
   slug: string
 }
 
-/**
- * Create a new entity and seed pending translation rows for every enabled locale.
- * The source locale gets status 'translated' (to be filled by the tenant).
- * All other locales get status 'pending' — Gemini Phase 5 will pick these up.
- */
 export async function createEntity({ tenantId, blockId, kind, slug }: CreateEntityParams) {
-  await assertTenantOwner(tenantId)
+  await assertCanEditContent(tenantId)
 
   const [tenant] = await db
     .select({ locales: tenants.locales, defaultLocale: tenants.defaultLocale })
@@ -57,7 +44,6 @@ export async function createEntity({ tenantId, blockId, kind, slug }: CreateEnti
     })
     .returning({ id: tenantEntities.id })
 
-  // Seed a translation row for every enabled locale
   const translationRows = tenant.locales.map(locale => ({
     tenantId,
     entityId: entity.id,
@@ -75,7 +61,7 @@ export async function createEntity({ tenantId, blockId, kind, slug }: CreateEnti
 }
 
 export async function publishEntity(entityId: string, tenantId: string) {
-  await assertTenantOwner(tenantId)
+  await assertCanEditContent(tenantId)
 
   await db
     .update(tenantEntities)
@@ -85,17 +71,13 @@ export async function publishEntity(entityId: string, tenantId: string) {
   revalidateSiteBuilder(tenantId)
 }
 
-/**
- * Upsert a translation for an entity+locale pair.
- * Sets isLocked=true so Gemini (Phase 5) does not overwrite manual edits.
- */
 export async function updateEntityTranslation(
   entityId: string,
   tenantId: string,
   locale: string,
   payload: Record<string, unknown>,
 ) {
-  await assertTenantOwner(tenantId)
+  await assertCanEditContent(tenantId)
 
   await db
     .insert(tenantTranslations)

@@ -37,9 +37,10 @@ interface BlockListProps {
   tenantId: string;
   onEdit: (blockId: string) => void;
   setActiveTab?: (tab: string) => void;
+  userRole?: "owner" | "editor" | null;
 }
 
-export function BlockList({ blocks, tenantId, onEdit, setActiveTab }: BlockListProps) {
+export function BlockList({ blocks, tenantId, onEdit, setActiveTab, userRole }: BlockListProps) {
   const [newKind, setNewKind] = useState<BlockKind>("hero");
 
   return (
@@ -53,6 +54,7 @@ export function BlockList({ blocks, tenantId, onEdit, setActiveTab }: BlockListP
           isLast={i === blocks.length - 1}
           onEdit={onEdit}
           setActiveTab={setActiveTab}
+          userRole={userRole}
         />
       ))}
 
@@ -62,37 +64,39 @@ export function BlockList({ blocks, tenantId, onEdit, setActiveTab }: BlockListP
         </p>
       )}
 
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button tenantVariant="outline" className="mt-2">
-            + Add Block
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add a New Block</DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 pt-2">
-            <Select value={newKind} onValueChange={(v) => setNewKind(v as BlockKind)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select block type" />
-              </SelectTrigger>
-              <SelectContent>
-                {AVAILABLE_BLOCK_KINDS.map((kind) => (
-                  <SelectItem key={kind} value={kind}>
-                    {kind}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <DialogClose asChild>
-              <Button onClick={() => addBlock(tenantId, newKind)} className="w-full">
-                Add &ldquo;{newKind}&rdquo;
-              </Button>
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {userRole === "owner" && (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button tenantVariant="outline" className="mt-2">
+              + Add Block
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add a New Block</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4 pt-2">
+              <Select value={newKind} onValueChange={(v) => setNewKind(v as BlockKind)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select block type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_BLOCK_KINDS.map((kind) => (
+                    <SelectItem key={kind} value={kind}>
+                      {kind}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <DialogClose asChild>
+                <Button onClick={() => addBlock(tenantId, newKind)} className="w-full">
+                  Add &ldquo;{newKind}&rdquo;
+                </Button>
+              </DialogClose>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
