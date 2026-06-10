@@ -14,6 +14,7 @@ This file defines the strict coding standards, architectural rules, and current 
 - **i18n:** next-intl v4 with `[locale]` in URL
 - **State:** Zustand (UI slice: sidebar toggle; tenant slice: partial)
 - **Multi-tenancy:** Single-codebase, data-driven rendering via proxy middleware
+- **Template Architecture:** TypeScript source of truth (`config/templates.ts`). Text slug on tenant. Appearance-only presets. No DB storage, no UUID FK, no seed script.
 - **Theme:** Platform-wide dark/light via `ThemeProvider` (`next-themes`), semantic shadcn CSS vars
 
 ---
@@ -125,6 +126,7 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 - `id`, `name`, `slug`, `domain`, `category` (social-work | wedding)
 - `locales` (text array — enabled languages per tenant)
 - `defaultLocale`, `branding` (JSONB — HSL vars, logo, fonts)
+- `templateId` (text, default `"default"` — slug referencing template in TypeScript config)
 - `isActive`, `createdAt`, `updatedAt`
 
 ### `blocks`

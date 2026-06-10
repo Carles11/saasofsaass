@@ -26,7 +26,7 @@ export const tenants = pgTable("tenants", {
   locales: text("locales").array().notNull().default(["en"]), // enabled languages
   defaultLocale: text("default_locale").notNull().default("en"),
   branding: jsonb("branding").default({}), // HSL vars, logo, fonts
-  templateId: text("template_id").notNull().default("default"), // Bentley Hybrid template system
+  templateId: text("template_id").notNull().default("default"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

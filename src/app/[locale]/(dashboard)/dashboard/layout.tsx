@@ -16,7 +16,12 @@ export default async function DashboardLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const { data: session } = await authServer.getSession();
+  console.log("before getSession")
+  const sessionResult = await authServer.getSession()
+
+console.log(sessionResult)
+
+const session = sessionResult.data
 
   if (!session?.user) {
     redirect(`/${locale}/auth/login`)
