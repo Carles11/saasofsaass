@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/5-shared/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/5-shared/lib/auth/provider";
+import { ThemeProvider } from "@/5-shared/theme/ThemeProvider";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -34,8 +35,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>{children}</AuthProvider>
-        <Toaster position="top-right" />
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+          <Toaster position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

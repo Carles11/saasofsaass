@@ -6,6 +6,7 @@ import { TemplatePicker } from "@/3-features/manage-site-blocks/ui/TemplatePicke
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
 import type { Block, Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
 import type { SupportedLocaleType } from "@/5-shared/types";
+import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useParams, usePathname, useRouter } from "next/navigation";
@@ -25,9 +26,16 @@ interface SiteBuilderProps {
   blocks: Block[];
   initialEntities: EntityRow[];
   userRole?: UserRole;
+  translations?: Record<string, string>;
 }
 
-export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteBuilderProps) {
+export function SiteBuilder({
+  tenant,
+  blocks,
+  initialEntities,
+  userRole,
+  translations,
+}: SiteBuilderProps) {
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType
   );
@@ -47,19 +55,49 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
   const previewUrl = (() => {
+    const devRoot = (process.env.NEXT_PUBLIC_DEV_ROOT_DOMAIN || "lvh.me:3000").replace(/https?:\/\//, "").replace(/\/+$/, "");
+    const prodRoot = (process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com").replace(/https?:\/\//, "").replace(/\/+$/, "");
     const isDev = typeof window !== "undefined" && window.location.hostname.includes("localhost");
-    const root = isDev ? "localhost" : (process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com");
+    const root = isDev ? devRoot : prodRoot;
     const port = isDev ? `:${window.location.port}` : "";
     return `http://${tenant.slug}.${root}${port}/${activeLocale}`;
   })();
+
+  const subtitle = resolveTranslation(translations, "subtitle", "Site Builder");
+  const tabBlocks = resolveTranslation(translations, "tab.blocks", "Blocks");
+  const tabContent = resolveTranslation(translations, "tab.content", "Content");
+  const tabSettings = resolveTranslation(translations, "tab.settings", "Settings");
+  const blockNotFound = resolveTranslation(translations, "block-not-found", "Block not found.");
+  const noContentToManage = resolveTranslation(
+    translations,
+    "no-content-to-manage",
+    "This block has no content to manage.",
+  );
+  const selectBlock = resolveTranslation(
+    translations,
+    "select-block",
+    "Select a block to manage its content.",
+  );
+  const enabledLanguages = resolveTranslation(
+    translations,
+    "settings.languages",
+    "Enabled Languages",
+  );
+  const languagesHint = resolveTranslation(
+    translations,
+    "settings.languages-hint",
+    "Click to enable/disable languages for your public site.",
+  );
+  const savingLabel = resolveTranslation(translations, "settings.saving", "Saving...");
+  const siteTemplate = resolveTranslation(translations, "settings.template", "Site Template");
 
   return (
     <div className="flex flex-col gap-6">
       {/* ── Header ──────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-zinc-900">{tenant.name}</h2>
-          <p className="text-sm text-zinc-500">Site Builder</p>
+          <h2 className="text-2xl font-bold text-foreground">{tenant.name}</h2>
+          <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <AutoTranslateButton tenantId={tenant.id} />
@@ -67,9 +105,9 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
             href={previewUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-medium text-zinc-500 hover:text-zinc-900 underline underline-offset-4 transition-colors"
+            className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
           >
-            Preview
+            {translations?.preview ?? "Preview"}
           </a>
           <LanguageSelector
             locales={tenant.locales}
@@ -92,22 +130,25 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
       {/* ── Main tabs ───────────────────────────────────────────────── */}
       <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="blocks">
         <TabsList>
-          <TabsTrigger value="blocks">Blocks</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
-          {userRole === "owner" && <TabsTrigger value="settings">Settings</TabsTrigger>}
+          <TabsTrigger value="blocks">{tabBlocks}</TabsTrigger>
+          <TabsTrigger value="content">{tabContent}</TabsTrigger>
+          {userRole === "owner" && <TabsTrigger value="settings">{tabSettings}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="blocks" className="mt-4">
           {/* Only the block preview area uses the tenant template styles */}
-          <div className="rounded-2xl border border-zinc-200 bg-white p-4">
+          <div className="rounded-2xl border border-border bg-card p-4">
             <TenantLayoutResolver templateId={previewTemplateId}>
               <BlockList
                 blocks={blocks}
                 tenantId={tenant.id}
-                category={tenant.category as import("@/5-shared/types/tenants/categories").TenantCategory}
+                category={
+                  tenant.category as import("@/5-shared/types/tenants/categories").TenantCategory
+                }
                 onEdit={setSelectedBlockId}
                 setActiveTab={setActiveTab}
                 userRole={userRole}
+                translations={translations}
               />
             </TenantLayoutResolver>
           </div>
@@ -119,7 +160,7 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
             (() => {
               const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
               if (!selectedBlock) {
-                return <div className="text-zinc-400 text-center py-8">Block not found.</div>;
+                return <div className="text-muted-foreground text-center py-8">{blockNotFound}</div>;
               }
               if (selectedBlock.type === "image-gallery") {
                 return (
@@ -139,25 +180,26 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
                     initialEntities={initialEntities}
                     blockType={selectedBlock.type}
                     blockId={selectedBlock.id}
+                    translations={translations}
                   />
                 );
               }
               return (
-                <div className="text-zinc-400 text-center py-8">
-                  This block has no content to manage.
+                <div className="text-muted-foreground text-center py-8">
+                  {noContentToManage}
                 </div>
               );
             })()
           ) : (
-            <div className="text-zinc-400 text-center py-8">
-              Select a block to manage its content.
+            <div className="text-muted-foreground text-center py-8">
+              {selectBlock}
             </div>
           )}
         </TabsContent>
 
         <TabsContent value="settings" className="mt-4">
           <div className="mb-6">
-            <h3 className="font-semibold mb-2">Enabled Languages</h3>
+            <h3 className="font-semibold mb-2">{enabledLanguages}</h3>
             <div className="flex flex-wrap gap-2">
               {SUPPORTED_LOCALES.map((locale) => (
                 <Badge
@@ -181,13 +223,13 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
                 </Badge>
               ))}
             </div>
-            <p className="text-xs text-zinc-500 mt-2">
-              Click to enable/disable languages for your public site.
-              {isSaving && <span className="ml-2 text-blue-500">Saving…</span>}
+            <p className="text-xs text-muted-foreground mt-2">
+              {languagesHint}
+              {isSaving && <span className="ml-2 text-blue-500">{savingLabel}</span>}
             </p>
           </div>
           <div className="mb-8">
-            <h3 className="font-semibold mb-2">Site Template</h3>
+            <h3 className="font-semibold mb-2">{siteTemplate}</h3>
             <TemplatePicker
               previewTemplateId={previewTemplateId}
               setPreviewTemplateId={setPreviewTemplateId}
@@ -204,6 +246,7 @@ export function SiteBuilder({ tenant, blocks, initialEntities, userRole }: SiteB
         activeLocale={activeLocale}
         open={selectedBlockId !== null}
         onClose={() => setSelectedBlockId(null)}
+        translations={translations}
       />
     </div>
   );

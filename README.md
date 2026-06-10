@@ -11,7 +11,8 @@ A **multi-tenant website factory** — a single Next.js codebase that dynamicall
 | **Framework** | Next.js 16.2 (App Router, Turbopack) |
 | **Language** | TypeScript 5.x, React 19.2 |
 | **Database** | Neon (Serverless PostgreSQL) via Drizzle ORM 0.45 |
-| **Auth** | Neon Auth (Better Auth foundation) |
+| **Auth** | Neon Auth (Better Auth foundation) via API proxy route |
+| **Theme** | next-themes (dark/light), shadcn semantic CSS vars, 2 palette themes (Ocean/Sunset) |
 | **Styling** | Tailwind CSS v4 + shadcn/ui |
 | **Animations** | Framer Motion 12.x |
 | **Icons** | Lucide React |
@@ -88,7 +89,15 @@ This idempotent script creates:
 - A navbar, hero, and blog-feed block
 - One sample blog post with English content (es/ca left as pending for Gemini)
 
-### 6. Start the dev server
+### 6. (Optional) Seed platform translations
+
+```bash
+npx tsx src/5-shared/lib/db/seed-platform-translations.ts
+```
+
+Seeds platform UI strings (e.g. "Preview") into the `platform_translations` table for all 8 locales.
+
+### 7. Start the dev server
 
 ```bash
 npm run dev
@@ -130,23 +139,26 @@ npm run db:studio    # Open Drizzle Studio (GUI DB browser at localhost:4983)
 
 ```
 src/
-  1-pages/           — Page-level components (marketing, dashboard, tenants)
-  2-widgets/         — Composite widgets (site builder, block renderer, sidebar)
-  3-features/        — Interactive features (AI translate, entity CRUD, block CRUD)
-  4-entities/        — Business logic & models (tenant, block, gallery, hero)
+  1-pages/
+    marketing/ui/sections/ — Marketing page sections (Hero, Features, Pricing, Testimonials, FAQ, CTA, Footer, Header)
+  2-widgets/         — Composite widgets (site builder, block renderer, sidebar, create dialog, team manager)
+  3-features/        — Interactive features (AI translate, entity CRUD, block CRUD, tenant actions)
+  4-entities/        — Business logic & models (tenant, block, gallery, content)
   5-shared/          — Infrastructure, config, types, lib, store, translations
-    lib/db/          — Drizzle schema, Neon client, seed script
+    lib/auth/        — Neon Auth integration (authorization, sync-profile, server)
+    lib/db/          — Drizzle schema (core + auth), Neon client, seed scripts
     lib/i18n/        — next-intl routing & request config
-    lib/next/        — Server/client params helpers, domain parser, tenant cache
+    lib/next/        — Server/client params helpers, domain parser, RTL detection
     lib/aws/         — S3 client, CloudFront URL builder
     lib/ai/          — Gemini image description generation
-    store/           — Zustand store (UI slice, tenant slice)
+    store/           — Zustand store (UI slice, tenant slice, StoreHydrator)
+    theme/           — ThemeProvider (next-themes) + ThemeToggle
     translations/    — JSON locale files (en, es, ca, eu, ga, fr, it, de)
-    config/          — Template & language configs
-    types/           — Shared TypeScript type definitions
-  app/               — Next.js App Router (layouts, pages, API routes)
-    api/             — API routes (blocks, hero upload/delete, gallery CRUD)
-    [locale]/        — Locale-based route groups
+    config/          — Category configs (blocks per category, labels)
+    types/           — Shared TypeScript types (categories, blocks, page props)
+  app/               — Next.js App Router (layouts, pages, API routes, sitemap)
+    api/auth/        — Auth API proxy route (Origin override for dev subdomains)
+    [locale]/        — Locale-based route groups (marketing, dashboard, tenants)
   proxy.ts           — DNS + i18n middleware (Next.js 16.2)
 components/
   ui/                — shadcn/ui primitives
@@ -157,28 +169,28 @@ components/
 **FSD Rules:**
 - Imports flow downward only: `app` → `1-pages` → `2-widgets` → `3-features` → `4-entities` → `5-shared`
 - No cross-slice imports on the same layer
-- No hardcoded colors/fonts — CSS variables only
+- Platform pages use semantic shadcn CSS vars (`bg-background`, `text-foreground`, etc.)
 
 ---
 
-## Database Schema (10 tables)
+## Database Schema (12 tables)
 
-| Table | Purpose |
-|---|---|
-| `tenants` | Tenant organizations with branding, locale config |
-| `blocks` | Content blocks (hero, blog, navbar, etc.) with JSONB config + translations |
-| `tenant_entities` | Entity items (blog posts, podcast episodes, awards) |
-| `tenant_translations` | Per-locale entity translations with AI status tracking |
-| `tenant_domains` | Custom domain mappings |
-| `gallery_images` | Gallery image references with S3 keys |
-| `gallery_image_i18n` | Gallery image alt-text/captions per locale |
-| `hero_images` | Hero background images with S3 keys |
-| `hero_image_i18n` | Hero image alt-text per locale |
-| `transactions` | Stripe transaction records (1% platform fee) |
-| `content_items` | Legacy entity table (being migrated to tenant_entities) |
-| `platform_translations` | Platform UI string translations |
+| Table | Location | Purpose |
+|---|---|---|
+| `tenants` | `schema.ts` | Tenant organizations with branding, locale config, category |
+| `blocks` | `schema.ts` | Content blocks (navbar, hero, blog-feed, awards, podcast-feed, contact) with JSONB config + translations |
+| `content_items` | `schema.ts` | Legacy entity table (being migrated to tenant_entities) |
+| `transactions` | `schema.ts` | Stripe transaction records (1% platform fee) |
+| `platform_translations` | `schema.ts` | Platform UI string translations (namespace/key/locale, unique constraint) |
+| `profiles` | `schema/auth.ts` | Local user profiles synced from Neon Auth |
+| `tenant_memberships` | `schema/auth.ts` | Role-based access (owner/editor) per tenant |
+| `tenant_entities` | (legacy) | Entity items (blog posts, podcast episodes, awards) |
+| `tenant_translations` | (legacy) | Per-locale entity translations |
+| `tenant_domains` | (legacy) | Custom domain mappings |
+| `gallery_images` | (legacy) | Gallery image references with S3 keys |
+| `hero_images` | (legacy) | Hero background images with S3 keys |
 
-View/manage via Drizzle Studio: `npm run db:studio`
+View/manage via Drizzle Studio using WSL Terminal: `npm run db:studio`
 
 ---
 
@@ -186,15 +198,41 @@ View/manage via Drizzle Studio: `npm run db:studio`
 
 | Block | Status |
 |---|---|
-| Navbar | ✅ Implemented |
-| Hero (3 layout variants) | ✅ Implemented |
+| Navbar | ✅ Implemented (3 layout variants: centered, sticky, minimal) |
+| Hero | ✅ Implemented (3 layout variants: image-left, centered-overlay, split-text) |
 | Blog Feed | ✅ Implemented |
 | Awards | ✅ Implemented |
 | Podcast Feed | ✅ Implemented |
 | Image Gallery | ✅ Implemented |
 | Contact | ❌ Type defined, component not yet built |
 
+Blocks are tenant-category-aware — the available block kinds are filtered by `CATEGORY_BLOCKS[category]` in the SiteBuilder.
+
 ---
+
+## Palette System
+
+Two color palettes are available and switchable at runtime:
+
+| Palette | Vibe | Light Mode | Dark Mode |
+|---|---|---|---|
+| **Ocean** | Professional, fresh | Soft blue-white bg, vibrant blue primary, coral accent | Deep navy bg, bright blue primary |
+| **Sunset** | Warm, friendly | Cream bg, rich terracotta primary, golden accent | Warm dark bg, bright terracotta primary |
+
+Switch via the `PaletteSwitcher` component (sunburst/snowflake icon). Preference persists in localStorage under `soos-palette`. Default is Ocean.
+
+## Marketing Page Structure
+
+The marketing page is composed of individual sections in `src/1-pages/marketing/ui/sections/`:
+
+- `MarketingHeader` — Sticky nav with logo, nav links, language selector, theme/palette toggles, sign in/up buttons, mobile menu
+- `HeroSection` — Headline, subtitle, CTA buttons, stats
+- `FeaturesSection` — 6 feature cards with icons using shadcn Card
+- `PricingSection` — 3-tier pricing with "Most Popular" badge
+- `TestimonialsSection` — 3 testimonial cards
+- `FaqSection` — Accordion-style FAQ
+- `CtaSection` — Final call-to-action
+- `FooterSection` — Links and copyright
 
 ## AI Translation Flow
 
@@ -214,25 +252,31 @@ View/manage via Drizzle Studio: `npm run db:studio`
 - shadcn/ui, Zustand (partial), helper utilities
 - Pilot tenant seed script
 
-### 🔄 Phase 2 — Auth & Dashboard (In Progress)
-- Dashboard scaffold with sidebar ✅
-- Gemini AI translation engine ✅
-- Neon Auth setup ❌ (placeholder `assertTenantOwner` stubs)
-- Zustand tenant store ❌ (partial)
-- Platform translations seeding ❌
+### ✅ Phase 2 — Auth, Dashboard, Team & SEO (Complete)
+- Neon Auth fully working with API proxy route and Origin override for dev subdomains
+- Local profiles + tenant_memberships with role-based permissions (owner/editor)
+- 5 auth pages (sign-in, sign-up, login, register, forgot-password)
+- Dashboard with collapsible sidebar, site builder UI, team management
+- "Create Site" dialog with tenant category selection
+- Entity CRUD (blog posts, podcast episodes, awards) with per-type translation forms
+- Platform translations table + seeding + helper
+- AI translation flow via Gemini 2.5
+- Marketing page SEO (per-locale metadata, OG, hreflang, canonical, sitemap)
+- Dark/light theme (next-themes, semantic CSS vars across all platform pages)
 
-### 🔄 Phase 3 — Block System (In Progress)
+### 🔄 Phase 3 — Block System Dark Mode & Polish (In Progress)
 - 6 of 7 block types implemented ✅
 - Block renderer + site builder UI ✅
+- Tenant template dark mode pass — block components still use hardcoded zinc colors ⏳
 - Contact block ❌
 
 ### 🔮 Phase 4 — Monetization (Not Started)
 - Stripe integration ❌
-- Full marketing landing page ❌
-- SEO (canonical links, sitemap, metadata) ❌
+- Full marketing landing page polish ❌
 
 ### Notable Gaps
 - Zero tests (no test framework installed)
 - RLS / row-level security not implemented
 - No CI/CD configuration
 - Some schema duplication (`content_items` vs `tenant_entities`)
+- Tenant template blocks need dark mode pass

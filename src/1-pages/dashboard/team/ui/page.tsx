@@ -1,6 +1,10 @@
 import { db } from "@/5-shared/lib/db";
 import { tenants } from "@/5-shared/lib/db/schema";
 import { profiles, tenantMemberships } from "@/5-shared/lib/db/schema/auth";
+import {
+  getPlatformTranslationsByNamespaces,
+  resolveNamespacedTranslation,
+} from "@/5-shared/lib/db/platform-translations";
 import { eq, inArray } from "drizzle-orm";
 import { TeamManager } from "@/2-widgets/dashboard/TeamManager/ui/TeamManager";
 import { getCurrentProfile } from "@/5-shared/lib/auth/authorization";
@@ -10,8 +14,38 @@ interface TeamPageProps {
 }
 
 export async function TeamPage({ locale }: TeamPageProps) {
+  const translations = await getPlatformTranslationsByNamespaces(
+    ["dashboard.team", "dashboard.team-manager"],
+    locale || "en",
+  );
+
+  const signInRequired = resolveNamespacedTranslation(
+    translations,
+    "dashboard.team",
+    "sign-in-required",
+    "Please sign in.",
+  );
+  const noTenantAccess = resolveNamespacedTranslation(
+    translations,
+    "dashboard.team",
+    "no-tenant-access",
+    "You don't have access to any tenants yet.",
+  );
+  const ownersOnly = resolveNamespacedTranslation(
+    translations,
+    "dashboard.team",
+    "owners-only",
+    "Only tenant owners can manage team members.",
+  );
+  const title = resolveNamespacedTranslation(
+    translations,
+    "dashboard.team",
+    "title",
+    "Team Management",
+  );
+
   const profile = await getCurrentProfile();
-  if (!profile) return <p className="text-zinc-500 p-6">Please sign in.</p>;
+  if (!profile) return <p className="text-muted-foreground p-6">{signInRequired}</p>;
 
   // Get all tenants the user has access to
   const memberships = await db
@@ -21,8 +55,8 @@ export async function TeamPage({ locale }: TeamPageProps) {
 
   if (memberships.length === 0) {
     return (
-      <main className="min-h-screen bg-zinc-50 p-6 md:p-12">
-        <p className="text-zinc-500">You don&apos;t have access to any tenants yet.</p>
+      <main className="min-h-screen bg-background p-6 md:p-12">
+        <p className="text-muted-foreground">{noTenantAccess}</p>
       </main>
     );
   }
@@ -34,9 +68,9 @@ export async function TeamPage({ locale }: TeamPageProps) {
 
   if (ownedTenantIds.length === 0) {
     return (
-      <main className="min-h-screen bg-zinc-50 p-6 md:p-12">
+      <main className="min-h-screen bg-background p-6 md:p-12">
         <h1 className="text-2xl font-bold mb-4">Team</h1>
-        <p className="text-zinc-500">Only tenant owners can manage team members.</p>
+        <p className="text-muted-foreground">{ownersOnly}</p>
       </main>
     );
   }
@@ -61,11 +95,16 @@ export async function TeamPage({ locale }: TeamPageProps) {
   );
 
   return (
-    <main className="min-h-screen bg-zinc-50 p-6 md:p-12">
+    <main className="min-h-screen bg-background p-6 md:p-12">
       <div className="max-w-3xl mx-auto space-y-8">
-        <h1 className="text-2xl font-bold text-zinc-900">Team Management</h1>
+        <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         {tenantTeams.map(({ tenant, members }) => (
-          <TeamManager key={tenant.id} tenant={tenant} initialMembers={members} />
+          <TeamManager
+            key={tenant.id}
+            tenant={tenant}
+            initialMembers={members}
+            translations={translations["dashboard.team-manager"]}
+          />
         ))}
       </div>
     </main>

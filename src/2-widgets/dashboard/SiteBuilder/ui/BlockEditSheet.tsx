@@ -4,6 +4,7 @@ import { blockFields } from "@/2-widgets/tenant/BlockRenderer/config/block-field
 import { updateBlockConfig, updateBlockTranslations } from "@/3-features/manage-site-blocks";
 import type { Block, Tenant } from "@/5-shared/lib/db/schema";
 import { isRtl } from "@/5-shared/lib/next/rtl";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { toast } from "@/5-shared/lib/ui/toast";
 import type { SupportedLocaleType } from "@/5-shared/types";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
@@ -36,6 +37,7 @@ interface BlockEditSheetProps {
   activeLocale: SupportedLocaleType;
   open: boolean;
   onClose: () => void;
+  translations?: TranslationDict;
 }
 
 export function BlockEditSheet({
@@ -44,6 +46,7 @@ export function BlockEditSheet({
   activeLocale,
   open,
   onClose,
+  translations,
 }: BlockEditSheetProps) {
   if (!block) return null;
 
@@ -56,11 +59,36 @@ export function BlockEditSheet({
   const fields = entry ?? [];
   const cfFields = CONFIG_FIELDS[block.type as BlockKind] ?? [];
 
-  const translations = (block.translations ?? {}) as Record<string, Record<string, string>>;
-  const current = translations[activeLocale] ?? translations[tenant.defaultLocale] ?? {};
+  const blockLocaleTranslations = (block.translations ?? {}) as Record<string, Record<string, string>>;
+  const current =
+    blockLocaleTranslations[activeLocale] ?? blockLocaleTranslations[tenant.defaultLocale] ?? {};
   const config = (block.config ?? {}) as Record<string, unknown>;
 
   const dir = isRtl(activeLocale) ? "rtl" : "ltr";
+  const editTitle = resolveTranslation(
+    translations,
+    "title",
+    "Edit \"{name}\" — {locale}",
+    { name: block.type, locale: activeLocale.toUpperCase() },
+  );
+  const sectionTranslations = resolveTranslation(
+    translations,
+    "section.translations",
+    "Translations",
+  );
+  const sectionSettings = resolveTranslation(translations, "section.settings", "Settings");
+  const saveTranslations = resolveTranslation(
+    translations,
+    "save-translations",
+    "Save Translations",
+  );
+  const saveSettings = resolveTranslation(translations, "save-settings", "Save Settings");
+  const removeImage = resolveTranslation(translations, "remove-image", "Remove image");
+  const noFields = resolveTranslation(
+    translations,
+    "no-fields",
+    "This block has no editable fields. Manage its content in the Content tab.",
+  );
 
   async function handleTranslationSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -126,16 +154,14 @@ export function BlockEditSheet({
     >
       <SheetContent className="overflow-y-auto w-full sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>
-            Edit &ldquo;{block.type}&rdquo; &mdash; {activeLocale.toUpperCase()}
-          </SheetTitle>
+          <SheetTitle>{editTitle}</SheetTitle>
         </SheetHeader>
 
         {/* ── Translation fields ─────────────────────────────────────── */}
         {fields.length > 0 && (
           <form onSubmit={handleTranslationSubmit} className="flex flex-col gap-4 mt-6" dir={dir}>
-            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-              Translations
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              {sectionTranslations}
             </p>
             {fields.map((field) => (
               <div key={field.key} className="flex flex-col gap-1">
@@ -159,7 +185,7 @@ export function BlockEditSheet({
               </div>
             ))}
             <Button type="submit" className="mt-2">
-              Save Translations
+              {saveTranslations}
             </Button>
           </form>
         )}
@@ -169,8 +195,8 @@ export function BlockEditSheet({
           <>
             <Separator className="my-6" />
             <form onSubmit={handleConfigSubmit} className="flex flex-col gap-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-                Settings
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                {sectionSettings}
               </p>
               {cfFields.map((f) => (
                 <div key={f.key} className="flex flex-col gap-1">
@@ -265,7 +291,7 @@ export function BlockEditSheet({
                                 }
                               }}
                             >
-                              Remove image
+                              {removeImage}
                             </button>
                           </div>
                         )}
@@ -283,15 +309,15 @@ export function BlockEditSheet({
                 </div>
               ))}
               <Button type="submit" className="mt-2">
-                Save Settings
+                {saveSettings}
               </Button>
             </form>
           </>
         )}
 
         {fields.length === 0 && cfFields.length === 0 && (
-          <p className="mt-6 text-sm text-zinc-400">
-            This block has no editable fields. Manage its content in the Content tab.
+          <p className="mt-6 text-sm text-muted-foreground">
+            {noFields}
           </p>
         )}
       </SheetContent>

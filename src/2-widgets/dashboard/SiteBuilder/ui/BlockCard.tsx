@@ -2,6 +2,7 @@
 
 import { deleteBlock, reorderBlock, toggleBlockVisibility } from "@/3-features/manage-site-blocks";
 import type { Block } from "@/5-shared/lib/db/schema";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { Button } from "@/components/tenant/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,6 +23,7 @@ interface BlockCardProps {
   onEdit: (blockId: string) => void;
   setActiveTab?: (tab: string) => void;
   userRole?: "owner" | "editor" | null;
+  translations?: TranslationDict;
 }
 
 export function BlockCard({
@@ -32,12 +34,39 @@ export function BlockCard({
   onEdit,
   setActiveTab,
   userRole,
+  translations,
 }: BlockCardProps) {
   const [isPending, startTransition] = useTransition();
 
+  const hiddenLabel = resolveTranslation(translations, "status.hidden", "hidden");
+  const manageContentLabel = resolveTranslation(
+    translations,
+    "action.manage-content",
+    "Manage Content",
+  );
+  const editLabel = resolveTranslation(translations, "action.edit", "Edit");
+  const deleteLabel = resolveTranslation(translations, "action.delete", "Delete");
+  const deleteTitle = resolveTranslation(
+    translations,
+    "delete-confirm.title",
+    "Delete \"{name}\" block?",
+    { name: block.type },
+  );
+  const deleteWarning = resolveTranslation(
+    translations,
+    "delete-confirm.warning",
+    "This action cannot be undone.",
+  );
+  const deleteConfirm = resolveTranslation(
+    translations,
+    "delete-confirm.confirm",
+    "Confirm Delete",
+  );
+  const cancelLabel = resolveTranslation(translations, "cancel", "Cancel");
+
   return (
     <div
-      className={`flex items-center justify-between p-4 bg-white rounded-xl border border-zinc-200 transition-opacity ${
+      className={`flex items-center justify-between p-4 bg-card rounded-xl border border-border transition-opacity ${
         isPending ? "opacity-50 pointer-events-none" : ""
       }`}
     >
@@ -45,7 +74,7 @@ export function BlockCard({
         <Badge variant="secondary" className="font-mono text-xs">
           {block.type}
         </Badge>
-        {!block.isVisible && <span className="text-xs text-zinc-400 italic">hidden</span>}
+        {!block.isVisible && <span className="text-xs text-muted-foreground italic">{hiddenLabel}</span>}
       </div>
 
       <div className="flex items-center gap-1">
@@ -101,7 +130,7 @@ export function BlockCard({
               if (setActiveTab) setActiveTab("content");
             }}
           >
-            Manage Content
+            {manageContentLabel}
           </Button>
         ) : (
           <Button
@@ -110,7 +139,7 @@ export function BlockCard({
             disabled={isPending}
             onClick={() => onEdit(block.id)}
           >
-            Edit
+            {editLabel}
           </Button>
         )}
 
@@ -119,24 +148,24 @@ export function BlockCard({
           <Dialog>
             <DialogTrigger asChild>
               <Button tenantVariant="destructive" size="sm" disabled={isPending}>
-                Delete
+                {deleteLabel}
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Delete &ldquo;{block.type}&rdquo; block?</DialogTitle>
+                <DialogTitle>{deleteTitle}</DialogTitle>
               </DialogHeader>
-              <p className="text-sm text-zinc-500 mb-4">This action cannot be undone.</p>
+              <p className="text-sm text-muted-foreground mb-4">{deleteWarning}</p>
               <div className="flex gap-2 justify-end">
                 <DialogClose asChild>
-                  <Button tenantVariant="outline">Cancel</Button>
+                  <Button tenantVariant="outline">{cancelLabel}</Button>
                 </DialogClose>
                 <DialogClose asChild>
                   <Button
                     tenantVariant="destructive"
                     onClick={() => startTransition(() => deleteBlock(block.id, tenantId))}
                   >
-                    Confirm Delete
+                    {deleteConfirm}
                   </Button>
                 </DialogClose>
               </div>

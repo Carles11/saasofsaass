@@ -5,6 +5,7 @@ import { CATEGORY_BLOCKS } from "@/5-shared/config/category-blocks";
 import type { Block } from "@/5-shared/lib/db/schema";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import type { TenantCategory } from "@/5-shared/types/tenants/categories";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { Button } from "@/components/tenant/ui/button";
 import {
   Dialog,
@@ -31,11 +32,39 @@ interface BlockListProps {
   onEdit: (blockId: string) => void;
   setActiveTab?: (tab: string) => void;
   userRole?: "owner" | "editor" | null;
+  translations?: TranslationDict;
 }
 
-export function BlockList({ blocks, tenantId, category, onEdit, setActiveTab, userRole }: BlockListProps) {
+export function BlockList({
+  blocks,
+  tenantId,
+  category,
+  onEdit,
+  setActiveTab,
+  userRole,
+  translations,
+}: BlockListProps) {
   const availableKinds = CATEGORY_BLOCKS[category] ?? [];
   const [newKind, setNewKind] = useState<BlockKind>(availableKinds[0] ?? "hero");
+
+  const emptyState = resolveTranslation(
+    translations,
+    "empty",
+    "No blocks yet. Add your first block below.",
+  );
+  const addBlockLabel = resolveTranslation(translations, "add", "+ Add Block");
+  const addDialogTitle = resolveTranslation(translations, "add-dialog.title", "Add a New Block");
+  const addDialogPlaceholder = resolveTranslation(
+    translations,
+    "add-dialog.select-placeholder",
+    "Select block type",
+  );
+  const addDialogConfirm = resolveTranslation(
+    translations,
+    "add-dialog.confirm",
+    "Add \"{name}\"",
+    { name: newKind },
+  );
 
   return (
     <div className="flex flex-col gap-3">
@@ -49,12 +78,13 @@ export function BlockList({ blocks, tenantId, category, onEdit, setActiveTab, us
           onEdit={onEdit}
           setActiveTab={setActiveTab}
           userRole={userRole}
+          translations={translations}
         />
       ))}
 
       {blocks.length === 0 && (
-        <p className="text-sm text-zinc-400 text-center py-8">
-          No blocks yet. Add your first block below.
+        <p className="text-sm text-muted-foreground text-center py-8">
+          {emptyState}
         </p>
       )}
 
@@ -62,17 +92,17 @@ export function BlockList({ blocks, tenantId, category, onEdit, setActiveTab, us
         <Dialog>
           <DialogTrigger asChild>
             <Button tenantVariant="outline" className="mt-2">
-              + Add Block
+              {addBlockLabel}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add a New Block</DialogTitle>
+              <DialogTitle>{addDialogTitle}</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-4 pt-2">
               <Select value={newKind} onValueChange={(v) => setNewKind(v as BlockKind)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select block type" />
+                  <SelectValue placeholder={addDialogPlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableKinds.map((kind) => (
@@ -84,7 +114,7 @@ export function BlockList({ blocks, tenantId, category, onEdit, setActiveTab, us
               </Select>
               <DialogClose asChild>
                 <Button onClick={() => addBlock(tenantId, newKind)} className="w-full">
-                  Add &ldquo;{newKind}&rdquo;
+                  {addDialogConfirm}
                 </Button>
               </DialogClose>
             </div>

@@ -30,7 +30,7 @@ export const DashboardSidebar = ({ session }: DashboardSidebarProps) => {
       initial={false}
       animate={{ width: isOpen ? 280 : 80 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="h-screen bg-zinc-950 text-white p-4 border-r border-white/10 flex flex-col overflow-hidden"
+      className="h-screen bg-background text-foreground p-4 border-r border-border flex flex-col overflow-hidden"
     >
       {/* ── Logo + Toggle ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-8 px-2">
@@ -70,7 +70,7 @@ export const DashboardSidebar = ({ session }: DashboardSidebarProps) => {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium truncate">{user.name || user.email}</p>
-            <p className="text-[10px] text-zinc-500 truncate">{user.email}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
           </div>
         </div>
       )}
@@ -107,7 +107,7 @@ export const DashboardSidebar = ({ session }: DashboardSidebarProps) => {
       {/* ── Footer ────────────────────────────────────────────────────── */}
       {isOpen && (
         <div className="p-4 bg-white/5 rounded-3xl border border-white/10">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-bold mb-1">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-bold mb-1">
             Active Engine
           </p>
           <p className="text-xs font-mono text-emerald-400">v16.2.0-turbo</p>

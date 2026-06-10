@@ -5,9 +5,9 @@ import "@neondatabase/auth-ui/css"
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-6 text-zinc-900">
+        <h1 className="text-2xl font-bold text-center mb-6 text-foreground">
           Sign In
         </h1>
         <AuthView pathname="sign-in" />

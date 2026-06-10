@@ -2,16 +2,14 @@ import { useTranslations } from "next-intl";
 
 /**
  * HOOK: useTranslation
- * Refactored for the "Bentley" Engine.
- * * Since platform translations (UI labels, etc.) are now handled by next-intl 
- * and fetched from the platform_translations table, we no longer store 
- * the dictionary in Zustand.
- * * This hook bridges the gap, providing the 't' function with native 
- * dot-notation support and server-side optimization.
+ * Wrapper around next-intl's client hook.
+ *
+ * Note: platform translations loaded from the DB are resolved server-side
+ * in page components and passed down as props. This hook is only for
+ * next-intl dictionaries and does not query Neon directly.
  */
 export function useTranslation(namespace?: string) {
-  // next-intl's useTranslations is our new source of truth.
-  // It handles the cache and the Neon DB handshake automatically.
+  // next-intl provides namespace-scoped lookup in client components.
   const t = useTranslations(namespace);
 
   /**

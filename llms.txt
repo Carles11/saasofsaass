@@ -1,18 +1,76 @@
-**SaaSofSaaSs (SoSS) Engine - AI Index**
-This file provides a map for AI crawlers and search engines to understand the SoSS multi-tenant factory.
+**SaaSofSaaSs (SoSS) Engine — AI Index**
+Multi-tenant website factory — one Next.js codebase renders unique multilingual sites per tenant via a content block engine.
 
-**Project Metadata**
-- Framework: Next.js 16.2
-- Architecture: Feature-Sliced Design (FSD)
-- Primary Domain: saasofsaass.com
-- Pilot Project: Àgora (Charity/Social Work)
+**Tech Stack**
+- Framework: Next.js 16.2 (App Router, Turbopack)
+- Language: TypeScript 5.x, React 19.2
+- Database: Neon (Serverless PostgreSQL) + Drizzle ORM 0.45
+- Auth: Neon Auth (Better Auth) via API proxy at `/api/auth/[...path]`
+- Styling: Tailwind CSS v4 + shadcn/ui + next-themes (dark/light)
+- i18n: next-intl v4 (8 locales: en, es, ca, eu, ga, fr, it, de)
+- AI: Google Gemini 2.5 Flash (translations, image descriptions)
+- File Storage: AWS S3 + CloudFront CDN
+- State: Zustand 5.x
+- Animations: Framer Motion 12.x
 
-**Documentation Roots**
-- Master Context: Vision and Core AI Rules. (aiContexts\0-global\.ai-context.md)
-- Routing Manual: DNS Matrix and Middleware Logic. (/aiContexts/1-architechture/.routing.md)
-- Feature: Paywall: Monetization logic.(aiContexts/3-features/paywall/.ai-paywall.md)
-- Feature: Translations: 11-language engine.(aiContexts/src/3-features/translations/.ai-translations.md)
+**Architecture**
+- Feature-Sliced Design (FSD): `1-pages` → `2-widgets` → `3-features` → `4-entities` → `5-shared`
+- Proxy middleware (`src/proxy.ts`) routes by hostname: marketing (localhost:3000), dashboard (app.localhost:3000), tenants (*.lvh.me:3000)
+- Tenant category system: `social-work` | `wedding` — determines available block types via `CATEGORY_BLOCKS`
 
-**Code Standards**
-- See AGENTS.md for internal coding protocols. (./AGENTS.md)
-- See Block Contract for data structures. (./4-entities/block/model/types.ts)
+**Key Source Files**
+- `src/5-shared/lib/db/schema.ts` — Core tables: tenants, blocks, content_items, transactions, platform_translations
+- `src/5-shared/lib/db/schema/auth.ts` — Auth tables: profiles, tenant_memberships
+- `src/5-shared/lib/auth/authorization.ts` — getCurrentProfile, assertTenantRole, assertCanEditContent, assertCanManageStructure
+- `src/5-shared/lib/auth/sync-profile.ts` — Syncs Neon Auth user to local profiles table by email
+- `src/5-shared/lib/db/platform-translations.ts` — getPlatformTranslations(namespace, locale) helper
+- `src/5-shared/theme/ThemeProvider.tsx` — next-themes wrapper (attribute="class")
+- `src/5-shared/theme/ThemeToggle.tsx` — Sun/moon toggle button
+- `src/5-shared/config/category-blocks.ts` — Maps categories to BlockKind[]
+- `src/5-shared/config/category-labels.ts` — Human labels for categories
+- `src/5-shared/types/tenants/categories.ts` — TenantCategory union type
+- `src/5-shared/types/tenants/blocks.ts` — BlockKind union type
+- `src/app/api/auth/[...path]/route.ts` — Auth API proxy with Origin override for dev subdomains
+- `src/proxy.ts` — DNS + i18n middleware
+
+**Directory Map (src/)**
+- `1-pages/` — Page components (dashboard, site-builder, team, marketing, tenants)
+- `2-widgets/` — Composite widgets (SiteBuilder, BlockRenderer, CreateTenantDialog, TeamManager, DashboardSidebar, TenantHeader)
+- `3-features/` — Features (manage-tenants, manage-entities, manage-site-blocks, translations)
+- `4-entities/` — Business logic (tenant, block, tenant-content)
+- `5-shared/` — Infrastructure (config, lib/auth, lib/db, lib/i18n, lib/next, store, theme, types)
+
+**Database (12 tables)**
+- `tenants` — Organizations with branding, locale config, category
+- `blocks` — Content blocks with JSONB config + translations
+- `content_items` — Blog posts, awards, episodes (legacy, migrating)
+- `transactions` — Stripe records (1% platform fee)
+- `platform_translations` — UI strings, unique on (namespace, key, locale)
+- `profiles` — Local user profiles synced from Neon Auth
+- `tenant_memberships` — Role-based access (owner/editor)
+- `tenant_entities`, `tenant_translations`, `tenant_domains`, `gallery_images`, `hero_images` — Legacy tables
+
+**Auth & Roles**
+- Two roles: `owner` (full control), `editor` (content only)
+- Auth pages at `/auth/{sign-in,sign-up,login,register,forgot-password}`
+- Dashboard at `app.localhost:3000/{locale}/dashboard`
+- Team management at `/dashboard/team`
+
+**SEO**
+- Dynamic sitemap at `src/app/sitemap.ts`
+- Per-locale generateMetadata on marketing page (8 locales, OG, Twitter, hreflang, canonical)
+- Dynamic metadata on tenant pages
+
+**Block Types (6 implemented, 1 planned)**
+- Navbar (3 variants), Hero (3 variants), Blog Feed, Awards, Podcast Feed, Image Gallery
+- Contact block — not yet built
+
+**Env Vars Required**
+DATABASE_URL, NEON_AUTH_BASE_URL, NEON_AUTH_COOKIE_SECRET, NEON_AUTH_JWKS_URL, NEXT_PUBLIC_ROOT_DOMAIN, NEXT_PUBLIC_APP_DOMAIN, NEXT_PUBLIC_DEV_ROOT_DOMAIN, GEMINI_API_KEY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET, NEXT_PUBLIC_AWS_CLOUDFRONT_URL
+
+**Project Status**
+- Phase 1 (Foundation): Complete
+- Phase 2 (Auth, Dashboard, Team, SEO, Theme): Complete
+- Phase 3 (Block dark mode, polish): In progress
+- Phase 4 (Monetization): Not started
+- Zero tests, no CI/CD, RLS not implemented

@@ -6,6 +6,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -174,7 +175,9 @@ export const platformTranslations = pgTable("platform_translations", {
   value: text("value").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (t) => ({
+  uniqueNsKeyLocale: unique().on(t.namespace, t.key, t.locale),
+}));
 
 // ============================================
 // AUTH (profiles + tenant memberships)

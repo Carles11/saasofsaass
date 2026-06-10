@@ -3,6 +3,7 @@
 import { createEntity, publishEntity, updateEntityTranslation } from "@/3-features/manage-entities";
 import type { Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
 import { isRtl } from "@/5-shared/lib/next/rtl";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import type { SupportedLocaleType } from "@/5-shared/types";
 import type { EntityKind } from "@/5-shared/types/tenants/entities";
 import { Button } from "@/components/tenant/ui/button";
@@ -36,6 +37,7 @@ interface CollectionManagerProps {
   initialEntities: EntityRow[];
   blockType?: string;
   blockId?: string;
+  translations?: TranslationDict;
 }
 
 export function CollectionManager({
@@ -44,6 +46,7 @@ export function CollectionManager({
   initialEntities,
   blockType,
   blockId,
+  translations,
 }: CollectionManagerProps) {
   const [isPending, startTransition] = useTransition();
   // Always set newKind to the only valid kind for the block when blockType changes
@@ -73,6 +76,17 @@ export function CollectionManager({
     );
   }
 
+  const newItemLabel = resolveTranslation(translations, "new-item", "New Item");
+  const kindLabel = resolveTranslation(translations, "label.kind", "Kind");
+  const slugLabel = resolveTranslation(translations, "label.slug", "Slug");
+  const slugPlaceholder = resolveTranslation(translations, "placeholder.slug", "my-first-post");
+  const createLabel = resolveTranslation(translations, "create", "Create");
+  const emptyLabel = resolveTranslation(
+    translations,
+    "empty",
+    "No content yet. Create your first item above.",
+  );
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!newSlug.trim()) return;
@@ -87,13 +101,13 @@ export function CollectionManager({
       {/* Only show the Kind dropdown if more than one kind is possible */}
       <form
         onSubmit={handleCreate}
-        className="flex flex-col gap-3 p-4 bg-zinc-50 rounded-xl border border-dashed border-zinc-300"
+        className="flex flex-col gap-3 p-4 bg-muted rounded-xl border border-dashed border-border"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">New Item</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{newItemLabel}</p>
         <div className="flex flex-wrap gap-3 items-end">
           {entityKinds.length > 1 && (
             <div className="flex flex-col gap-1 min-w-35">
-              <Label>Kind</Label>
+              <Label>{kindLabel}</Label>
               <Select value={newKind} onValueChange={(v) => setNewKind(v as EntityKind)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -109,17 +123,17 @@ export function CollectionManager({
             </div>
           )}
           <div className="flex flex-col gap-1 flex-1 min-w-40">
-            <Label>Slug</Label>
+            <Label>{slugLabel}</Label>
             <Input
               value={newSlug}
               onChange={(e) => setNewSlug(e.target.value)}
-              placeholder="my-first-post"
+              placeholder={slugPlaceholder}
               pattern="[a-z0-9-]+"
               title="lowercase letters, numbers and hyphens only"
             />
           </div>
           <Button type="submit" tenantVariant="default" disabled={isPending || !newSlug.trim()}>
-            Create
+            {createLabel}
           </Button>
         </div>
       </form>
@@ -128,8 +142,8 @@ export function CollectionManager({
 
       {/* ── Entity list ────────────────────────────────────────────── */}
       {filteredEntities.length === 0 && (
-        <p className="text-sm text-zinc-400 text-center py-8">
-          No content yet. Create your first item above.
+        <p className="text-sm text-muted-foreground text-center py-8">
+          {emptyLabel}
         </p>
       )}
 
@@ -142,6 +156,7 @@ export function CollectionManager({
             tenantId={tenant.id}
             activeLocale={activeLocale}
             dir={dir}
+            translations={translations}
           />
         ))}
       </div>
@@ -157,21 +172,36 @@ interface EntityRowProps {
   tenantId: string;
   activeLocale: SupportedLocaleType;
   dir: "ltr" | "rtl";
+  translations?: TranslationDict;
 }
 
-function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityRowProps) {
+function EntityRow({ entity, translation, tenantId, activeLocale, dir, translations }: EntityRowProps) {
   const [isPending, startTransition] = useTransition();
   const payload = (translation?.payload ?? {}) as Record<string, string>;
   const displayTitle = payload.title ?? entity.slug ?? entity.id;
 
+  const noTranslationLabel = resolveTranslation(
+    translations,
+    "no-translation",
+    "no translation for {locale}",
+    { locale: activeLocale },
+  );
+  const editLabel = resolveTranslation(
+    translations,
+    "edit-translation",
+    "Edit Translation — {locale}",
+    { locale: activeLocale.toUpperCase() },
+  );
+  const publishLabel = resolveTranslation(translations, "publish", "Publish");
+
   return (
-    <div className="flex items-center justify-between p-4 bg-white rounded-xl border border-zinc-200">
+    <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border">
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs font-mono">
             {entity.kind}
           </Badge>
-          <span className="text-sm font-medium text-zinc-800 truncate max-w-50">
+          <span className="text-sm font-medium text-card-foreground truncate max-w-50">
             {displayTitle}
           </span>
         </div>
@@ -183,9 +213,9 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
             {entity.status}
           </Badge>
           {translation ? (
-            <TranslationStatusBadge status={translation.translationStatus} />
+            <TranslationStatusBadge status={translation.translationStatus} translations={translations} />
           ) : (
-            <span className="text-xs text-amber-500">no translation for {activeLocale}</span>
+            <span className="text-xs text-amber-500">{noTranslationLabel}</span>
           )}
         </div>
       </div>
@@ -195,7 +225,7 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" size="sm" disabled={isPending}>
-              Edit ({activeLocale})
+              {editLabel}
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -209,6 +239,7 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
                 activeLocale={activeLocale}
                 currentPayload={payload}
                 dir={dir}
+                translations={translations}
               />
             </div>
           </DialogContent>
@@ -221,7 +252,7 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir }: EntityR
             disabled={isPending}
             onClick={() => startTransition(() => publishEntity(entity.id, tenantId))}
           >
-            Publish
+            {publishLabel}
           </Button>
         )}
       </div>
@@ -237,6 +268,7 @@ interface TranslationFormProps {
   activeLocale: SupportedLocaleType;
   currentPayload: Record<string, string>;
   dir: "ltr" | "rtl";
+  translations?: TranslationDict;
 }
 
 function TranslationForm({
@@ -245,6 +277,7 @@ function TranslationForm({
   activeLocale,
   currentPayload,
   dir,
+  translations,
 }: TranslationFormProps) {
   const isBlog = entity.kind === "blog_post";
   const isPodcast = entity.kind === "podcast_episode";
@@ -262,7 +295,7 @@ function TranslationForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4" dir={dir}>
       <div className="flex flex-col gap-1">
-        <Label htmlFor="et-title">Title</Label>
+        <Label htmlFor="et-title">{resolveTranslation(translations, "label.title", "Title")}</Label>
         <Input
           id="et-title"
           name="title"
@@ -274,7 +307,11 @@ function TranslationForm({
 
       {(isBlog || isPodcast) && (
         <div className="flex flex-col gap-1">
-          <Label htmlFor="et-excerpt">{isBlog ? "Excerpt" : "Description"}</Label>
+          <Label htmlFor="et-excerpt">
+            {isBlog
+              ? resolveTranslation(translations, "label.excerpt", "Excerpt")
+              : resolveTranslation(translations, "label.description", "Description")}
+          </Label>
           <Textarea
             id="et-excerpt"
             name={isBlog ? "excerpt" : "description"}
@@ -289,7 +326,7 @@ function TranslationForm({
 
       {!isBlog && !isPodcast && (
         <div className="flex flex-col gap-1">
-          <Label htmlFor="et-desc">Description</Label>
+          <Label htmlFor="et-desc">{resolveTranslation(translations, "label.description", "Description")}</Label>
           <Textarea
             id="et-desc"
             name="description"
@@ -302,7 +339,9 @@ function TranslationForm({
 
       {isBlog && (
         <div className="flex flex-col gap-1">
-          <Label htmlFor="et-slug">Localized Slug</Label>
+          <Label htmlFor="et-slug">
+            {resolveTranslation(translations, "label.localized-slug", "Localized Slug")}
+          </Label>
           <Input
             id="et-slug"
             name="localizedSlug"
@@ -313,7 +352,7 @@ function TranslationForm({
 
       <DialogClose asChild>
         <Button type="submit" className="mt-2">
-          Save Translation
+          {resolveTranslation(translations, "save-translation", "Save Translation")}
         </Button>
       </DialogClose>
     </form>
@@ -334,12 +373,23 @@ const STATUS_CONFIG: Record<
   locked: { label: "locked", icon: "🔒", variant: "outline" },
 };
 
-function TranslationStatusBadge({ status }: { status: string }) {
+function TranslationStatusBadge({
+  status,
+  translations,
+}: {
+  status: string;
+  translations?: TranslationDict;
+}) {
   const cfg = STATUS_CONFIG[status as TranslationStatus] ?? {
-    label: status,
+    label: resolveTranslation(translations, `status.${status}`, status),
     icon: "?",
     variant: "outline" as const,
   };
+
+  if (STATUS_CONFIG[status as TranslationStatus]) {
+    cfg.label = resolveTranslation(translations, `status.${status}`, cfg.label);
+  }
+
   return (
     <Badge variant={cfg.variant} className="gap-1 text-xs">
       {cfg.icon} {cfg.label}

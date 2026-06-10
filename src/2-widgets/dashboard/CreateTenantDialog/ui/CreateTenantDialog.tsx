@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
@@ -30,7 +31,11 @@ function slugify(text: string): string {
     .slice(0, 63);
 }
 
-export function CreateTenantDialog() {
+interface CreateTenantDialogProps {
+  translations?: TranslationDict;
+}
+
+export function CreateTenantDialog({ translations }: CreateTenantDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -72,30 +77,54 @@ export function CreateTenantDialog() {
     [name, slug, category, router]
   );
 
+  const triggerLabel = resolveTranslation(translations, "trigger", "+ Create Site");
+  const dialogTitle = resolveTranslation(translations, "dialog.title", "Create a New Site");
+  const nameLabel = resolveTranslation(translations, "label.name", "Site Name");
+  const namePlaceholder = resolveTranslation(
+    translations,
+    "placeholder.name",
+    "e.g. Àgora Association",
+  );
+  const slugLabel = resolveTranslation(translations, "label.slug", "Subdomain");
+  const slugPlaceholder = resolveTranslation(translations, "placeholder.slug", "agora");
+  const slugHint = resolveTranslation(
+    translations,
+    "slug-hint",
+    "Lowercase letters, numbers, and hyphens only (3-63 chars).",
+  );
+  const categoryLabel = resolveTranslation(translations, "label.category", "Category");
+  const categoryPlaceholder = resolveTranslation(
+    translations,
+    "placeholder.category",
+    "Select category",
+  );
+  const creatingLabel = resolveTranslation(translations, "creating", "Creating...");
+  const submitLabel = resolveTranslation(translations, "submit", "Create Site");
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button tenantVariant="default" className="shrink-0">
-          + Create Site
+          {triggerLabel}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create a New Site</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2">
           {/* Name */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="create-site-name" className="text-sm font-medium text-zinc-700">
-              Site Name
+            <label htmlFor="create-site-name" className="text-sm font-medium text-foreground">
+              {nameLabel}
             </label>
             <input
               id="create-site-name"
               type="text"
               value={name}
               onChange={(e) => handleNameChange(e.target.value)}
-              placeholder="e.g. Àgora Association"
-              className="rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              placeholder={namePlaceholder}
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               required
               maxLength={100}
             />
@@ -103,10 +132,10 @@ export function CreateTenantDialog() {
 
           {/* Slug */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="create-site-slug" className="text-sm font-medium text-zinc-700">
-              Subdomain
+            <label htmlFor="create-site-slug" className="text-sm font-medium text-foreground">
+              {slugLabel}
             </label>
-            <div className="flex items-center rounded-lg border border-zinc-200 px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-zinc-900">
+            <div className="flex items-center rounded-lg border border-border bg-background px-3 py-2 text-sm focus-within:ring-2 focus-within:ring-ring">
               <input
                 id="create-site-slug"
                 type="text"
@@ -115,32 +144,32 @@ export function CreateTenantDialog() {
                   setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
                   setSlugEdited(true);
                 }}
-                placeholder="agora"
+                placeholder={slugPlaceholder}
                 className="flex-1 focus:outline-none"
                 required
                 pattern="^[a-z0-9]([a-z0-9-]{1,61})[a-z0-9]$"
                 title="3-63 characters, only lowercase letters, numbers, and hyphens. Must start and end with a letter or number."
               />
-              <span className="text-xs text-zinc-400 ml-2 shrink-0">
+              <span className="text-xs text-muted-foreground ml-2 shrink-0">
                 .{typeof window !== "undefined" && window.location.hostname.includes("localhost") ? "lvh.me:3000" : "saasofsaass.com"}
               </span>
             </div>
-            <p className="text-xs text-zinc-400">
-              Lowercase letters, numbers, and hyphens only (3-63 chars).
+            <p className="text-xs text-muted-foreground">
+              {slugHint}
             </p>
           </div>
 
           {/* Category */}
           <div className="flex flex-col gap-1">
-            <label htmlFor="create-site-category" className="text-sm font-medium text-zinc-700">
-              Category
+            <label htmlFor="create-site-category" className="text-sm font-medium text-foreground">
+              {categoryLabel}
             </label>
             <Select
               value={category}
               onValueChange={(v) => setCategory(v as TenantCategory)}
             >
               <SelectTrigger id="create-site-category">
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder={categoryPlaceholder} />
               </SelectTrigger>
               <SelectContent>
                 {Object.entries(CATEGORY_LABELS).map(
@@ -159,11 +188,11 @@ export function CreateTenantDialog() {
           <div className="flex justify-end gap-2 pt-2">
             <DialogClose asChild>
               <Button type="button" tenantVariant="outline" disabled={pending}>
-                Cancel
+                {resolveTranslation(translations, "cancel", "Cancel")}
               </Button>
             </DialogClose>
             <Button type="submit" tenantVariant="default" disabled={pending}>
-              {pending ? "Creating…" : "Create Site"}
+              {pending ? creatingLabel : submitLabel}
             </Button>
           </div>
         </form>
