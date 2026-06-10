@@ -142,9 +142,6 @@ export function SiteBuilder({
               <BlockList
                 blocks={blocks}
                 tenantId={tenant.id}
-                category={
-                  tenant.category as import("@/5-shared/types/tenants/categories").TenantCategory
-                }
                 onEdit={setSelectedBlockId}
                 setActiveTab={setActiveTab}
                 userRole={userRole}

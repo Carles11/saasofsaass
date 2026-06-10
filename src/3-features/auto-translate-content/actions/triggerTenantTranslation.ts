@@ -56,7 +56,6 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
     .select({
       id: tenants.id,
       name: tenants.name,
-      category: tenants.category,
       defaultLocale: tenants.defaultLocale,
       locales: tenants.locales,
     })
@@ -231,8 +230,8 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
   for (const job of batch) {
     const context =
       job.kind === "entity"
-        ? `${job.entityKind.replace("_", " ")} on a ${tenant.category} website called "${tenant.name}"`
-        : `${job.blockType} block on a ${tenant.category} website called "${tenant.name}"`;
+        ? `${job.entityKind.replace("_", " ")} on "${tenant.name}"`
+        : `${job.blockType} block on "${tenant.name}"`;
 
     try {
       const translated = await translatePayload({
@@ -240,7 +239,6 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
         sourceLocale: job.sourceLocale,
         targetLocale: job.targetLocale,
         context,
-        category: tenant.category,
       });
 
       if (job.kind === "entity") {

@@ -18,15 +18,13 @@ export function TemplatePicker({
   previewTemplateId: TenantTemplateId;
   setPreviewTemplateId: (id: TenantTemplateId) => void;
 }) {
+  const [applyLoading, setApplyLoading] = useState(false);
   const tenant = useStore((state) => state.activeTenant);
   const setTenant = useStore((state) => state.setTenant);
   const [isPending, startTransition] = useTransition();
   if (!tenant) return null;
 
   const current = tenant.templateId as TenantTemplateId;
-
-  // UX: Show an 'Apply Template' button if previewing a non-active template
-  const [applyLoading, setApplyLoading] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">

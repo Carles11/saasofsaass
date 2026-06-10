@@ -53,6 +53,7 @@ export function HeroBlock(props: BlockProps) {
         <div className="flex-1 flex items-center justify-center w-full h-48 md:h-[85vh]">
           {heroImage?.url ? (
             <div className="relative w-full h-full flex items-center justify-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={heroImage.url}
                 alt={heroImage.alt || "Hero image"}
@@ -83,12 +84,15 @@ export function HeroBlock(props: BlockProps) {
       >
         <div className="absolute inset-0 w-full h-full rounded-xl overflow-hidden">
           {heroImage?.url ? (
-            <img
-              src={heroImage.url}
-              alt={heroImage.alt || "Hero image"}
-              className="w-full h-full object-cover opacity-75"
-              style={{ filter: "brightness(0.95)" }}
-            />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroImage.url}
+                alt={heroImage.alt || "Hero image"}
+                className="w-full h-full object-cover opacity-75"
+                style={{ filter: "brightness(0.95)" }}
+              />
+            </>
           ) : (
             <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-30 rounded-xl" />
           )}
@@ -125,6 +129,7 @@ export function HeroBlock(props: BlockProps) {
     >
       {heroImage?.url && (
         <div className="absolute inset-0 w-full h-full z-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={heroImage.url}
             alt={heroImage.alt || "Hero image"}

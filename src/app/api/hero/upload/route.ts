@@ -53,13 +53,12 @@ export async function POST(req: NextRequest) {
   const processedMeta = await sharp(processedBuffer).metadata();
 
   // Generate SEO-optimized filename (always .webp)
-  let filename: string;
-  let tenantCategory = tenant.category || "general";
-  let tenantName = tenant.name || "tenant";
+  const tenantCategory = "general";
+  const tenantName = tenant.name || "tenant";
 
   if (!alt || !alt.trim()) alt = "hero image in saasofsaass.com for " + tenantName;
 
-  filename = generateSeoImageName({
+  const filename = generateSeoImageName({
     title: alt,
     blockType: "hero",
     tenantCategory,

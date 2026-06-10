@@ -31,7 +31,7 @@ src/
     tenants/           → TenantPage component
   2-widgets/
     dashboard/
-      CreateTenantDialog/  → "Create Site" dialog (name, slug, category)
+      CreateTenantDialog/  → "Create Site" dialog (name, slug)
       SiteBuilder/         → Block management UI + CollectionManager + BlockEditSheet + BlockList
       TeamManager/         → Team member management
       ui/sidebar/          → DashboardSidebar (collapsible, user info, nav)
@@ -48,16 +48,14 @@ src/
     tenant/                → getTenantById, etc.
     tenant-content/        → getEntitiesByTenant, etc.
   5-shared/
-    config/
-      category-blocks.ts   → Maps categories to BlockKind[]
-      category-labels.ts   → Human labels for categories
+     config/
     lib/
       auth/
         authorization.ts   → getCurrentProfile, assertTenantRole, assertCanEditContent
         sync-profile.ts    → Syncs Neon Auth user to local profiles table
         server.ts          → AuthSession type
       db/
-        schema.ts          → Drizzle schema (tenants, blocks, content_items, transactions, platform_translations)
+        schema.ts          → Drizzle schema (tenants, blocks, transactions, platform_translations)
         schema/auth.ts     → Auth schema (profiles, tenant_memberships)
         index.ts           → Neon DB client
         platform-translations.ts → getPlatformTranslations() helper
@@ -76,7 +74,6 @@ src/
       PaletteSwitcher.tsx  → Ocean/Sunset palette toggle (localStorage)
     types/
       tenants/
-        categories.ts      → TenantCategory union type
         blocks.ts          → BlockKind union type
 app/
   [locale]/
@@ -114,7 +111,7 @@ drizzle.config.ts
 - Schema (auth): `src/5-shared/lib/db/schema/auth.ts`
 - Authorization: `src/5-shared/lib/auth/authorization.ts`
 - Theme: `src/5-shared/theme/ThemeProvider.tsx`, `src/5-shared/theme/ThemeToggle.tsx`
-- Categories: `src/5-shared/config/category-blocks.ts`, `src/5-shared/types/tenants/categories.ts`
+- Blocks: `src/5-shared/types/tenants/blocks.ts`
 
 ---
 
@@ -123,7 +120,7 @@ drizzle.config.ts
 Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/auth.ts`:
 
 ### `tenants`
-- `id`, `name`, `slug`, `domain`, `category` (social-work | wedding)
+- `id`, `name`, `slug`, `domain`
 - `locales` (text array — enabled languages per tenant)
 - `defaultLocale`, `branding` (JSONB — HSL vars, logo, fonts)
 - `templateId` (text, default `"default"` — slug referencing template in TypeScript config)
@@ -135,11 +132,16 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 - `translations` (JSONB — `{ en: { title, subtitle }, es: { ... } }`)
 - `createdAt`, `updatedAt`
 
-### `content_items` (legacy — being migrated to `tenant_entities`)
-- `id`, `tenantId` (FK → tenants), `blockId` (FK → blocks)
-- `type` (blog-post/award/episode/team-member)
-- `order`, `isPublished`, `slug`, `coverImage`
-- `data` (JSONB), `translations` (JSONB), `publishedAt`, `createdAt`, `updatedAt`
+### `tenant_entities`
+- `id`, `tenantId` (FK → tenants), `blockId` (FK → blocks, nullable)
+- `kind` (blog_post/podcast_episode/award_item), `status` (draft/published/archived)
+- `order`, `slug`, `coverImageUrl`, `metadata` (JSONB)
+- `publishedAt`, `createdAt`, `updatedAt`
+
+### `tenant_translations`
+- `id`, `tenantId` (FK → tenants), `entityId` (FK → tenant_entities)
+- `locale`, `payload` (JSONB — { title, body, excerpt }), `translationStatus`, `isLocked`
+- Unique on `(entityId, locale)`
 
 ### `transactions`
 - `id`, `tenantId` (FK → tenants)
@@ -175,9 +177,8 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 - **URL pattern:** `/{locale}/{path}` (e.g. `/en/dashboard`, `/es/`)
 - **Source of truth:** `src/5-shared/lib/i18n/routing.ts`
 - **Locale resolution:** Always via `getLocale()` (server) or `useLocale()` (client) from next-intl. Never manually from params.
-- **Tenant translations:** AI-generated via Gemini 2.5. Tenant clicks "Add Language" → Gemini translates → saved to `translations` JSONB column on `blocks` and `content_items`.
 - **Platform UI strings:** Stored in `platform_translations` table (namespace/key/locale/value pattern). Fetched via `getPlatformTranslations(namespace, locale)` from `src/5-shared/lib/db/platform-translations.ts`. Unique constraint on `(namespace, key, locale)`.
-- **Rich content** (blog posts, awards): JSONB `translations` column on `content_items`.
+- **Tenant translations:** AI-generated via Gemini 2.5. Tenant clicks "Add Language" → Gemini translates all blocks and entities → saved to `blocks.translations` JSONB column and `tenant_translations` table.
 
 ---
 
@@ -228,14 +229,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - **RLS mandatory:** Every Neon query MUST scope to `tenant_id`
 - **CSS variables only:** Never hardcode hex/colors on platform pages. Use semantic shadcn vars (`bg-background`, `text-foreground`, `bg-card`, `text-muted-foreground`, `border-border`, etc.). Tenant template blocks may use hardcoded zinc as they are Phase 3 for dark mode.
 
-### 3. Category System
-- Every tenant has a `category` field (`social-work` | `wedding`)
-- Categories determine which block types are available via `CATEGORY_BLOCKS` config at `src/5-shared/config/category-blocks.ts`
-- BlockList uses `CATEGORY_BLOCKS[category]` to filter available block kinds
-- CATEGORY_LABELS at `src/5-shared/config/category-labels.ts` provides human-readable names
-- New categories are added to the `TenantCategory` union type in `src/5-shared/types/tenants/categories.ts`
-
-### 4. Auth Pattern
+### 3. Auth Pattern
 - **Neon Auth** handles user sessions. API proxy at `/api/auth/[...path]/route.ts` forwards to `NEON_AUTH_BASE_URL`.
 - **Origin override:** In local dev, the proxy overrides the `Origin` header to `http://localhost:3000` for subdomain requests (lvh.me, app.localhost). This is required because Neon Auth's `allow_localhost` matches only the exact string `localhost`.
 - **Profile sync:** `sync-profile.ts` creates/updates a local `profiles` record when a Neon Auth user signs in (matched by email).
@@ -246,7 +240,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
   - `assertCanManageStructure(tenantId, profileId)` — owner only
 - **Roles:** `owner` (full control), `editor` (content-only — cannot add/remove blocks, reorder, manage languages, invite members)
 
-### 5. Theme System
+### 4. Theme System
 - Dark/light mode via `next-themes` wrapped in `<ThemeProvider>` at root layout
 - Toggle via `ThemeToggle` (sun/moon icon, uses `lucide-react`)
 - Platform pages (marketing, auth, dashboard) use semantic shadcn CSS vars from `globals.css`:
@@ -258,28 +252,18 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - **Palette system:** Two color palettes available — `ocean` (blue/coral, professional) and `sunset` (terracotta/gold, warm). Applied by adding `.theme-ocean` or `.theme-sunset` class to `<html>`. Default is `ocean`. Switcher via `PaletteSwitcher` component in `5-shared/theme/PaletteSwitcher.tsx` (persists to localStorage under `soos-palette` key). Both palettes have light and dark variants.
 - Tenant template blocks (Bentley template) still use hardcoded zinc colors — scheduled for Phase 3 dark mode pass
 
-### 6. Params Pattern
+### 5. Params Pattern
 - **Server components:** `getServerParams(params, searchParams)` from `@/5-shared/lib/next/params.server`
 - **Client components:** `useClientParams()` from `@/5-shared/lib/next/params.client`
 - Never read `params.locale` manually — next-intl owns locale
 
-### 7. Next.js 16.2 Async Params
+### 6. Next.js 16.2 Async Params
 - `params` and `searchParams` are Promises — always `await` them
 - Use `getServerParams()` helper which handles this automatically
 
-### 8. Preview Link
+### 7. Preview Link
 - SiteBuilder shows a Preview button that links to `{slug}.lvh.me:3000/{locale}` in dev or `{slug}.saasofsaass.com/{locale}` in prod
 - The "Preview" label comes from `platform_translations` table (namespace `common`, key `preview`), fetched server-side and passed as prop
-
----
-
-## 🧪 The Wedding Test
-
-Before finalizing any component, ask:
-
-> *"If I change the tenant category from `'Social Work'` to `'Wedding'`, does this component break?"*
-
-If yes → abstract the logic.
 
 ---
 
@@ -308,10 +292,9 @@ If yes → abstract the logic.
 - [x] Authorization helpers: `getCurrentProfile`, `assertTenantRole`, `assertCanEditContent`, `assertCanManageStructure`
 - [x] Profile sync on sign-in (`sync-profile.ts`, matches by email)
 - [x] Dashboard scaffold with collapsible sidebar (user info, nav links)
-- [x] "Create Site" dialog (`CreateTenantDialog`) — name/slug/category fields, creates tenant + pre-seeds blocks + owner membership
-- [x] Tenant category system (`TenantCategory` union, `CATEGORY_BLOCKS` config, `CATEGORY_LABELS`)
+- [x] "Create Site" dialog (`CreateTenantDialog`) — name/slug fields, creates tenant + owner membership
 - [x] Team management page (`/dashboard/team`) with `TeamManager` widget
-- [x] Site builder UI — block list (category-filtered), block edit sheet, collection manager, entity CRUD
+- [x] Site builder UI — block list, block edit sheet, collection manager, entity CRUD
 - [x] Entity system: blog_post, podcast_episode, award_item with per-type translation forms
 - [x] Platform translations table with unique constraint `(namespace, key, locale)`
 - [x] `getPlatformTranslations(namespace, locale)` helper
@@ -329,6 +312,13 @@ If yes → abstract the logic.
 - [x] All platform pages use semantic shadcn CSS vars (marketing, auth, dashboard, site builder, team)
 - [x] Two color palettes (Ocean, Sunset) with light/dark variants, switchable via PaletteSwitcher
 - [x] Marketing page restructured with nav header (language selector, theme/palette toggles, sign in/up) + sections (Hero, Features, Pricing, Testimonials, FAQ, CTA, Footer)
+
+### Phase 2c — Category & Schema Cleanup
+- [x] Removed category system: `TenantCategory` type, `CATEGORY_BLOCKS`/`CATEGORY_LABELS` configs, category column from tenants table
+- [x] Removed category selector from CreateTenantDialog, category filter from BlockList
+- [x] Removed TONE_PRESETS from translateWithGemini (category-based tone)
+- [x] Dropped legacy `content_items` table (migrated to `tenant_entities` + `tenant_translations`)
+- [x] Updated all docs to reflect schema/architecture changes
 
 ### Bug Fixes
 - [x] `ga` locale changed from Irish to Galician
@@ -350,7 +340,7 @@ If yes → abstract the logic.
 - [ ] Tenant template dark mode pass — all block components (NavbarBlock, HeroBlock, BlogFeedBlock, AwardsBlock, PodcastFeedBlock, ContactBlock) need semantic vars
 - [ ] Add theme toggle to marketing page header
 - [ ] Responsive pass on blocks
-- [ ] Seed Àgora with `social-work` category
+- Seed Àgora with blocks (done)
 - [ ] Contact block implementation
 
 ### Phase 4 — Monetization
@@ -362,7 +352,6 @@ If yes → abstract the logic.
 ### Testing & Infrastructure
 - [ ] Zero tests (no test framework installed)
 - [ ] No CI/CD configuration
-- [ ] Schema deduplication (`content_items` vs `tenant_entities`)
 
 ---
 

@@ -413,13 +413,13 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.features",
     key: "templates.title",
-    translations: t({ en: "Category Templates" }),
+    translations: t({ en: "Template Presets" }),
   },
   {
     namespace: "marketing.features",
     key: "templates.description",
     translations: t({
-      en: "Social work, wedding, and more — each category has purpose-built blocks and layouts.",
+      en: "Choose from a growing library of appearance presets — modern, classic, and more.",
     }),
   },
   {
@@ -1176,16 +1176,6 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "dashboard.create-tenant",
     key: "slug-hint",
     translations: t({ en: "Lowercase letters, numbers, and hyphens only (3-63 chars)." }),
-  },
-  {
-    namespace: "dashboard.create-tenant",
-    key: "label.category",
-    translations: t({ en: "Category" }),
-  },
-  {
-    namespace: "dashboard.create-tenant",
-    key: "placeholder.category",
-    translations: t({ en: "Select category" }),
   },
   {
     namespace: "dashboard.create-tenant",

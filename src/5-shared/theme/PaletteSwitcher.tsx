@@ -22,10 +22,11 @@ export function PaletteSwitcher() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const p = getInitialPalette();
-    setPalette(p);
     applyPalette(p);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPalette(p);
+    setMounted(true);
   }, []);
 
   function toggle() {

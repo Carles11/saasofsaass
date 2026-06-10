@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         .limit(1);
       const existingAlt = i18nArr[0]?.alt;
       // Only set alt if not present; otherwise, preserve
-      let alt =
+      const alt =
         existingAlt ??
         (s3Key
           .split("/")

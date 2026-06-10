@@ -53,7 +53,7 @@ export function GalleryManager({
         setImages(config.images ?? []);
       })
       .finally(() => setLoading(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [blockId]);
 
   if (loading) return <div>Loading gallery...</div>;
@@ -340,6 +340,7 @@ function GalleryImageCard({
       }}
       className="relative border rounded-lg p-2 bg-white flex flex-col gap-2 shadow-sm"
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={img.url}
         alt={img.i18n[lang]?.alt ?? ""}

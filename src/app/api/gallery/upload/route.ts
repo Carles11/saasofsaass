@@ -65,10 +65,9 @@ export async function POST(req: NextRequest) {
 
   // Generate SEO-optimized filename (always .webp)
   // Use alt/caption if available, else fallback to Gemini-generated or filename
-  let filename: string;
-  let blockType = "image-gallery";
-  let tenantCategory = tenant.category || "general";
-  let tenantName = tenant.name || "tenant";
+  const blockType = "image-gallery";
+  const tenantCategory = "general";
+  const tenantName = tenant.name || "tenant";
 
   // If alt/caption are missing or empty, generate them with Gemini
   if (!alt || !caption || !alt.trim() || !caption.trim()) {
@@ -99,7 +98,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Generate SEO filename from alt/caption/context
-  filename = generateSeoImageName({
+  const filename = generateSeoImageName({
     title: alt || caption || undefined,
     blockType,
     tenantCategory,
@@ -110,8 +109,7 @@ export async function POST(req: NextRequest) {
   // If alt/caption are missing or empty, generate them with Gemini
   if (!alt || !caption || !alt.trim() || !caption.trim()) {
     // Try to get block type for context (optional, fallback to 'image-gallery')
-    let blockType = "image-gallery";
-    let tenantCategory = tenant.category || "general";
+    const blockType = "image-gallery";
     try {
       // If you want to fetch block type from DB, uncomment below:
       // const block = await db.query.blocks.findFirst({ where: (b) => b.id.eq(blockId) });

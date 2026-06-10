@@ -55,12 +55,9 @@ export function CollectionManager({
   else if (blockType === "podcast-feed") entityKinds = ["podcast_episode"];
   else if (blockType === "awards") entityKinds = ["award_item"];
 
+  // Derive effective kind from entityKinds; if blockType changed, reset to first
   const [newKind, setNewKind] = useState<EntityKind>(entityKinds[0]);
-
-  // Keep newKind in sync with entityKinds if blockType changes
-  useEffect(() => {
-    setNewKind(entityKinds[0]);
-  }, [blockType]);
+  const effectiveKind = entityKinds.includes(newKind) ? newKind : entityKinds[0];
   const [newSlug, setNewSlug] = useState("");
   const dir = isRtl(activeLocale) ? "rtl" : "ltr";
 

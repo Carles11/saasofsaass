@@ -37,7 +37,7 @@ export async function generateMetadata({
   const description =
     typeof heroTranslations.description === "string"
       ? heroTranslations.description
-      : `${tenant.name} — Professional ${tenant.category} website`;
+      : `${tenant.name} — Professional website`;
 
   return {
     title: {

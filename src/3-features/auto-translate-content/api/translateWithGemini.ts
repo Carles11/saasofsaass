@@ -1,28 +1,14 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Tone presets keyed by tenant.category — injected verbatim into the system prompt
-const TONE_PRESETS: Record<string, string> = {
-  "social-work":
-    "empathetic, inclusive and accessible; avoid jargon or overly formal phrasing; use language that feels warm and human",
-  wedding:
-    "warm, romantic and celebratory; use elegant and heartfelt language without being too cheesy",
-  business: "professional, concise and persuasive",
-  law: "formal and precise; leave legal terminology and proper nouns untranslated",
-};
-
-function getTone(category: string): string {
-  return TONE_PRESETS[category] ?? "clear, friendly, but formal and professional";
-}
+const TONE = "clear, friendly, but formal and professional";
 
 export interface TranslatePayloadArgs {
   /** The source-locale content to translate. Values must be plain strings. */
   payload: Record<string, string>;
   sourceLocale: string;
   targetLocale: string;
-  /** Human-readable usage hint, e.g. "hero block title on a social-work association website" */
+  /** Human-readable usage hint, e.g. "hero block title on an association website" */
   context: string;
-  /** The tenant.category value — determines tone preset */
-  category: string;
 }
 
 export class TranslationError extends Error {
@@ -52,7 +38,6 @@ export async function translatePayload({
   sourceLocale,
   targetLocale,
   context,
-  category,
 }: TranslatePayloadArgs): Promise<Record<string, string>> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new TranslationError("GEMINI_API_KEY is not set");
@@ -63,10 +48,8 @@ export async function translatePayload({
   );
   if (!hasContent) return payload;
 
-  const tone = getTone(category);
-
   const systemInstruction = [
-    `You are a professional translator for a ${tone} website.`,
+    `You are a professional translator for a ${TONE} website.`,
     `Context: ${context}.`,
     "Rules:",
     "  1. Translate ONLY the values in the JSON object. NEVER translate or change the keys.",

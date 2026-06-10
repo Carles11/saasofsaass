@@ -26,6 +26,7 @@ export const TenantHeader = () => {
       >
         <div className="flex flex-col items-center">
           {branding.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={branding.logoUrl}
               alt={tenant.name}
@@ -65,6 +66,7 @@ export const TenantHeader = () => {
       >
         <div className="flex items-center gap-4">
           {branding.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={branding.logoUrl}
               alt={tenant.name}
@@ -108,6 +110,7 @@ export const TenantHeader = () => {
     >
       <div className="flex items-center gap-4">
         {branding.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={branding.logoUrl}
             alt={tenant.name}

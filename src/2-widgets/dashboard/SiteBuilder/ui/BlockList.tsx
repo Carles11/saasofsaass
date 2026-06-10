@@ -1,10 +1,8 @@
 "use client";
 
 import { addBlock } from "@/3-features/manage-site-blocks";
-import { CATEGORY_BLOCKS } from "@/5-shared/config/category-blocks";
 import type { Block } from "@/5-shared/lib/db/schema";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
-import type { TenantCategory } from "@/5-shared/types/tenants/categories";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { Button } from "@/components/tenant/ui/button";
 import {
@@ -25,10 +23,19 @@ import {
 import { useState } from "react";
 import { BlockCard } from "./BlockCard";
 
+const ALL_BLOCK_KINDS: BlockKind[] = [
+  "navbar",
+  "hero",
+  "blog-feed",
+  "podcast-feed",
+  "awards",
+  "contact",
+  "image-gallery",
+];
+
 interface BlockListProps {
   blocks: Block[];
   tenantId: string;
-  category: TenantCategory;
   onEdit: (blockId: string) => void;
   setActiveTab?: (tab: string) => void;
   userRole?: "owner" | "editor" | null;
@@ -38,14 +45,12 @@ interface BlockListProps {
 export function BlockList({
   blocks,
   tenantId,
-  category,
   onEdit,
   setActiveTab,
   userRole,
   translations,
 }: BlockListProps) {
-  const availableKinds = CATEGORY_BLOCKS[category] ?? [];
-  const [newKind, setNewKind] = useState<BlockKind>(availableKinds[0] ?? "hero");
+  const [newKind, setNewKind] = useState<BlockKind>(ALL_BLOCK_KINDS[0]);
 
   const emptyState = resolveTranslation(
     translations,
@@ -105,7 +110,7 @@ export function BlockList({
                   <SelectValue placeholder={addDialogPlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableKinds.map((kind) => (
+                  {ALL_BLOCK_KINDS.map((kind) => (
                     <SelectItem key={kind} value={kind}>
                       {kind}
                     </SelectItem>

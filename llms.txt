@@ -16,20 +16,17 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 **Architecture**
 - Feature-Sliced Design (FSD): `1-pages` → `2-widgets` → `3-features` → `4-entities` → `5-shared`
 - Proxy middleware (`src/proxy.ts`) routes by hostname: marketing (localhost:3000), dashboard (app.localhost:3000), tenants (*.lvh.me:3000)
-- Tenant category system: `social-work` | `wedding` — determines available block types via `CATEGORY_BLOCKS`
 
 **Key Source Files**
-- `src/5-shared/lib/db/schema.ts` — Core tables: tenants, blocks, content_items, transactions, platform_translations
+- `src/5-shared/lib/db/schema.ts` — Core tables: tenants, blocks, tenant_entities, tenant_translations, transactions, platform_translations
 - `src/5-shared/lib/db/schema/auth.ts` — Auth tables: profiles, tenant_memberships
 - `src/5-shared/lib/auth/authorization.ts` — getCurrentProfile, assertTenantRole, assertCanEditContent, assertCanManageStructure
 - `src/5-shared/lib/auth/sync-profile.ts` — Syncs Neon Auth user to local profiles table by email
 - `src/5-shared/lib/db/platform-translations.ts` — getPlatformTranslations(namespace, locale) helper
 - `src/5-shared/theme/ThemeProvider.tsx` — next-themes wrapper (attribute="class")
 - `src/5-shared/theme/ThemeToggle.tsx` — Sun/moon toggle button
-- `src/5-shared/config/category-blocks.ts` — Maps categories to BlockKind[]
-- `src/5-shared/config/category-labels.ts` — Human labels for categories
-- `src/5-shared/types/tenants/categories.ts` — TenantCategory union type
 - `src/5-shared/types/tenants/blocks.ts` — BlockKind union type
+- `src/5-shared/config/templates.ts` — Template presets (TypeScript source of truth)
 - `src/app/api/auth/[...path]/route.ts` — Auth API proxy with Origin override for dev subdomains
 - `src/proxy.ts` — DNS + i18n middleware
 
@@ -40,15 +37,18 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 - `4-entities/` — Business logic (tenant, block, tenant-content)
 - `5-shared/` — Infrastructure (config, lib/auth, lib/db, lib/i18n, lib/next, store, theme, types)
 
-**Database (12 tables)**
-- `tenants` — Organizations with branding, locale config, category
+**Database (11 tables)**
+- `tenants` — Organizations with branding, locale config
 - `blocks` — Content blocks with JSONB config + translations
-- `content_items` — Blog posts, awards, episodes (legacy, migrating)
+- `tenant_entities` — Blog posts, podcast episodes, awards
+- `tenant_translations` — Per-locale entity translations
+- `tenant_domains` — Custom domain mappings
 - `transactions` — Stripe records (1% platform fee)
 - `platform_translations` — UI strings, unique on (namespace, key, locale)
 - `profiles` — Local user profiles synced from Neon Auth
 - `tenant_memberships` — Role-based access (owner/editor)
-- `tenant_entities`, `tenant_translations`, `tenant_domains`, `gallery_images`, `hero_images` — Legacy tables
+- `gallery_images` — Gallery image references with S3 keys
+- `hero_images` — Hero background images with S3 keys
 
 **Auth & Roles**
 - Two roles: `owner` (full control), `editor` (content only)

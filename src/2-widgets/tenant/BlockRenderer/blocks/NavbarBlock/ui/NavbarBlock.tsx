@@ -22,6 +22,7 @@ export function NavbarBlock({ config, t, tenant, locale }: BlockProps & { locale
     <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-zinc-100">
       <div className="flex items-center gap-4">
         {branding.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={branding.logoUrl}
             alt={siteTitle}

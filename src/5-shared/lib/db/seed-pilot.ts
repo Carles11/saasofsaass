@@ -49,7 +49,6 @@ async function main() {
       .values({
         name:          'Àgora Association',
         slug:          'agora',
-        category:      'social-work',
         locales:       ['en', 'es', 'ca'],
         defaultLocale: 'en',
         isActive:      true,

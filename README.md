@@ -85,7 +85,7 @@ npx tsx src/5-shared/lib/db/seed-pilot.ts
 ```
 
 This idempotent script creates:
-- The **Àgora** tenant (social-work category, en/es/ca locales)
+- The **Àgora** tenant (en/es/ca locales)
 - A navbar, hero, and blog-feed block
 - One sample blog post with English content (es/ca left as pending for Gemini)
 
@@ -179,16 +179,17 @@ components/
 |---|---|---|
 | `tenants` | `schema.ts` | Tenant organizations with branding, locale config, category |
 | `blocks` | `schema.ts` | Content blocks (navbar, hero, blog-feed, awards, podcast-feed, contact) with JSONB config + translations |
-| `content_items` | `schema.ts` | Legacy entity table (being migrated to tenant_entities) |
+| `tenants` | `schema.ts` | Tenant organizations with branding, locale config |
+| `blocks` | `schema.ts` | Content blocks (navbar, hero, blog-feed, awards, podcast-feed, contact) with JSONB config + translations |
+| `tenant_entities` | `schema.ts` | Entity items (blog posts, podcast episodes, awards) |
+| `tenant_translations` | `schema.ts` | Per-locale entity translations |
 | `transactions` | `schema.ts` | Stripe transaction records (1% platform fee) |
 | `platform_translations` | `schema.ts` | Platform UI string translations (namespace/key/locale, unique constraint) |
 | `profiles` | `schema/auth.ts` | Local user profiles synced from Neon Auth |
 | `tenant_memberships` | `schema/auth.ts` | Role-based access (owner/editor) per tenant |
-| `tenant_entities` | (legacy) | Entity items (blog posts, podcast episodes, awards) |
-| `tenant_translations` | (legacy) | Per-locale entity translations |
-| `tenant_domains` | (legacy) | Custom domain mappings |
-| `gallery_images` | (legacy) | Gallery image references with S3 keys |
-| `hero_images` | (legacy) | Hero background images with S3 keys |
+| `tenant_domains` | `schema.ts` | Custom domain mappings |
+| `gallery_images` | `4-entities/gallery/model/image.ts` | Gallery image references with S3 keys |
+| `hero_images` | `4-entities/hero/model/image.ts` | Hero background images with S3 keys |
 
 View/manage via Drizzle Studio using WSL Terminal: `npm run db:studio`
 
@@ -206,7 +207,7 @@ View/manage via Drizzle Studio using WSL Terminal: `npm run db:studio`
 | Image Gallery | ✅ Implemented |
 | Contact | ❌ Type defined, component not yet built |
 
-Blocks are tenant-category-aware — the available block kinds are filtered by `CATEGORY_BLOCKS[category]` in the SiteBuilder.
+Blocks are added by the user via the SiteBuilder interface — all 7 block kinds are always available.
 
 ---
 
@@ -257,7 +258,7 @@ The marketing page is composed of individual sections in `src/1-pages/marketing/
 - Local profiles + tenant_memberships with role-based permissions (owner/editor)
 - 5 auth pages (sign-in, sign-up, login, register, forgot-password)
 - Dashboard with collapsible sidebar, site builder UI, team management
-- "Create Site" dialog with tenant category selection
+- "Create Site" dialog
 - Entity CRUD (blog posts, podcast episodes, awards) with per-type translation forms
 - Platform translations table + seeding + helper
 - AI translation flow via Gemini 2.5
@@ -278,5 +279,5 @@ The marketing page is composed of individual sections in `src/1-pages/marketing/
 - Zero tests (no test framework installed)
 - RLS / row-level security not implemented
 - No CI/CD configuration
-- Some schema duplication (`content_items` vs `tenant_entities`)
+- ~~Schema duplication (`content_items` vs `tenant_entities`)~~ ✅ Resolved, content_items dropped
 - Tenant template blocks need dark mode pass

@@ -42,7 +42,7 @@ export async function triggerCaptionTranslation({
     : await imageQuery;
 
   // For each image, get the source caption and missing target langs
-  let jobs: Array<{
+  const jobs: Array<{
     imageId: string;
     s3Key: string;
     sourceCaption: string;
@@ -91,7 +91,6 @@ export async function triggerCaptionTranslation({
         sourceLocale: job.fromLang,
         targetLocale: job.toLang,
         context: `Image caption for a multilingual website`,
-        category: "gallery_image",
       });
       await db
         .insert(galleryImageI18n)

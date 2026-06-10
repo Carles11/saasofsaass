@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-
 // Config fields that are non-translatable, per block type
 const CONFIG_FIELDS: Partial<
   Record<BlockKind, Array<{ key: string; label: string; inputType?: string }>>
@@ -63,7 +62,6 @@ export function BlockEditSheet({
   const current =
     blockLocaleTranslations[activeLocale] ?? blockLocaleTranslations[tenant.defaultLocale] ?? {};
   const config = (block.config ?? {}) as Record<string, unknown>;
-
   const dir = isRtl(activeLocale) ? "rtl" : "ltr";
   const editTitle = resolveTranslation(
     translations,
@@ -124,6 +122,7 @@ export function BlockEditSheet({
             // Add cache-busting param to url
             const heroImage = {
               ...data.heroImage,
+              // eslint-disable-next-line react-hooks/purity
               url: data.heroImage.url + (data.heroImage.s3Key ? `?t=${Date.now()}` : ""),
               s3Key: data.heroImage.s3Key,
             };
@@ -207,6 +206,7 @@ export function BlockEditSheet({
                         config.heroImage &&
                         "url" in config.heroImage && (
                           <div className="mb-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={(config.heroImage as any).url}
                               alt={(config.heroImage as any).alt || "Hero image"}

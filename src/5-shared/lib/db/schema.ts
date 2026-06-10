@@ -22,7 +22,7 @@ export const tenants = pgTable("tenants", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(), // e.g. "agora"
   domain: text("domain"), // custom domain e.g. "agora.com"
-  category: text("category").notNull(), // "wedding", "social-work", "law"...
+
   locales: text("locales").array().notNull().default(["en"]), // enabled languages
   defaultLocale: text("default_locale").notNull().default("en"),
   branding: jsonb("branding").default({}), // HSL vars, logo, fonts
@@ -124,29 +124,6 @@ export const tenantDomains = pgTable("tenant_domains", {
 });
 
 // ============================================
-// CONTENT ITEMS (repeatable content inside blocks)
-// ============================================
-export const contentItems = pgTable("content_items", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  tenantId: uuid("tenant_id")
-    .notNull()
-    .references(() => tenants.id, { onDelete: "cascade" }),
-  blockId: uuid("block_id")
-    .notNull()
-    .references(() => blocks.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // "blog-post", "award", "episode", "team-member"
-  order: integer("order").notNull().default(0),
-  isPublished: boolean("is_published").notNull().default(false),
-  slug: text("slug"), // for blog posts, SEO
-  coverImage: text("cover_image"), // URL
-  data: jsonb("data").default({}), // type-specific fields (duration, audioUrl, etc)
-  translations: jsonb("translations").default({}), // { en: { title, body }, es: { ... } }
-  publishedAt: timestamp("published_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-// ============================================
 // TRANSACTIONS (1% platform fee)
 // ============================================
 export const transactions = pgTable("transactions", {
@@ -196,8 +173,6 @@ export type Tenant = typeof tenants.$inferSelect;
 export type NewTenant = typeof tenants.$inferInsert;
 export type Block = typeof blocks.$inferSelect;
 export type NewBlock = typeof blocks.$inferInsert;
-export type ContentItem = typeof contentItems.$inferSelect;
-export type NewContentItem = typeof contentItems.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
 export type TenantEntity = typeof tenantEntities.$inferSelect;

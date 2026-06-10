@@ -28,9 +28,9 @@ const FEATURE_DEFS = [
   {
     id: "templates",
     icon: Palette,
-    fallbackTitle: "Category Templates",
+    fallbackTitle: "Template Presets",
     fallbackDescription:
-      "Social work, wedding, and more — each category has purpose-built blocks and layouts.",
+      "Choose from a growing library of appearance presets — modern, classic, and more.",
   },
   {
     id: "domains",

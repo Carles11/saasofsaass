@@ -3,9 +3,7 @@ import { db } from "@/5-shared/lib/db";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-// Next.js 13/14/16 app router API route signature
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
-  // context.params may be a Promise in Next.js 16, so unwrap if needed
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const params = await context.params;
   const id = params?.id;
   if (!id) return NextResponse.json({ error: "Missing block id" }, { status: 400 });

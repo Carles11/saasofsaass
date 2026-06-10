@@ -109,7 +109,7 @@ export async function DashboardPage({ locale }: { locale?: string }) {
                 <div>
                   <h2 className="text-2xl font-bold text-card-foreground">{tenant.name}</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {tenant.category} &middot; {tenant.locales?.length || 0} {languagesLabel}
+                    {tenant.locales?.length || 0} {languagesLabel}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

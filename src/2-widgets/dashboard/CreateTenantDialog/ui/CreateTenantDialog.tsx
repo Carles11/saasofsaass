@@ -1,8 +1,6 @@
 "use client";
 
 import { createTenant } from "@/3-features/manage-tenants";
-import { CATEGORY_LABELS } from "@/5-shared/config/category-labels";
-import type { TenantCategory } from "@/5-shared/types/tenants/categories";
 import { Button } from "@/components/tenant/ui/button";
 import {
   Dialog,
@@ -12,13 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
@@ -41,7 +32,6 @@ export function CreateTenantDialog({ translations }: CreateTenantDialogProps) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
-  const [category, setCategory] = useState<TenantCategory>("social-work");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -62,7 +52,7 @@ export function CreateTenantDialog({ translations }: CreateTenantDialogProps) {
       setPending(true);
 
       try {
-        const result = await createTenant({ name, slug, category });
+        const result = await createTenant({ name, slug });
         setOpen(false);
         setName("");
         setSlug("");
@@ -74,7 +64,7 @@ export function CreateTenantDialog({ translations }: CreateTenantDialogProps) {
         setPending(false);
       }
     },
-    [name, slug, category, router]
+    [name, slug, router]
   );
 
   const triggerLabel = resolveTranslation(translations, "trigger", "+ Create Site");
@@ -91,12 +81,6 @@ export function CreateTenantDialog({ translations }: CreateTenantDialogProps) {
     translations,
     "slug-hint",
     "Lowercase letters, numbers, and hyphens only (3-63 chars).",
-  );
-  const categoryLabel = resolveTranslation(translations, "label.category", "Category");
-  const categoryPlaceholder = resolveTranslation(
-    translations,
-    "placeholder.category",
-    "Select category",
   );
   const creatingLabel = resolveTranslation(translations, "creating", "Creating...");
   const submitLabel = resolveTranslation(translations, "submit", "Create Site");
@@ -157,30 +141,6 @@ export function CreateTenantDialog({ translations }: CreateTenantDialogProps) {
             <p className="text-xs text-muted-foreground">
               {slugHint}
             </p>
-          </div>
-
-          {/* Category */}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="create-site-category" className="text-sm font-medium text-foreground">
-              {categoryLabel}
-            </label>
-            <Select
-              value={category}
-              onValueChange={(v) => setCategory(v as TenantCategory)}
-            >
-              <SelectTrigger id="create-site-category">
-                <SelectValue placeholder={categoryPlaceholder} />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(CATEGORY_LABELS).map(
-                  ([key, val]) => (
-                    <SelectItem key={key} value={key}>
-                      {val.label} — {val.description}
-                    </SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
           </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
