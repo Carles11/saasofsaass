@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache'
 import type { BlockKind } from '@/5-shared/types/tenants/blocks'
 import type { SupportedLocaleType } from '@/5-shared/types'
 import { assertCanEditContent, assertCanManageStructure } from '@/5-shared/lib/auth/authorization'
+import { pingIndexNow } from '@/5-shared/lib/seo/indexnow'
 
 function revalidateSiteBuilder(tenantId: string): void {
   revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, 'page')
@@ -134,7 +135,7 @@ export async function updateTenantLocales(
 ) {
   await assertCanManageStructure(tenantId)
 
-  const [tenant] = await db.select({ locales: tenants.locales }).from(tenants).where(eq(tenants.id, tenantId)).limit(1)
+  const [tenant] = await db.select({ locales: tenants.locales, slug: tenants.slug, domain: tenants.domain }).from(tenants).where(eq(tenants.id, tenantId)).limit(1)
   const prevLocales: string[] = tenant?.locales ?? []
 
   await db
@@ -183,6 +184,14 @@ export async function updateTenantLocales(
         inArray(tenantTranslations.locale, removed)
       ))
   }
+
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'saasofsaass.com'
+  const tenantBaseUrl = tenant?.domain
+    ? `https://${tenant.domain}`
+    : `https://${tenant?.slug}.${rootDomain}`
+  void pingIndexNow(
+    locales.map((locale) => `${tenantBaseUrl}/${locale}`)
+  )
 
   revalidateSiteBuilder(tenantId)
 }
