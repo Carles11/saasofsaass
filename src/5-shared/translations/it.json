@@ -1,0 +1,8 @@
+{
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Qualcosa è andato storto",
+    "save": "Salva",
+    "cancel": "Annulla"
+  }
+}

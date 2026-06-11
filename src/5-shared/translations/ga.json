@@ -1,0 +1,8 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Algo saíu mal",
+    "save": "Gardar",
+    "cancel": "Cancelar"
+  }
+}

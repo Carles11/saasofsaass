@@ -1,0 +1,8 @@
+{
+  "common": {
+    "loading": "Kargatzen...",
+    "error": "Zerbait gaizki joan da",
+    "save": "Gorde",
+    "cancel": "Utzi"
+  }
+}
