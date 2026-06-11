@@ -16,10 +16,8 @@ export default async function DashboardLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  console.log("before getSession")
   const sessionResult = await authServer.getSession()
 
-console.log(sessionResult)
 
 const session = sessionResult.data
 
