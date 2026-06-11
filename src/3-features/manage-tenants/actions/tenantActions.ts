@@ -6,6 +6,7 @@ import { tenants } from "@/5-shared/lib/db/schema";
 import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { pingIndexNow } from '@/5-shared/lib/seo/indexnow'
 
 const SLUG_REGEX = /^[a-z0-9]([a-z0-9-]{1,61})[a-z0-9]$/;
 const ALLOWED_LOCALES = ["en", "es", "ca", "fr", "de", "it", "eu", "ga"] as const;
@@ -82,6 +83,12 @@ export async function createTenant(raw: FormData | CreateTenantInput) {
     profileId: profile.id,
     role: "owner",
   });
+
+const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? 'saasofsaass.com'
+  const tenantLocales = tenant.locales as string[]
+  void pingIndexNow(
+    tenantLocales.map((locale) => `https://${tenant.slug}.${rootDomain}/${locale}`)
+  )
 
   revalidatePath("/", "layout");
 
