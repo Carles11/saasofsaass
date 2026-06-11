@@ -1,7 +1,7 @@
 "use client"
 
 import { NeonAuthUIProvider } from "@neondatabase/auth-ui"
-import "@neondatabase/auth-ui/css"
+// CSS loaded only in AuthViewClient.tsx - prevents Neon reset from overriding Tailwind preflight
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { authClient } from "./client"

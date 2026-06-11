@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
-import "./globals.css";
 import { cn } from "@/5-shared/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/5-shared/lib/auth/provider";
 import { ThemeProvider } from "@/5-shared/theme/ThemeProvider";
+
+import "./globals.css";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
