@@ -54,14 +54,23 @@ export function SiteBuilder({
   // Restore selectedBlock for BlockEditSheet
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
-  const previewUrl = (() => {
-    const devRoot = (process.env.NEXT_PUBLIC_DEV_ROOT_DOMAIN || "lvh.me:3000").replace(/https?:\/\//, "").replace(/\/+$/, "");
-    const prodRoot = (process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com").replace(/https?:\/\//, "").replace(/\/+$/, "");
-    const isDev = typeof window !== "undefined" && window.location.hostname.includes("localhost");
-    const root = isDev ? devRoot : prodRoot;
-    const port = isDev ? `:${window.location.port}` : "";
-    return `http://${tenant.slug}.${root}${port}/${activeLocale}`;
-  })();
+const devRoot =
+  process.env.NEXT_PUBLIC_DEV_ROOT_DOMAIN || "lvh.me";
+
+const devPort =
+  process.env.NEXT_PUBLIC_DEV_PORT || "3000";
+
+const prodRoot = (
+  process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com"
+)
+  .replace(/https?:\/\//, "")
+  .replace(/\/+$/, "");
+
+const isDev = process.env.NODE_ENV === "development";
+
+const previewUrl = isDev
+  ? `http://${tenant.slug}.${devRoot}:${devPort}/${activeLocale}`
+  : `https://${tenant.slug}.${prodRoot}/${activeLocale}`;
 
   const subtitle = resolveTranslation(translations, "subtitle", "Site Builder");
   const tabBlocks = resolveTranslation(translations, "tab.blocks", "Blocks");

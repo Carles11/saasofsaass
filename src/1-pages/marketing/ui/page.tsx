@@ -2,6 +2,7 @@ import { MarketingHeader } from "./sections/MarketingHeader";
 import { HeroSection } from "./sections/HeroSection";
 import { HowItWorksSection } from "./sections/HowItWorksSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
+import { StructuredVsAISection } from "./sections/StructuredVsAISection";
 import { PricingSection } from "./sections/PricingSection";
 import { TestimonialsSection } from "./sections/TestimonialsSection";
 import { FaqSection } from "./sections/FaqSection";
@@ -18,6 +19,7 @@ export async function MarketingPage() {
       "marketing.hero",
       "marketing.howitworks",
       "marketing.features",
+      "marketing.structured-vs-ai",
       "marketing.pricing",
       "marketing.testimonials",
       "marketing.faq",
@@ -34,6 +36,7 @@ export async function MarketingPage() {
         <HeroSection translations={translations["marketing.hero"]} locale={locale} />
         <HowItWorksSection translations={translations["marketing.howitworks"]} />
         <FeaturesSection translations={translations["marketing.features"]} />
+        <StructuredVsAISection translations={translations["marketing.structured-vs-ai"]} locale={locale} />
         <PricingSection translations={translations["marketing.pricing"]} />
         <TestimonialsSection translations={translations["marketing.testimonials"]} />
         <FaqSection translations={translations["marketing.faq"]} />

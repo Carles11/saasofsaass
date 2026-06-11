@@ -1764,6 +1764,111 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     key: "status.hidden",
     translations: t({ en: "hidden" }),
   },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.navbar.name",
+    translations: t({ en: "Navigation Bar" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.navbar.description",
+    translations: t({ en: "Top navigation with logo, links, and optional CTA button" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.navbar.hint",
+    translations: t({ en: "Add your site title and configure navigation links" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.hero.name",
+    translations: t({ en: "Hero Section" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.hero.description",
+    translations: t({ en: "Bold headline, subtitle, and primary call-to-action" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.hero.hint",
+    translations: t({ en: "Write a compelling headline and upload a background image" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.blog-feed.name",
+    translations: t({ en: "Blog Feed" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.blog-feed.description",
+    translations: t({ en: "Automatically displays blog posts in a grid layout" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.blog-feed.hint",
+    translations: t({ en: "Write blog posts in the Content tab to populate this section" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.podcast-feed.name",
+    translations: t({ en: "Podcast Feed" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.podcast-feed.description",
+    translations: t({ en: "Showcases podcast episodes with cover art and descriptions" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.podcast-feed.hint",
+    translations: t({ en: "Add podcast episodes in the Content tab" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.awards.name",
+    translations: t({ en: "Awards" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.awards.description",
+    translations: t({ en: "Displays a list of awards, certifications, or recognitions" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.awards.hint",
+    translations: t({ en: "Add your awards in the Content tab" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.contact.name",
+    translations: t({ en: "Contact Section" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.contact.description",
+    translations: t({ en: "Contact information with email, phone, address, and optional form" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.contact.hint",
+    translations: t({ en: "Add your contact details and set up email forwarding" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.image-gallery.name",
+    translations: t({ en: "Image Gallery" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.image-gallery.description",
+    translations: t({ en: "Visual image gallery with lightbox viewing" }),
+  },
+  {
+    namespace: "dashboard.blocks",
+    key: "picker.image-gallery.hint",
+    translations: t({ en: "Upload images and add captions in the Gallery tab" }),
+  },
 
   // ── Dashboard: Collection Manager ───────────────────────────────────────
   {
@@ -1981,6 +2086,510 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "dashboard.create-tenant",
     key: "submit",
     translations: t({ en: "Create Site" }),
+  },
+
+  // ── Marketing: Structured vs AI ──────────────────────────────────────────
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "meta.title",
+    translations: t({ en: "Stop Prompting. Start Publishing. — Structured Website Builder vs AI" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "meta.description",
+    translations: t({
+      en: "Most AI website builders generate pages. You still need to figure out what those pages should be. SaaS of SaaS starts with proven structures and uses AI for content, translation, and localization.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "badge",
+    translations: t({ en: "Structure vs AI" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "title",
+    translations: t({ en: "Your website shouldn\u2019t start with a prompt" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "description",
+    translations: t({
+      en: "Most AI website builders can generate pages. You still need to figure out what those pages should be. SaaS of SaaS starts with proven structures and uses AI where it truly shines: content, translation, and localization.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "cta",
+    translations: t({ en: "See the comparison" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hero.badge",
+    translations: t({ en: "Website architecture" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hero.title.line1",
+    translations: t({ en: "Stop Prompting." }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hero.title.line2",
+    translations: t({ en: "Start Publishing." }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hero.subtitle",
+    translations: t({
+      en: "Most AI website builders can generate pages. You still need to figure out what those pages should be. SaaS of SaaS starts with proven website structures and uses AI where it truly shines: content creation, multilingual publishing, and localization.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hero.cta.primary",
+    translations: t({ en: "Build Your Website" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hero.cta.secondary",
+    translations: t({ en: "See How It Works" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.badge",
+    translations: t({ en: "Foundation" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.title",
+    translations: t({ en: "Every Website Needs Structure Before Content" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.intro",
+    translations: t({
+      en: "Before any AI writes a headline, every successful website already requires navigation, page hierarchy, conversion flow, SEO architecture, internal linking, and content organization. AI can generate text. Structure is what makes a website work.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.item.nav",
+    translations: t({ en: "Navigation & Page Hierarchy" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.item.flow",
+    translations: t({ en: "Conversion Flow" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.item.seo",
+    translations: t({ en: "SEO Architecture" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.item.linking",
+    translations: t({ en: "Internal Linking" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.item.i18n",
+    translations: t({ en: "Multilingual Structure" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "structure.item.content",
+    translations: t({ en: "Content Organization" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.badge",
+    translations: t({ en: "The Reality" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.title",
+    translations: t({ en: "The Hidden Work Behind \u201CGenerate My Website\u201D" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.intro",
+    translations: t({
+      en: "Most AI website builders follow the same workflow: describe your business, review generated pages, rewrite sections, regenerate content, reorganize navigation, adjust SEO structure, and repeat until satisfied.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.empathy",
+    translations: t({
+      en: "That process is normal and often useful. But with SaaS of SaaS, the structure already exists. You select the website type and immediately receive a complete architecture ready for publishing.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.cta",
+    translations: t({ en: "Start with a proven structure" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.step.1",
+    translations: t({ en: "Describe your business" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.step.2",
+    translations: t({ en: "Review generated pages" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.step.3",
+    translations: t({ en: "Rewrite and regenerate" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.step.4",
+    translations: t({ en: "Reorganize navigation" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.step.5",
+    translations: t({ en: "Adjust SEO structure" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.step.6",
+    translations: t({ en: "Repeat until satisfied" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "hidden.soss",
+    translations: t({ en: "SaaS of SaaS: structure already exists \u2192" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.badge",
+    translations: t({ en: "Comparison" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.title",
+    translations: t({ en: "Generated Websites vs Structured Systems" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.header.feature",
+    translations: t({ en: "Feature" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.header.soss",
+    translations: t({ en: "SaaS of SaaS" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.header.ai",
+    translations: t({ en: "AI Builders" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.architecture.feature",
+    translations: t({ en: "Website Architecture" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.architecture.soss",
+    translations: t({ en: "Proven system" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.architecture.ai",
+    translations: t({ en: "Generated each time" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.structure.feature",
+    translations: t({ en: "Page Structure" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.structure.soss",
+    translations: t({ en: "Consistent" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.structure.ai",
+    translations: t({ en: "Varies by prompt" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.seo.feature",
+    translations: t({ en: "SEO Foundation" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.seo.soss",
+    translations: t({ en: "Built in" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.seo.ai",
+    translations: t({ en: "Requires review" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.multilingual.feature",
+    translations: t({ en: "Multilingual Publishing" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.multilingual.soss",
+    translations: t({ en: "Native system" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.multilingual.ai",
+    translations: t({ en: "Additional configuration" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.content.feature",
+    translations: t({ en: "Content Creation" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.content.soss",
+    translations: t({ en: "AI assisted" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.content.ai",
+    translations: t({ en: "AI generated" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.predictability.feature",
+    translations: t({ en: "Predictability" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.predictability.soss",
+    translations: t({ en: "High" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "comparison.row.predictability.ai",
+    translations: t({ en: "Depends on prompt quality" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.badge",
+    translations: t({ en: "GEO Ready" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.title",
+    translations: t({ en: "Built for Search Engines. Built for AI Search." }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.subtitle",
+    translations: t({
+      en: "Modern discovery happens through Google, ChatGPT, Perplexity, Claude, and Gemini. These systems understand structure. A predictable architecture helps machines understand what your business does, how pages relate, which content matters, and which language version should appear.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.item.urls",
+    translations: t({ en: "Clean URL structures" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.item.multilingual",
+    translations: t({ en: "Multilingual architecture with hreflang" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.item.metadata",
+    translations: t({ en: "Consistent metadata across pages" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.item.headings",
+    translations: t({ en: "Semantic heading hierarchy" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.item.structured",
+    translations: t({ en: "Structured content for AI parsing" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "geo.item.speed",
+    translations: t({ en: "Fast, predictable rendering" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "ai.badge",
+    translations: t({ en: "AI powered" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "ai.title",
+    translations: t({ en: "AI Where It Matters Most" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "ai.subtitle",
+    translations: t({
+      en: "SaaS of SaaS fully embraces AI. Generate descriptions, rewrite copy, improve messaging, translate entire websites, and localize content for different markets. AI improves the content. It does not need to reinvent the website architecture.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "ai.item.write",
+    translations: t({ en: "Write descriptions" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "ai.item.improve",
+    translations: t({ en: "Improve copy" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "ai.item.translate",
+    translations: t({ en: "Translate sites" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "ai.item.localize",
+    translations: t({ en: "Localize content" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.badge",
+    translations: t({ en: "FAQ" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.title",
+    translations: t({ en: "Questions about structured vs AI websites" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q1.q",
+    translations: t({ en: "Why not let AI create my whole website?" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q1.a",
+    translations: t({
+      en: "AI is excellent at generating text, but it struggles with consistent architecture, navigation logic, conversion flow, and multilingual structure. A website that changes every time you add content risks confusing visitors and losing SEO rankings. SaaS of SaaS gives you a fixed, predictable structure while AI handles the content layer.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q2.q",
+    translations: t({ en: "Can I still use AI inside SaaS of SaaS?" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q2.a",
+    translations: t({
+      en: "Absolutely. AI is built into the platform for content generation, rewriting, translation, and tone adjustment. The difference is that AI improves the content within a proven architecture, rather than inventing a new structure each time.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q3.q",
+    translations: t({ en: "Is structured architecture better for SEO?" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q3.a",
+    translations: t({
+      en: "Yes. Search engines and AI crawlers prefer predictable, well-organized websites. Consistent URL patterns, clear heading hierarchies, stable navigation, and proper metadata all contribute to better indexing and higher rankings.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q4.q",
+    translations: t({ en: "What is GEO optimization?" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q4.a",
+    translations: t({
+      en: "Generative Engine Optimization (GEO) means optimizing your website so AI search systems like ChatGPT, Perplexity, and Gemini can understand and accurately represent your content. Structured data, clear hierarchies, and multilingual architecture are key factors.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q5.q",
+    translations: t({ en: "How does multilingual publishing work?" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q5.a",
+    translations: t({
+      en: "Select any of our 8 supported languages and AI translates your entire site automatically. The multilingual structure, including hreflang tags and locale-specific URLs, is built into the platform. You don't need to configure anything.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q6.q",
+    translations: t({ en: "Can AI search engines understand my website better?" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q6.a",
+    translations: t({
+      en: "Yes. AI search systems parse structured content more accurately. When your website has clear navigation, semantic headings, proper metadata, and consistent multilingual architecture, AI models can extract, summarize, and present your content with higher confidence.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q7.q",
+    translations: t({ en: "Do I need prompt engineering skills?" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "faq.q7.a",
+    translations: t({
+      en: "Not at all. Unlike AI-first website builders where you must craft detailed prompts to get usable results, SaaS of SaaS provides predefined structures. You describe what you need, and the AI enhances the content within a fixed architecture. No prompt expertise required.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "cta.badge",
+    translations: t({ en: "Get started" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "cta.title",
+    translations: t({ en: "Your Website Shouldn\u2019t Start With a Prompt." }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "cta.title.accent",
+    translations: t({ en: "It Should Start With a Plan." }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "cta.subtitle",
+    translations: t({
+      en: "Use proven structures, publish faster, and let AI focus on the content instead of rebuilding your website from scratch.",
+    }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "cta.primary",
+    translations: t({ en: "Start Building Free" }),
+  },
+  {
+    namespace: "marketing.structured-vs-ai",
+    key: "cta.secondary",
+    translations: t({ en: "Back to Home" }),
   },
 ];
 
