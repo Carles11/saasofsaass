@@ -8,14 +8,14 @@ interface CtaSectionProps {
 }
 
 export function CtaSection({ translations }: CtaSectionProps) {
-  const title = resolveTranslation(translations, "title", "Ready to Build?");
+  const title = resolveTranslation(translations, "title", "Ready to add websites to your services?");
   const subtitle = resolveTranslation(
     translations,
     "subtitle",
-    "Start your first tenant site in minutes. No credit card required.",
+    "Set up your first client site in under 20 minutes. No credit card, no developer, no nonsense.",
   );
-  const getStarted = resolveTranslation(translations, "cta.get-started", "Get Started Free");
-  const talkSales = resolveTranslation(translations, "cta.talk-sales", "Talk to Sales");
+  const getStarted = resolveTranslation(translations, "cta.get-started", "Create your free account");
+  const talkSales = resolveTranslation(translations, "cta.talk-sales", "Book a demo");
 
   return (
     <section className="px-4 py-16 md:py-24">

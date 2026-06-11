@@ -92,6 +92,20 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   // ── Marketing: Header ───────────────────────────────────────────────────
   {
     namespace: "marketing.header",
+    key: "nav.how-it-works",
+    translations: t({
+      en: "How It Works",
+      es: "Cómo funciona",
+      ca: "Com funciona",
+      fr: "Comment ça marche",
+      de: "So funktioniert's",
+      it: "Come funziona",
+      eu: "Nola funtzionatzen duen",
+      ga: "Como funciona",
+    }),
+  },
+  {
+    namespace: "marketing.header",
     key: "nav.features",
     translations: t({
       en: "Features",
@@ -164,14 +178,14 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.header",
     key: "get-started",
     translations: t({
-      en: "Get Started",
-      es: "Comenzar",
-      ca: "Començar",
-      fr: "Commencer",
-      de: "Loslegen",
-      it: "Inizia",
-      eu: "Hasi",
-      ga: "Comezar",
+      en: "Start for Free",
+      es: "Empieza gratis",
+      ca: "Comença gratis",
+      fr: "Commencer gratuitement",
+      de: "Kostenlos starten",
+      it: "Inizia gratis",
+      eu: "Hasi doan",
+      ga: "Comeza gratis",
     }),
   },
 
@@ -180,7 +194,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "badge",
     translations: t({
-      en: "Now in public beta",
+      en: "Now in public beta — join free",
       es: "Ahora en beta pública",
       ca: "Ara en beta pública",
       fr: "Maintenant en bêta publique",
@@ -194,7 +208,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "title.line1",
     translations: t({
-      en: "Create Professional",
+      en: "Add websites to your",
       es: "Crea sitios web",
       ca: "Crea llocs web",
       fr: "Créez des sites web",
@@ -208,7 +222,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "title.line2",
     translations: t({
-      en: "Websites",
+      en: "professional services.",
       es: "profesionales",
       ca: "professionals",
       fr: "professionnels",
@@ -222,7 +236,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "title.accent",
     translations: t({
-      en: "For Anyone.",
+      en: "Your clients will love it.",
       es: "Para Cualquiera.",
       ca: "Per a Qualsevol.",
       fr: "Pour Tous.",
@@ -236,7 +250,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "subtitle",
     translations: t({
-      en: "You manage the structure, your clients edit the content. Launch unlimited multi-tenant sites — no coding required.",
+      en: "Offer branded, multilingual websites to every client you work with — without hiring a developer or learning to code. You set it up once. They update it forever.",
       es: "Tú gestionas la estructura, tus clientes editan el contenido. Lanza sitios multi-inquilino ilimitados — sin necesidad de programar.",
       ca: "Tu gestiones l'estructura, els teus clients editen el contingut. Llança llocs multi-inquilí il·limitats — sense necessitat de programar.",
       fr: "Vous gérez la structure, vos clients modifient le contenu. Lancez des sites multi-locataires illimités — sans codage.",
@@ -250,7 +264,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "cta.start-building",
     translations: t({
-      en: "Start Building",
+      en: "Start for Free",
       es: "Empezar a construir",
       ca: "Començar a construir",
       fr: "Commencer à créer",
@@ -264,7 +278,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "cta.see-how",
     translations: t({
-      en: "See How It Works",
+      en: "See how it works",
       es: "Ver cómo funciona",
       ca: "Veure com funciona",
       fr: "Voir comment ça marche",
@@ -278,7 +292,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "stat.sites",
     translations: t({
-      en: "Sites Built",
+      en: "Sites launched",
       es: "Sitios creados",
       ca: "Llocs creats",
       fr: "Sites créés",
@@ -292,7 +306,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "stat.languages",
     translations: t({
-      en: "Languages",
+      en: "Languages supported",
       es: "Idiomas",
       ca: "Idiomes",
       fr: "Langues",
@@ -320,7 +334,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "stat.code",
     translations: t({
-      en: "Code Required",
+      en: "Lines of code",
       es: "Código necesario",
       ca: "Codi necessari",
       fr: "Code requis",
@@ -328,6 +342,162 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       it: "Codice richiesto",
       eu: "Kodea behar da",
       ga: "Código necesario",
+    }),
+  },
+
+  // ── Marketing: How It Works ───────────────────────────────────────────
+  {
+    namespace: "marketing.howitworks",
+    key: "badge",
+    translations: t({
+      en: "How It Works",
+      es: "Cómo funciona",
+      ca: "Com funciona",
+      fr: "Comment ça marche",
+      de: "So funktioniert's",
+      it: "Come funziona",
+      eu: "Nola funtzionatzen duen",
+      ga: "Como funciona",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "title",
+    translations: t({
+      en: "Turn website management into a revenue stream",
+      es: "Convierte la gestión web en un flujo de ingresos",
+      ca: "Converteix la gestió web en un flux d'ingressos",
+      fr: "Transformez la gestion de sites web en source de revenus",
+      de: "Verwandle Website-Management in eine Einnahmequelle",
+      it: "Trasforma la gestione dei siti web in un flusso di entrate",
+      eu: "Bihurtu webguneen kudeaketa diru-sarrera iturri",
+      ga: "Converte a xestión web nun fluxo de ingresos",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "subtitle",
+    translations: t({
+      en: "You don't need a team of developers. Just a client who needs a site.",
+      es: "No necesitas un equipo de desarrolladores. Solo un cliente que necesite un sitio web.",
+      ca: "No necessites un equip de desenvolupadors. Només un client que necessiti un lloc web.",
+      fr: "Vous n'avez pas besoin d'une équipe de développeurs. Juste d'un client qui a besoin d'un site.",
+      de: "Du brauchst kein Entwicklerteam. Nur einen Kunden, der eine Website braucht.",
+      it: "Non hai bisogno di un team di sviluppatori. Solo un cliente che ha bisogno di un sito.",
+      eu: "Ez duzu garatzaile talde bat behar. Webgune bat behar duen bezero bat besterik ez.",
+      ga: "Non precisas un equipo de desenvolvedores. Só un cliente que necesite un sitio web.",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.1.title",
+    translations: t({
+      en: "Choose a template",
+      es: "Elige una plantilla",
+      ca: "Tria una plantilla",
+      fr: "Choisissez un modèle",
+      de: "Wähle eine Vorlage",
+      it: "Scegli un modello",
+      eu: "Aukeratu txantiloi bat",
+      ga: "Elixe unha plantilla",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.1.description",
+    translations: t({
+      en: "Pick a layout. Customize colors and fonts. Add your client's logo. You're done.",
+      es: "Elige un diseño. Personaliza colores y fuentes. Añade el logo de tu cliente. Listo.",
+      ca: "Tria un disseny. Personalitza colors i fonts. Afegeix el logotip del teu client. Llest.",
+      fr: "Choisissez une mise en page. Personnalisez couleurs et polices. Ajoutez le logo de votre client. Terminé.",
+      de: "Wähle ein Layout. Passe Farben und Schriftarten an. Füge das Logo deines Kunden hinzu. Fertig.",
+      it: "Scegli un layout. Personalizza colori e caratteri. Aggiungi il logo del tuo cliente. Fatto.",
+      eu: "Aukeratu diseinu bat. Pertsonalizatu koloreak eta letra-tipoak. Gehitu bezeroaren logotipoa. Eginda.",
+      ga: "Elixe un deseño. Personaliza cores e fontes. Engade o logotipo do teu cliente. Listo.",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.2.title",
+    translations: t({
+      en: "Invite your client",
+      es: "Invita a tu cliente",
+      ca: "Convida al teu client",
+      fr: "Invitez votre client",
+      de: "Lade deinen Kunden ein",
+      it: "Invita il tuo cliente",
+      eu: "Gonbidatu bezeroa",
+      ga: "Invita ao teu cliente",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.2.description",
+    translations: t({
+      en: "Add them as an editor of their site. They can add pages, write posts, and upload images on their own.",
+      es: "Añádelos como editores de su sitio. Pueden añadir páginas, escribir artículos y subir imágenes por su cuenta.",
+      ca: "Afegeix-los com a editors del seu lloc. Poden afegir pàgines, escriure articles i pujar imatges pel seu compte.",
+      fr: "Ajoutez-les en tant qu'éditeurs de leur site. Ils peuvent ajouter des pages, écrire des articles et télécharger des images seuls.",
+      de: "Füge sie als Redakteure ihrer Website hinzu. Sie können selbstständig Seiten hinzufügen, Beiträge schreiben und Bilder hochladen.",
+      it: "Aggiungili come editori del loro sito. Possono aggiungere pagine, scrivere articoli e caricare immagini da soli.",
+      eu: "Gehitu editore gisa beren webgunean. Orriak gehitu, mezuak idatzi eta irudiak igo ditzakete beren kabuz.",
+      ga: "Engádeos como editores do seu sitio. Poden engadir páxinas, escribir artigos e subir imaxes pola súa conta.",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.3.title",
+    translations: t({
+      en: "Set up languages",
+      es: "Configura los idiomas",
+      ca: "Configura els idiomes",
+      fr: "Configurez les langues",
+      de: "Sprachen einrichten",
+      it: "Configura le lingue",
+      eu: "Konfiguratu hizkuntzak",
+      ga: "Configura os idiomas",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.3.description",
+    translations: t({
+      en: "Toggle any of our 8 supported languages. AI translates everything — text, blog posts, menus — automatically.",
+      es: "Activa cualquiera de nuestros 8 idiomas. La IA traduce todo — texto, artículos, menús — automáticamente.",
+      ca: "Activa qualsevol dels nostres 8 idiomes. La IA tradueix tot — text, articles, menús — automàticament.",
+      fr: "Activez l'une de nos 8 langues prises en charge. L'IA traduit tout — texte, articles, menus — automatiquement.",
+      de: "Aktiviere eine unserer 8 unterstützten Sprachen. KI übersetzt alles — Texte, Blogbeiträge, Menüs — automatisch.",
+      it: "Attiva una delle nostre 8 lingue supportate. L'IA traduce tutto — testi, articoli, menu — automaticamente.",
+      eu: "Gaitu gure 8 hizkuntza onartuetako edozein. AIak dena itzultzen du — testua, blog mezuak, menuak — automatikoki.",
+      ga: "Activa calquera dos nosos 8 idiomas compatibles. A IA traduce todo — texto, artigos, menús — automaticamente.",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.4.title",
+    translations: t({
+      en: "Go live",
+      es: "Publica",
+      ca: "Publica",
+      fr: "Mettez en ligne",
+      de: "Live schalten",
+      it: "Pubblica",
+      eu: "Argitaratu",
+      ga: "Publica",
+    }),
+  },
+  {
+    namespace: "marketing.howitworks",
+    key: "step.4.description",
+    translations: t({
+      en: "Your client gets a branded subdomain (or their own domain). You bill them monthly. We handle the rest.",
+      es: "Tu cliente recibe un subdominio personalizado (o su propio dominio). Les facturas mensualmente. Nosotros nos encargamos del resto.",
+      ca: "El teu client rep un subdomini personalitzat (o el seu propi domini). Els factures mensualment. Nosaltres ens encarreguem de la resta.",
+      fr: "Votre client reçoit un sous-domaine personnalisé (ou son propre domaine). Vous le facturez mensuellement. Nous gérons le reste.",
+      de: "Dein Kunde bekommt eine eigene Subdomain (oder eine eigene Domain). Du stellst ihm monatlich in Rechnung. Wir kümmern uns um den Rest.",
+      it: "Il tuo cliente riceve un sottodominio personalizzato (o il proprio dominio). Lo fatturi mensilmente. Noi ci occupiamo del resto.",
+      eu: "Bezeroak azpidomeinu pertsonalizatua (edo bere domeinua) jasotzen du. Hilero fakturatzen diezu. Guk gainerakoa kudeatzen dugu.",
+      ga: "O teu cliente recibe un subdominio personalizado (ou o seu propio dominio). Factúraslles mensualmente. Nós encargámonos do resto.",
     }),
   },
 
@@ -350,7 +520,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.features",
     key: "title",
     translations: t({
-      en: "Everything You Need",
+      en: "Built for the rest of us",
       es: "Todo lo que necesitas",
       ca: "Tot el que necessites",
       fr: "Tout ce dont vous avez besoin",
@@ -364,7 +534,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.features",
     key: "subtitle",
     translations: t({
-      en: "From multi-tenant isolation to AI-powered translations — built for agencies and freelancers.",
+      en: "A full website factory for non-technical professionals. No code, no stress, no overhead.",
       es: "Desde aislamiento multi-inquilino hasta traducciones con IA — construido para agencias y freelancers.",
       ca: "Des d'aïllament multi-inquilí fins a traduccions amb IA — construït per a agències i freelancers.",
       fr: "De l'isolement multi-locataire aux traductions par IA — conçu pour les agences et les freelances.",
@@ -377,73 +547,73 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.features",
     key: "multi-tenant.title",
-    translations: t({ en: "Multi-Tenant" }),
+    translations: t({ en: "One platform, unlimited clients" }),
   },
   {
     namespace: "marketing.features",
     key: "multi-tenant.description",
     translations: t({
-      en: "Spin up a new site for every client. Fully isolated with its own branding, content, and languages.",
+      en: "Create a separate website for every client you have. Each one is fully isolated — its own content, branding, and languages. Add a new client in minutes.",
     }),
   },
   {
     namespace: "marketing.features",
     key: "role-based.title",
-    translations: t({ en: "Role-Based Access" }),
+    translations: t({ en: "You control the structure" }),
   },
   {
     namespace: "marketing.features",
     key: "role-based.description",
     translations: t({
-      en: "You control the structure. Invite editors to manage content without touching layout or settings.",
+      en: "Set up the site once. Then invite your client as an editor so they can update text, photos, and blog posts — without ever touching layout or settings.",
     }),
   },
   {
     namespace: "marketing.features",
     key: "ai-translations.title",
-    translations: t({ en: "AI Translations" }),
+    translations: t({ en: "Go multilingual in one click" }),
   },
   {
     namespace: "marketing.features",
     key: "ai-translations.description",
     translations: t({
-      en: "One click translates your entire site. Enable any language and let Gemini handle the rest.",
+      en: "Enable any language and let AI translate the entire site automatically. Perfect if your clients serve diverse communities or operate across borders.",
     }),
   },
   {
     namespace: "marketing.features",
     key: "templates.title",
-    translations: t({ en: "Template Presets" }),
+    translations: t({ en: "Pre-built templates" }),
   },
   {
     namespace: "marketing.features",
     key: "templates.description",
     translations: t({
-      en: "Choose from a growing library of appearance presets — modern, classic, and more.",
+      en: "Choose a professional layout for each client. You can customize branding, colors, and fonts to match their identity.",
     }),
   },
   {
     namespace: "marketing.features",
     key: "domains.title",
-    translations: t({ en: "Custom Domains" }),
+    translations: t({ en: "Custom domains included" }),
   },
   {
     namespace: "marketing.features",
     key: "domains.description",
     translations: t({
-      en: "Every tenant gets a subdomain or a custom domain of their own. Full DNS support included.",
+      en: "Every client gets a free subdomain to start. Connect their own domain in minutes — SSL and hosting included.",
     }),
   },
   {
     namespace: "marketing.features",
     key: "no-code.title",
-    translations: t({ en: "No Code" }),
+    translations: t({ en: "Let your clients take over" }),
   },
   {
     namespace: "marketing.features",
     key: "no-code.description",
     translations: t({
-      en: "Your clients edit content through a clean dashboard. No coding, no confusion, no support tickets.",
+      en: "Once you hand over the keys, clients manage their own content. No training needed, no more support calls about broken layouts.",
     }),
   },
 
@@ -466,7 +636,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.pricing",
     key: "title",
     translations: t({
-      en: "Simple, Transparent",
+      en: "Plans that grow with your practice.",
       es: "Simple, Transparente",
       ca: "Simple, Transparent",
       fr: "Simple, Transparent",
@@ -480,7 +650,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.pricing",
     key: "subtitle",
     translations: t({
-      en: "Start free. Scale as you grow. No hidden fees.",
+      en: "Start free. Add sites as your client list grows.",
       es: "Empieza gratis. Escala a medida que creces. Sin tarifas ocultas.",
       ca: "Comença gratis. Escala a mesura que creixes. Sense tarifes ocultes.",
       fr: "Commencez gratuitement. Évoluez au fur et à mesure. Sans frais cachés.",
@@ -498,12 +668,12 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.pricing",
     key: "tier.starter.description",
-    translations: t({ en: "Perfect for testing the waters." }),
+    translations: t({ en: "For professionals just starting out." }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.starter.feature.0",
-    translations: t({ en: "Up to 3 tenant sites" }),
+    translations: t({ en: "Up to 3 client sites" }),
   },
   {
     namespace: "marketing.pricing",
@@ -513,12 +683,12 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.pricing",
     key: "tier.starter.feature.2",
-    translations: t({ en: "AI translations" }),
+    translations: t({ en: "AI translations (8 languages)" }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.starter.feature.3",
-    translations: t({ en: "Basic support" }),
+    translations: t({ en: "Custom branding per site" }),
   },
   {
     namespace: "marketing.pricing",
@@ -528,17 +698,17 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.pricing",
     key: "tier.professional.description",
-    translations: t({ en: "For growing agencies." }),
+    translations: t({ en: "For growing practices and agencies." }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.professional.feature.0",
-    translations: t({ en: "Up to 15 tenant sites" }),
+    translations: t({ en: "Up to 15 client sites" }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.professional.feature.1",
-    translations: t({ en: "Custom domains" }),
+    translations: t({ en: "Custom domains for each client" }),
   },
   {
     namespace: "marketing.pricing",
@@ -548,7 +718,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.pricing",
     key: "tier.professional.feature.3",
-    translations: t({ en: "Team members" }),
+    translations: t({ en: "Team member access" }),
   },
   {
     namespace: "marketing.pricing",
@@ -558,27 +728,27 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.pricing",
     key: "tier.enterprise.description",
-    translations: t({ en: "For large-scale operations." }),
+    translations: t({ en: "For agencies managing at scale." }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.enterprise.feature.0",
-    translations: t({ en: "Unlimited tenant sites" }),
+    translations: t({ en: "Unlimited client sites" }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.enterprise.feature.1",
-    translations: t({ en: "White-label" }),
+    translations: t({ en: "White-label platform" }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.enterprise.feature.2",
-    translations: t({ en: "Dedicated support" }),
+    translations: t({ en: "Dedicated account support" }),
   },
   {
     namespace: "marketing.pricing",
     key: "tier.enterprise.feature.3",
-    translations: t({ en: "Early access" }),
+    translations: t({ en: "Early access to new features" }),
   },
   {
     namespace: "marketing.pricing",
@@ -597,12 +767,30 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.pricing",
     key: "month",
-    translations: t({ en: "/month" }),
+    translations: t({
+      en: "/month",
+      es: "/mes",
+      ca: "/mes",
+      fr: "/mois",
+      de: "/Monat",
+      it: "/mese",
+      eu: "/hilabete",
+      ga: "/mes",
+    }),
   },
   {
     namespace: "marketing.pricing",
     key: "cta",
-    translations: t({ en: "Choose {name}" }),
+    translations: t({
+      en: "Get started with {name}",
+      es: "Elige {name}",
+      ca: "Tria {name}",
+      fr: "Choisir {name}",
+      de: "Wähle {name}",
+      it: "Scegli {name}",
+      eu: "Aukeratu {name}",
+      ga: "Elixe {name}",
+    }),
   },
 
   // ── Marketing: Testimonials ──────────────────────────────────────────────
@@ -624,7 +812,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.testimonials",
     key: "title",
     translations: t({
-      en: "Loved by Builders",
+      en: "Trusted by professionals across industries",
       es: "Amado por los creadores",
       ca: "Estimat pels creadors",
       fr: "Adoré par les créateurs",
@@ -633,6 +821,93 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       eu: "Sortzaileek maitea",
       ga: "Amado polos creadores",
     }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "subtitle",
+    translations: t({
+      en: "From social workers to wedding planners — here's what they say.",
+      es: "De trabajadores sociales a organizadores de bodas — esto es lo que dicen.",
+      ca: "De treballadors socials a organitzadors de casaments — això és el que diuen.",
+      fr: "Des travailleurs sociaux aux organisateurs de mariages — voici ce qu'ils disent.",
+      de: "Von Sozialarbeitern bis zu Hochzeitsplanern — das sagen sie.",
+      it: "Da assistenti sociali a organizzatori di matrimoni — ecco cosa dicono.",
+      eu: "Gizarte langileetatik ezkontza antolatzaileetara — hau diote.",
+      ga: "De traballadores sociais a organizadores de vodas — isto é o que din.",
+    }),
+  },
+
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.1.quote",
+    translations: t({
+      en: "I added website management to my coaching offer overnight. Clients pay me for it and I don't have to touch the code.",
+      es: "Lanzamos 12 sitios de clientes en un fin de semana. La configuración multi-inquilino cambia las reglas del juego.",
+      ca: "Vam llançar 12 llocs de clients en un cap de setmana. La configuració multi-inquilí canvia les regles del joc.",
+      fr: "Nous avons lancé 12 sites clients en un week-end. La configuration multi-locataire change la donne.",
+      de: "Wir haben 12 Kundenseiten an einem Wochenende gestartet. Das Multi-Mandanten-Setup ist ein Game-Changer.",
+      it: "Abbiamo lanciato 12 siti clienti in un fine settimana. La configurazione multi-tenant è un punto di svolta.",
+      eu: "12 bezeroen webgune jarri genituen martxan asteburu batean. Multi-errentari konfigurazioa joko-aldatzailea da.",
+      ga: "Lanzamos 12 sitios de clientes nunha fin de semana. A configuración multi-inquilino cambia as regras do xogo.",
+    }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.1.author",
+    translations: t({ en: "Sara Méndez" }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.1.role",
+    translations: t({ en: "Business Coach" }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.2.quote",
+    translations: t({
+      en: "Every family I work with gets a proper site in their language. The AI translation is genuinely impressive.",
+      es: "Las traducciones con IA nos ahorraron meses de trabajo. A nuestros clientes les encanta tener sus sitios en 8 idiomas.",
+      ca: "Les traduccions amb IA ens van estalviar mesos de feina. Als nostres clients els encanta tenir els seus llocs en 8 idiomes.",
+      fr: "Les traductions par IA nous ont fait gagner des mois de travail. Nos clients adorent avoir leurs sites en 8 langues.",
+      de: "KI-Übersetzungen allein haben uns Monate Arbeit erspart. Unsere Kunden lieben es, ihre Websites in 8 Sprachen zu haben.",
+      it: "Le traduzioni con IA ci hanno fatto risparmiare mesi di lavoro. I nostri clienti amano avere i loro siti in 8 lingue.",
+      eu: "AI bidezko itzulpenek hilabeteetako lana aurrezteaz gain. Gure bezeroek beren webguneak 8 hizkuntzatan izatea maite dute.",
+      ga: "As traducións con IA aforráronnos meses de traballo. Aos nosos clientes encántalles ter os seus sitios en 8 idiomas.",
+    }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.2.author",
+    translations: t({ en: "James Carter" }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.2.role",
+    translations: t({ en: "Social Worker" }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.3.quote",
+    translations: t({
+      en: "I manage 14 client sites from one dashboard. My clients update their own content. Zero support calls.",
+      es: "Mis editores pueden actualizar el contenido sin romper el diseño. Cero llamadas de soporte desde el lanzamiento.",
+      ca: "Els meus editors poden actualitzar el contingut sense trencar el disseny. Zero trucades de suport des del llançament.",
+      fr: "Mes rédacteurs peuvent mettre à jour le contenu sans casser le design. Zéro appel de support depuis le lancement.",
+      de: "Meine Redakteure können Inhalte aktualisieren, ohne das Design zu beeinträchtigen. Keine Support-Anrufe seit dem Start.",
+      it: "I miei editor possono aggiornare i contenuti senza rompere il design. Zero chiamate di supporto dal lancio.",
+      eu: "Nire editoreek edukia eguneratu dezakete diseinua hautsi gabe. Zero laguntza-dei abian jarri zenetik.",
+      ga: "Os meus editores poden actualizar o contido sen romper o deseño. Cero chamadas de soporte dende o lanzamento.",
+    }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.3.author",
+    translations: t({ en: "Claudia Reyes" }),
+  },
+  {
+    namespace: "marketing.testimonials",
+    key: "testimonial.3.role",
+    translations: t({ en: "Freelance Consultant" }),
   },
 
   // ── Marketing: FAQ ──────────────────────────────────────────────────────
@@ -654,7 +929,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.faq",
     key: "title",
     translations: t({
-      en: "Frequently Asked",
+      en: "Questions professionals ask",
       es: "Preguntas frecuentes",
       ca: "Preguntes freqüents",
       fr: "Questions fréquentes",
@@ -667,61 +942,61 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   {
     namespace: "marketing.faq",
     key: "q1.question",
-    translations: t({ en: "What is a multi-tenant website factory?" }),
+    translations: t({ en: "Do I need to be a developer to use this?" }),
   },
   {
     namespace: "marketing.faq",
     key: "q1.answer",
     translations: t({
-      en: "It means you run one platform that serves many clients. Each client gets their own branded, multilingual site — but you manage everything from a single dashboard.",
+      en: "Not at all. If you can use a word processor, you can use SoSS. You set up the site structure once using our visual builder, and your client handles everything after that.",
     }),
   },
   {
     namespace: "marketing.faq",
     key: "q2.question",
-    translations: t({ en: "Do my clients need to code?" }),
+    translations: t({ en: "How does my client edit their site?" }),
   },
   {
     namespace: "marketing.faq",
     key: "q2.answer",
     translations: t({
-      en: "No. Your clients edit content through a simple interface. They never touch code, layout, or settings.",
+      en: "You invite them as an editor. They get a clean, simple dashboard where they can update text, upload images, and write blog posts — without being able to break anything.",
     }),
   },
   {
     namespace: "marketing.faq",
     key: "q3.question",
-    translations: t({ en: "How do AI translations work?" }),
+    translations: t({ en: "Can I offer this as part of my services?" }),
   },
   {
     namespace: "marketing.faq",
     key: "q3.answer",
     translations: t({
-      en: "Enable a language for any tenant. Gemini 2.5 translates every block and piece of content automatically. You can review and edit before publishing.",
+      en: "Absolutely. Many of our users charge their clients a monthly fee for website management. SoSS works behind the scenes — your client just sees a site that looks like yours.",
     }),
   },
   {
     namespace: "marketing.faq",
     key: "q4.question",
-    translations: t({ en: "Can I use my own domain?" }),
+    translations: t({ en: "What languages can a site be in?" }),
   },
   {
     namespace: "marketing.faq",
     key: "q4.answer",
     translations: t({
-      en: "Yes. Every tenant can have a custom domain or a subdomain. DNS setup is handled through your dashboard.",
+      en: "We support 8 languages out of the box: English, Spanish, Catalan, French, German, Italian, Basque, and Galician. Add a new language in one click and AI translates everything automatically.",
     }),
   },
   {
     namespace: "marketing.faq",
     key: "q5.question",
-    translations: t({ en: "Is there a free trial?" }),
+    translations: t({ en: "Can each client have their own domain?" }),
   },
   {
     namespace: "marketing.faq",
     key: "q5.answer",
     translations: t({
-      en: "Yes. Start with the Starter plan and build up to 3 sites at no cost during the trial period.",
+      en: "Yes. Every site gets a free subdomain to start, and you can connect a custom domain from your dashboard in minutes.",
     }),
   },
 
@@ -730,7 +1005,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.cta",
     key: "title",
     translations: t({
-      en: "Ready to Build?",
+      en: "Ready to add websites to your services?",
       es: "¿Listo para construir?",
       ca: "Llest per construir?",
       fr: "Prêt à créer ?",
@@ -744,7 +1019,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.cta",
     key: "subtitle",
     translations: t({
-      en: "Start your first tenant site in minutes. No credit card required.",
+      en: "Set up your first client site in under 20 minutes. No credit card, no developer, no nonsense.",
       es: "Crea tu primer sitio multi-inquilino en minutos. Sin necesidad de tarjeta de crédito.",
       ca: "Crea el teu primer lloc multi-inquilí en minuts. Sense necessitat de targeta de crèdit.",
       fr: "Créez votre premier site multi-locataire en minutes. Aucune carte de crédit requise.",
@@ -758,7 +1033,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.cta",
     key: "cta.get-started",
     translations: t({
-      en: "Get Started Free",
+      en: "Create your free account",
       es: "Empieza gratis",
       ca: "Comença gratis",
       fr: "Commencez gratuitement",
@@ -772,7 +1047,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.cta",
     key: "cta.talk-sales",
     translations: t({
-      en: "Talk to Sales",
+      en: "Book a demo",
       es: "Hablar con ventas",
       ca: "Parlar amb vendes",
       fr: "Parler aux ventes",
@@ -786,8 +1061,189 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   // ── Marketing: Footer ───────────────────────────────────────────────────
   {
     namespace: "marketing.footer",
+    key: "link.features",
+    translations: t({
+      en: "Features",
+      es: "Características",
+      ca: "Característiques",
+      fr: "Fonctionnalités",
+      de: "Funktionen",
+      it: "Funzionalità",
+      eu: "Ezaugarriak",
+      ga: "Características",
+    }),
+  },
+  {
+    namespace: "marketing.footer",
+    key: "link.pricing",
+    translations: t({
+      en: "Pricing",
+      es: "Precios",
+      ca: "Preus",
+      fr: "Tarifs",
+      de: "Preise",
+      it: "Prezzi",
+      eu: "Prezioak",
+      ga: "Prezos",
+    }),
+  },
+  {
+    namespace: "marketing.footer",
+    key: "link.testimonials",
+    translations: t({
+      en: "Testimonials",
+      es: "Testimonios",
+      ca: "Testimonis",
+      fr: "Témoignages",
+      de: "Erfahrungsberichte",
+      it: "Testimonianze",
+      eu: "Testigantzak",
+      ga: "Testemuños",
+    }),
+  },
+  {
+    namespace: "marketing.footer",
+    key: "link.faq",
+    translations: t({
+      en: "FAQ",
+      es: "Preguntas frecuentes",
+      ca: "Preguntes freqüents",
+      fr: "FAQ",
+      de: "FAQ",
+      it: "FAQ",
+      eu: "OHO",
+      ga: "Preguntas frecuentes",
+    }),
+  },
+  {
+    namespace: "marketing.footer",
+    key: "tagline",
+    translations: t({
+      en: "Websites for your clients. Managed by you.",
+      es: "Sitios web para tus clientes. Gestionados por ti.",
+      ca: "Llocs web per als teus clients. Gestionats per tu.",
+      fr: "Des sites web pour vos clients. Gérés par vous.",
+      de: "Websites für deine Kunden. Von dir verwaltet.",
+      it: "Siti web per i tuoi clienti. Gestiti da te.",
+      eu: "Webguneak zure bezeroentzat. Zuk kudeatuak.",
+      ga: "Sitios web para os teus clientes. Xestionados por ti.",
+    }),
+  },
+  {
+    namespace: "marketing.footer",
     key: "copyright",
-    translations: t({ en: "© {year} SoSS Engine. All rights reserved." }),
+    translations: t({
+      en: "© {year} SoSS Engine. All rights reserved.",
+      es: "© {year} SoSS Engine. Todos los derechos reservados.",
+      ca: "© {year} SoSS Engine. Tots els drets reservats.",
+      fr: "© {year} SoSS Engine. Tous droits réservés.",
+      de: "© {year} SoSS Engine. Alle Rechte vorbehalten.",
+      it: "© {year} SoSS Engine. Tutti i diritti riservati.",
+      eu: "© {year} SoSS Engine. Eskubide guztiak erreserbatuak.",
+      ga: "© {year} SoSS Engine. Todos os dereitos reservados.",
+    }),
+  },
+
+  // ── Marketing: Auth ─────────────────────────────────────────────────────
+  {
+    namespace: "marketing.auth",
+    key: "sign-in.title",
+    translations: t({
+      en: "Sign In",
+      es: "Iniciar sesión",
+      ca: "Iniciar sessió",
+      fr: "Connexion",
+      de: "Anmelden",
+      it: "Accedi",
+      eu: "Hasi saioa",
+      ga: "Iniciar sesión",
+    }),
+  },
+  {
+    namespace: "marketing.auth",
+    key: "sign-up.title",
+    translations: t({
+      en: "Create Account",
+      es: "Crear cuenta",
+      ca: "Crear compte",
+      fr: "Créer un compte",
+      de: "Konto erstellen",
+      it: "Crea account",
+      eu: "Sortu kontua",
+      ga: "Crear conta",
+    }),
+  },
+  {
+    namespace: "marketing.auth",
+    key: "login.title",
+    translations: t({
+      en: "Sign In",
+      es: "Iniciar sesión",
+      ca: "Iniciar sessió",
+      fr: "Connexion",
+      de: "Anmelden",
+      it: "Accedi",
+      eu: "Hasi saioa",
+      ga: "Iniciar sesión",
+    }),
+  },
+  {
+    namespace: "marketing.auth",
+    key: "register.title",
+    translations: t({
+      en: "Create Account",
+      es: "Crear cuenta",
+      ca: "Crear compte",
+      fr: "Créer un compte",
+      de: "Konto erstellen",
+      it: "Crea account",
+      eu: "Sortu kontua",
+      ga: "Crear conta",
+    }),
+  },
+  {
+    namespace: "marketing.auth",
+    key: "forgot-password.title",
+    translations: t({
+      en: "Reset Password",
+      es: "Restablecer contraseña",
+      ca: "Restablir contrasenya",
+      fr: "Réinitialiser le mot de passe",
+      de: "Passwort zurücksetzen",
+      it: "Reimposta password",
+      eu: "Pasahitza berrezarri",
+      ga: "Restablecer contrasinal",
+    }),
+  },
+
+  // ── Marketing: Meta ──────────────────────────────────────────────────────
+  {
+    namespace: "marketing.meta",
+    key: "title",
+    translations: t({
+      en: "SoSS Engine — Website Factory for Professionals",
+      es: "SoSS Engine — Fábrica de Sitios Web Multi-Inquilino",
+      ca: "SoSS Engine — Fàbrica de Llocs Web Multi-Inquilí",
+      fr: "SoSS Engine — Usine de Sites Web Multi-Locataire",
+      de: "SoSS Engine — Multi-Mandanten Website-Fabrik",
+      it: "SoSS Engine — Fabbrica di Siti Web Multi-Tenant",
+      eu: "SoSS Engine — Webgune Fabrika Multi-Errentari",
+      ga: "SoSS Engine — Fábrica de Sitios Web Multi-Inquilino",
+    }),
+  },
+  {
+    namespace: "marketing.meta",
+    key: "description",
+    translations: t({
+      en: "Create unlimited professional websites for your clients. No coding needed. You manage the structure, your clients edit the content.",
+      es: "Crea sitios web profesionales ilimitados para tus clientes. Sin necesidad de programar. Tú gestionas la estructura, tus clientes editan el contenido.",
+      ca: "Crea llocs web professionals il·limitats per als teus clients. Sense necessitat de programar. Tu gestiones l'estructura, els teus clients editen el contingut.",
+      fr: "Créez des sites web professionnels illimités pour vos clients. Sans codage. Vous gérez la structure, vos clients modifient le contenu.",
+      de: "Erstellen Sie unbegrenzt professionelle Websites für Ihre Kunden. Ohne Programmierung. Sie verwalten die Struktur, Ihre Kunden bearbeiten den Inhalt.",
+      it: "Crea siti web professionali illimitati per i tuoi clienti. Senza codice. Tu gestisci la struttura, i tuoi clienti modificano i contenuti.",
+      eu: "Sortu webgune profesional mugagabeak zure bezeroentzat. Koderik gabe. Zuk egitura kudeatzen duzu, zure bezeroek edukia editatzen dute.",
+      ga: "Crea sitios web profesionais ilimitados para os teus clientes. Sen necesidade de programar. Ti xestionas a estrutura, os teus clientes editan o contido.",
+    }),
   },
 
   // ── Dashboard: Main page ────────────────────────────────────────────────

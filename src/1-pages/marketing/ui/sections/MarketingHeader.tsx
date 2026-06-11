@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
 import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
@@ -34,9 +35,21 @@ interface MarketingHeaderProps {
 
 export function MarketingHeader({ translations }: MarketingHeaderProps) {
   const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  function handleLocaleChange(newLocale: string) {
+    const segments = pathname.split("/");
+    segments[1] = newLocale;
+    router.push(segments.join("/") || "/");
+  }
+
   const navLinks = [
+    {
+      label: resolveTranslation(translations, "nav.how-it-works", "How It Works"),
+      href: "#how-it-works",
+    },
     {
       label: resolveTranslation(translations, "nav.features", "Features"),
       href: "#features",
@@ -77,11 +90,11 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Select defaultValue={locale}>
+          <Select defaultValue={locale} onValueChange={handleLocaleChange}>
             <SelectTrigger className="h-9 w-18 text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper">
               {SUPPORTED_LOCALES.map((l) => (
                 <SelectItem key={l} value={l} className="text-xs">
                   {LOCALE_LABELS[l] ?? l.toUpperCase()}

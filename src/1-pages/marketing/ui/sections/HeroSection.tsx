@@ -5,20 +5,21 @@ import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/transla
 
 interface HeroSectionProps {
   translations?: TranslationDict;
+  locale?: string;
 }
 
-export function HeroSection({ translations }: HeroSectionProps) {
-  const badge = resolveTranslation(translations, "badge", "Now in public beta");
+export function HeroSection({ translations, locale }: HeroSectionProps) {
+  const badge = resolveTranslation(translations, "badge", "Now in public beta — join free");
   const titleLine1 = resolveTranslation(translations, "title.line1", "Create Professional");
   const titleLine2 = resolveTranslation(translations, "title.line2", "Websites");
   const titleAccent = resolveTranslation(translations, "title.accent", "For Anyone.");
   const subtitle = resolveTranslation(
     translations,
     "subtitle",
-    "You manage the structure, your clients edit the content. Launch unlimited multi-tenant sites — no coding required.",
+    "Offer branded, multilingual websites to every client you work with — without hiring a developer or learning to code. You set it up once. They update it forever.",
   );
-  const startBuilding = resolveTranslation(translations, "cta.start-building", "Start Building");
-  const seeHow = resolveTranslation(translations, "cta.see-how", "See How It Works");
+  const startBuilding = resolveTranslation(translations, "cta.start-building", "Start for Free");
+  const seeHow = resolveTranslation(translations, "cta.see-how", "See how it works");
 
   const stats = [
     {
@@ -58,7 +59,7 @@ export function HeroSection({ translations }: HeroSectionProps) {
         </p>
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Button size="lg" asChild>
-            <Link href="/">
+            <Link href={`/${locale}/auth/sign-up`}>
               {startBuilding}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

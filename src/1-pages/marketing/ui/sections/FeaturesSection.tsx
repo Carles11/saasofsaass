@@ -7,44 +7,44 @@ const FEATURE_DEFS = [
   {
     id: "multi-tenant",
     icon: Layers,
-    fallbackTitle: "Multi-Tenant",
+    fallbackTitle: "One platform, unlimited clients",
     fallbackDescription:
-      "Spin up a new site for every client. Fully isolated with its own branding, content, and languages.",
+      "Create a separate website for every client you have. Each one is fully isolated — its own content, branding, and languages. Add a new client in minutes.",
   },
   {
     id: "role-based",
     icon: Users,
-    fallbackTitle: "Role-Based Access",
+    fallbackTitle: "You control the structure",
     fallbackDescription:
-      "You control the structure. Invite editors to manage content without touching layout or settings.",
+      "Set up the site once. Then invite your client as an editor so they can update text, photos, and blog posts — without ever touching layout or settings.",
   },
   {
     id: "ai-translations",
     icon: Languages,
-    fallbackTitle: "AI Translations",
+    fallbackTitle: "Go multilingual in one click",
     fallbackDescription:
-      "One click translates your entire site. Enable any language and let Gemini handle the rest.",
+      "Enable any language and let AI translate the entire site automatically. Perfect if your clients serve diverse communities or operate across borders.",
   },
   {
     id: "templates",
     icon: Palette,
-    fallbackTitle: "Template Presets",
+    fallbackTitle: "Pre-built templates",
     fallbackDescription:
-      "Choose from a growing library of appearance presets — modern, classic, and more.",
+      "Choose a professional layout for each client. You can customize branding, colors, and fonts to match their identity.",
   },
   {
     id: "domains",
     icon: Globe,
-    fallbackTitle: "Custom Domains",
+    fallbackTitle: "Custom domains included",
     fallbackDescription:
-      "Every tenant gets a subdomain or a custom domain of their own. Full DNS support included.",
+      "Every client gets a free subdomain to start. Connect their own domain in minutes — SSL and hosting included.",
   },
   {
     id: "no-code",
     icon: Zap,
-    fallbackTitle: "No Code",
+    fallbackTitle: "Let your clients take over",
     fallbackDescription:
-      "Your clients edit content through a clean dashboard. No coding, no confusion, no support tickets.",
+      "Once you hand over the keys, clients manage their own content. No training needed, no more support calls about broken layouts.",
   },
 ];
 
@@ -54,11 +54,11 @@ interface FeaturesSectionProps {
 
 export function FeaturesSection({ translations }: FeaturesSectionProps) {
   const badge = resolveTranslation(translations, "badge", "Features");
-  const title = resolveTranslation(translations, "title", "Everything You Need");
+  const title = resolveTranslation(translations, "title", "Built for the rest of us");
   const subtitle = resolveTranslation(
     translations,
     "subtitle",
-    "From multi-tenant isolation to AI-powered translations — built for agencies and freelancers.",
+    "A full website factory for non-technical professionals. No code, no stress, no overhead.",
   );
 
   const features = FEATURE_DEFS.map((feature) => ({

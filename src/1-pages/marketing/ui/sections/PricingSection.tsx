@@ -10,11 +10,11 @@ interface PricingSectionProps {
 
 export function PricingSection({ translations }: PricingSectionProps) {
   const badge = resolveTranslation(translations, "badge", "Pricing");
-  const title = resolveTranslation(translations, "title", "Simple, Transparent");
+  const title = resolveTranslation(translations, "title", "Plans that grow with your practice.");
   const subtitle = resolveTranslation(
     translations,
     "subtitle",
-    "Start free. Scale as you grow. No hidden fees.",
+    "Start free. Add sites as your client list grows.",
   );
   const popularBadge = resolveTranslation(translations, "popular-badge", "Most Popular");
   const monthLabel = resolveTranslation(translations, "month", "/month");
@@ -26,13 +26,13 @@ export function PricingSection({ translations }: PricingSectionProps) {
       description: resolveTranslation(
         translations,
         "tier.starter.description",
-        "Perfect for testing the waters.",
+        "For professionals just starting out.",
       ),
       features: [
-        resolveTranslation(translations, "tier.starter.feature.0", "Up to 3 tenant sites"),
+        resolveTranslation(translations, "tier.starter.feature.0", "Up to 3 client sites"),
         resolveTranslation(translations, "tier.starter.feature.1", "All block types"),
-        resolveTranslation(translations, "tier.starter.feature.2", "AI translations"),
-        resolveTranslation(translations, "tier.starter.feature.3", "Basic support"),
+        resolveTranslation(translations, "tier.starter.feature.2", "AI translations (8 languages)"),
+        resolveTranslation(translations, "tier.starter.feature.3", "Custom branding per site"),
       ],
     },
     {
@@ -41,13 +41,13 @@ export function PricingSection({ translations }: PricingSectionProps) {
       description: resolveTranslation(
         translations,
         "tier.professional.description",
-        "For growing agencies.",
+        "For growing practices and agencies.",
       ),
       features: [
-        resolveTranslation(translations, "tier.professional.feature.0", "Up to 15 tenant sites"),
-        resolveTranslation(translations, "tier.professional.feature.1", "Custom domains"),
+        resolveTranslation(translations, "tier.professional.feature.0", "Up to 15 client sites"),
+        resolveTranslation(translations, "tier.professional.feature.1", "Custom domains for each client"),
         resolveTranslation(translations, "tier.professional.feature.2", "Priority support"),
-        resolveTranslation(translations, "tier.professional.feature.3", "Team members"),
+        resolveTranslation(translations, "tier.professional.feature.3", "Team member access"),
       ],
       popular: true,
     },
@@ -57,13 +57,13 @@ export function PricingSection({ translations }: PricingSectionProps) {
       description: resolveTranslation(
         translations,
         "tier.enterprise.description",
-        "For large-scale operations.",
+        "For agencies managing at scale.",
       ),
       features: [
-        resolveTranslation(translations, "tier.enterprise.feature.0", "Unlimited tenant sites"),
-        resolveTranslation(translations, "tier.enterprise.feature.1", "White-label"),
-        resolveTranslation(translations, "tier.enterprise.feature.2", "Dedicated support"),
-        resolveTranslation(translations, "tier.enterprise.feature.3", "Early access"),
+        resolveTranslation(translations, "tier.enterprise.feature.0", "Unlimited client sites"),
+        resolveTranslation(translations, "tier.enterprise.feature.1", "White-label platform"),
+        resolveTranslation(translations, "tier.enterprise.feature.2", "Dedicated account support"),
+        resolveTranslation(translations, "tier.enterprise.feature.3", "Early access to new features"),
       ],
     },
   ];
@@ -106,7 +106,7 @@ export function PricingSection({ translations }: PricingSectionProps) {
               </CardContent>
               <CardFooter>
                 <Button className="w-full" variant={tier.popular ? "default" : "outline"}>
-                  {resolveTranslation(translations, "cta", "Choose {name}", { name: tier.name })}
+                  {resolveTranslation(translations, "cta", "Get started with {name}", { name: tier.name })}
                 </Button>
               </CardFooter>
             </Card>

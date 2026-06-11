@@ -7,50 +7,50 @@ interface FaqSectionProps {
 
 export function FaqSection({ translations }: FaqSectionProps) {
   const badge = resolveTranslation(translations, "badge", "FAQ");
-  const title = resolveTranslation(translations, "title", "Frequently Asked");
+  const title = resolveTranslation(translations, "title", "Questions professionals ask");
   const faqs = [
     {
       q: resolveTranslation(
         translations,
         "q1.question",
-        "What is a multi-tenant website factory?",
+        "Do I need to be a developer to use this?",
       ),
       a: resolveTranslation(
         translations,
         "q1.answer",
-        "It means you run one platform that serves many clients. Each client gets their own branded, multilingual site — but you manage everything from a single dashboard.",
+        "Not at all. If you can use a word processor, you can use SoSS. You set up the site structure once using our visual builder, and your client handles everything after that.",
       ),
     },
     {
-      q: resolveTranslation(translations, "q2.question", "Do my clients need to code?"),
+      q: resolveTranslation(translations, "q2.question", "How does my client edit their site?"),
       a: resolveTranslation(
         translations,
         "q2.answer",
-        "No. Your clients edit content through a simple interface. They never touch code, layout, or settings.",
+        "You invite them as an editor. They get a clean, simple dashboard where they can update text, upload images, and write blog posts — without being able to break anything.",
       ),
     },
     {
-      q: resolveTranslation(translations, "q3.question", "How do AI translations work?"),
+      q: resolveTranslation(translations, "q3.question", "Can I offer this as part of my services?"),
       a: resolveTranslation(
         translations,
         "q3.answer",
-        "Enable a language for any tenant. Gemini 2.5 translates every block and piece of content automatically. You can review and edit before publishing.",
+        "Absolutely. Many of our users charge their clients a monthly fee for website management. SoSS works behind the scenes — your client just sees a site that looks like yours.",
       ),
     },
     {
-      q: resolveTranslation(translations, "q4.question", "Can I use my own domain?"),
+      q: resolveTranslation(translations, "q4.question", "What languages can a site be in?"),
       a: resolveTranslation(
         translations,
         "q4.answer",
-        "Yes. Every tenant can have a custom domain or a subdomain. DNS setup is handled through your dashboard.",
+        "We support 8 languages out of the box: English, Spanish, Catalan, French, German, Italian, Basque, and Galician. Add a new language in one click and AI translates everything automatically.",
       ),
     },
     {
-      q: resolveTranslation(translations, "q5.question", "Is there a free trial?"),
+      q: resolveTranslation(translations, "q5.question", "Can each client have their own domain?"),
       a: resolveTranslation(
         translations,
         "q5.answer",
-        "Yes. Start with the Starter plan and build up to 3 sites at no cost during the trial period.",
+        "Yes. Every site gets a free subdomain to start, and you can connect a custom domain from your dashboard in minutes.",
       ),
     },
   ];

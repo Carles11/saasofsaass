@@ -1,5 +1,6 @@
 import { MarketingHeader } from "./sections/MarketingHeader";
 import { HeroSection } from "./sections/HeroSection";
+import { HowItWorksSection } from "./sections/HowItWorksSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
 import { PricingSection } from "./sections/PricingSection";
 import { TestimonialsSection } from "./sections/TestimonialsSection";
@@ -15,6 +16,7 @@ export async function MarketingPage() {
     [
       "marketing.header",
       "marketing.hero",
+      "marketing.howitworks",
       "marketing.features",
       "marketing.pricing",
       "marketing.testimonials",
@@ -29,7 +31,8 @@ export async function MarketingPage() {
     <div className="min-h-screen bg-background">
       <MarketingHeader translations={translations["marketing.header"]} />
       <main>
-        <HeroSection translations={translations["marketing.hero"]} />
+        <HeroSection translations={translations["marketing.hero"]} locale={locale} />
+        <HowItWorksSection translations={translations["marketing.howitworks"]} />
         <FeaturesSection translations={translations["marketing.features"]} />
         <PricingSection translations={translations["marketing.pricing"]} />
         <TestimonialsSection translations={translations["marketing.testimonials"]} />

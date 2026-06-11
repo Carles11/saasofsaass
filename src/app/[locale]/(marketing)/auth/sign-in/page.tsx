@@ -1,17 +1,18 @@
-"use client"
+import { getPlatformTranslations } from "@/5-shared/lib/db/platform-translations";
+import { getLocale } from "next-intl/server";
+import { AuthViewClient } from "../_components/AuthViewClient";
 
-import { AuthView } from "@neondatabase/auth-ui"
-import "@neondatabase/auth-ui/css"
+export default async function SignInPage() {
+  const locale = await getLocale();
+  const t = await getPlatformTranslations("marketing.auth", locale);
+  const title = t["sign-in.title"] ?? "Sign In";
 
-export default function SignInPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center mb-6 text-foreground">
-          Sign In
-        </h1>
-        <AuthView pathname="sign-in" />
+        <h1 className="text-2xl font-bold text-center mb-6 text-foreground">{title}</h1>
+        <AuthViewClient pathname="sign-in" />
       </div>
     </div>
-  )
+  );
 }

@@ -1,24 +1,25 @@
 import Link from "next/link";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 
-const FOOTER_LINKS = [
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Testimonials", href: "#testimonials" },
-  { label: "FAQ", href: "#faq" },
-];
-
 interface FooterSectionProps {
   translations?: TranslationDict;
 }
 
 export function FooterSection({ translations }: FooterSectionProps) {
+  const tagline = resolveTranslation(translations, "tagline", "Websites for your clients. Managed by you.");
   const copyright = resolveTranslation(
     translations,
     "copyright",
     "© {year} SoSS Engine. All rights reserved.",
     { year: new Date().getFullYear() },
   );
+
+  const footerLinks = [
+    { label: resolveTranslation(translations, "link.features", "Features"), href: "#features" },
+    { label: resolveTranslation(translations, "link.pricing", "Pricing"), href: "#pricing" },
+    { label: resolveTranslation(translations, "link.testimonials", "Testimonials"), href: "#testimonials" },
+    { label: resolveTranslation(translations, "link.faq", "FAQ"), href: "#faq" },
+  ];
 
   return (
     <footer className="border-t border-border px-4 py-12">
@@ -28,7 +29,7 @@ export function FooterSection({ translations }: FooterSectionProps) {
             SoSS
           </Link>
           <nav className="flex gap-6">
-            {FOOTER_LINKS.map((link) => (
+            {footerLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -39,7 +40,10 @@ export function FooterSection({ translations }: FooterSectionProps) {
             ))}
           </nav>
         </div>
-        <p className="mt-8 text-center text-xs text-muted-foreground">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
+          {tagline}
+        </p>
+        <p className="mt-2 text-center text-xs text-muted-foreground">
           {copyright}
         </p>
       </div>
