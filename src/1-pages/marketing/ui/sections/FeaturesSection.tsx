@@ -1,7 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Layers, Users, Languages, Palette, Globe, Zap } from "lucide-react";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { Layers, Users, Languages, Palette, Globe, Zap } from "lucide-react";
 
 const FEATURE_DEFS = [
   {
@@ -63,43 +61,39 @@ export function FeaturesSection({ translations }: FeaturesSectionProps) {
 
   const features = FEATURE_DEFS.map((feature) => ({
     icon: feature.icon,
-    title: resolveTranslation(
-      translations,
-      `${feature.id}.title`,
-      feature.fallbackTitle,
-    ),
-    description: resolveTranslation(
-      translations,
-      `${feature.id}.description`,
-      feature.fallbackDescription,
-    ),
+    title: resolveTranslation(translations, `${feature.id}.title`, feature.fallbackTitle),
+    description: resolveTranslation(translations, `${feature.id}.description`, feature.fallbackDescription),
   }));
 
   return (
-    <section id="features" className="px-4 py-16 md:py-24">
-      <div className="mx-auto max-w-6xl">
-        <div className="text-center mb-12">
-          <Badge variant="outline" className="mb-4">{badge}</Badge>
-          <h2 className="text-3xl font-black tracking-tighter text-foreground md:text-4xl">
+    <section id="features" className="px-6 py-24 md:py-32">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">{badge}</p>
+          <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
             {title}
           </h2>
-          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             {subtitle}
           </p>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+        {/* Feature grid */}
+        <div className="grid gap-px bg-border/30 rounded-2xl overflow-hidden border border-border/30 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
-            <Card key={f.title}>
-              <CardHeader>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <f.icon className="h-5 w-5" />
-                </div>
-                <CardTitle className="text-lg">{f.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{f.description}</p>
-              </CardContent>
-            </Card>
+            <div
+              key={f.title}
+              className="group bg-background hover:bg-muted/40 transition-colors duration-200 p-8 flex flex-col gap-4"
+            >
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/8 group-hover:bg-primary/12 transition-colors">
+                <f.icon className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-foreground mb-2">{f.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+              </div>
+            </div>
           ))}
         </div>
       </div>
