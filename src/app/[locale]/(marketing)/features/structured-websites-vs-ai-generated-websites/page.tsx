@@ -23,9 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     alternates: {
       canonical: `${baseUrl}/${locale}${path}`,
-      languages: Object.fromEntries(
-        routing.locales.map((l) => [l, `${baseUrl}/${l}${path}`]),
-      ),
+      languages: {
+        ...Object.fromEntries(routing.locales.map((l) => [l, `${baseUrl}/${l}${path}`])),
+        'x-default': `${baseUrl}/en${path}`,
+      },
     },
     openGraph: {
       title,
@@ -43,6 +44,42 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Page() {
-  return <StructuredVsAIPage />;
+export default async function Page() {
+  const locale = await getLocale()
+  const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
+    ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+    : 'http://localhost:3000'
+  const path = '/features/structured-websites-vs-ai-generated-websites'
+
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'Stop Prompting. Start Publishing. — Structured Website Builder vs AI',
+    description:
+      'Most AI website builders generate pages. You still need to figure out what those pages should be. SaaS of SaaS starts with proven structures and uses AI for content, translation, and localization.',
+    url: `${baseUrl}/${locale}${path}`,
+    inLanguage: locale,
+    datePublished: '2026-06-01',
+    dateModified: '2026-06-01',
+    author: {
+      '@type': 'Organization',
+      name: 'SaaSofSaaSs',
+      url: baseUrl,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'SaaSofSaaSs',
+      url: baseUrl,
+    },
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <StructuredVsAIPage />
+    </>
+  )
 }

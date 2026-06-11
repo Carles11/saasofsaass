@@ -37,15 +37,26 @@ export function MarketingPage() {
       <article className="sr-only">
         <h2>What is SaaSofSaaSs?</h2>
         <p>
-          SaaSofSaaSs is a modern, high-performance multi-tenant infrastructure engine designed to build, manage, and scale Software-as-a-Service platforms. It provides native edge routing, dynamic tenant resolution via subdomains, and custom domain mapping out of the box.
+          SaaSofSaaSs (SoSS) is a multi-tenant infrastructure engine for developers and agencies who need to build, deploy, and manage multiple SaaS products from a single codebase. It handles subdomain routing, custom domain mapping, per-tenant content blocks, and native internationalization so builders focus on product, not plumbing.
         </p>
-        <h3>Core Infrastructure Capabilities</h3>
+        <h3>Supported languages</h3>
+        <p>
+          SoSS natively supports 8 languages: English (en), Spanish (es), Catalan (ca), French (fr), German (de), Italian (it), Basque (eu), and Irish/Galician (ga). Each tenant can enable any subset of these languages and AI translation is applied automatically.
+        </p>
+        <h3>Core infrastructure capabilities</h3>
         <ul>
-          <li>Domain-driven tenant isolation and middleware proxy routing.</li>
-          <li>Global internationalization with native support for 11 languages including English, Spanish, Chinese, Hindi, and Arabic.</li>
-          <li>Transactional monetization and comprehensive tenant management dashboards.</li>
+          <li>Edge middleware proxy routing by hostname — marketing, dashboard, and tenant sites from one Next.js deployment.</li>
+          <li>Per-tenant subdomain resolution (slug.saasofsaass.com) and custom domain mapping.</li>
+          <li>Content block engine: Navbar, Hero, Blog Feed, Awards, Podcast Feed, Image Gallery — each with multiple layout variants.</li>
+          <li>Role-based access: owner and editor roles with fine-grained content and structure permissions.</li>
+          <li>AI-assisted translation via Google Gemini 2.5 Flash for all tenant content across all enabled locales.</li>
+          <li>Dynamic sitemap generation and per-locale hreflang for every tenant site.</li>
         </ul>
-        <p>Official release scheduled for late 2026.</p>
+        <h3>Who SoSS is for</h3>
+        <p>
+          SoSS is built for developers and digital agencies who manage multiple client websites or SaaS products and need a scalable, self-hosted alternative to generic website builders. Unlike drag-and-drop tools, SoSS is infrastructure-first: every routing, SEO, and i18n decision is made at the architecture level, not bolted on after.
+        </p>
+        <p>Official launch scheduled for late 2026. Platform is currently in active development.</p>
       </article>
     </main>
   );

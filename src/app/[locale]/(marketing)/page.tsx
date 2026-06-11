@@ -36,9 +36,10 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     alternates: {
       canonical: `${baseUrl}/${locale}`,
-      languages: Object.fromEntries(
-        routing.locales.map((l) => [l, `${baseUrl}/${l}`])
-      ),
+      languages: {
+        ...Object.fromEntries(routing.locales.map((l) => [l, `${baseUrl}/${l}`])),
+        'x-default': `${baseUrl}/en`,
+      },
     },
     openGraph: {
       title,
@@ -56,36 +57,106 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Page() {
-  // JSON-LD is critical for Generative Engine Optimization (GEO)
-  // It feeds LLMs structured facts about your software entity.
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "SaaSofSaaSs",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "Web",
-    "description": "A multi-tenant infrastructure engine and SaaS platform builder featuring automated subdomain routing, custom domains, and native internationalization.",
-    "offers": {
-      "@type": "Offer",
-      "availability": "https://schema.org/PreOrder",
-      "price": "0",
-      "priceCurrency": "USD"
+export default async function Page() {
+  const locale = await getLocale()
+
+  const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
+    ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+    : 'http://localhost:3000'
+
+  const softwareAppSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'SaaSofSaaSs',
+    alternateName: 'SoSS Engine',
+    applicationCategory: 'DeveloperApplication',
+    applicationSubCategory: 'Infrastructure',
+    operatingSystem: 'Web',
+    url: `${baseUrl}/${locale}`,
+    inLanguage: locale,
+    description:
+      'A multi-tenant infrastructure engine and SaaS platform builder featuring automated subdomain routing, custom domain mapping, and native internationalization across 8 languages.',
+    featureList: [
+      'Multi-tenant subdomain and custom domain routing',
+      'Content block engine with 6 block types and multiple variants',
+      'Native internationalization for 8 languages with AI-assisted translation',
+      'Role-based access control (owner and editor roles)',
+      'Dynamic sitemap and hreflang generation per tenant',
+      'Edge middleware proxy for zero-config tenant resolution',
+    ],
+    offers: {
+      '@type': 'Offer',
+      availability: 'https://schema.org/PreOrder',
+      price: '0',
+      priceCurrency: 'USD',
     },
-    "creator": {
-      "@type": "Organization",
-      "name": "SaaSofSaaSs"
-    }
-  };
+    creator: {
+      '@type': 'Organization',
+      name: 'SaaSofSaaSs',
+      url: baseUrl,
+      foundingDate: '2026',
+      sameAs: ['https://github.com/Carles11/saasofsaass'],
+    },
+  }
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: 'Do I need to be a developer to use SoSS?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Not at all. If you can use a word processor, you can use SoSS. You set up the site structure once using our visual builder, and your client handles everything after that.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'How does my client edit their site?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'You invite them as an editor. They get a clean, simple dashboard where they can update text, upload images, and write blog posts — without being able to break anything.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can I offer SoSS as part of my services?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Absolutely. Many of our users charge their clients a monthly fee for website management. SoSS works behind the scenes — your client just sees a site that looks like yours.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'What languages can a site be in?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'SoSS supports 8 languages: English, Spanish, Catalan, French, German, Italian, Basque, and Irish/Galician. Add a new language in one click and AI translates everything automatically.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: 'Can each client have their own domain?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: 'Yes. Every site gets a free subdomain to start, and you can connect a custom domain from your dashboard in minutes.',
+        },
+      },
+    ],
+  }
 
   return (
     <>
-      {/* Injecting Schema.org directly into the DOM */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       <MarketingPage />
     </>
-  );
+  )
 }

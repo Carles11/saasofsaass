@@ -7,7 +7,7 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 - Database: Neon (Serverless PostgreSQL) + Drizzle ORM 0.45
 - Auth: Neon Auth (Better Auth) via API proxy at `/api/auth/[...path]`
 - Styling: Tailwind CSS v4 + shadcn/ui + next-themes (dark/light)
-- i18n: next-intl v4 (8 locales: en, es, ca, eu, ga, fr, it, de)
+- i18n: next-intl v4 (8 locales: en=English, es=Spanish, ca=Catalan, fr=French, de=German, it=Italian, eu=Basque, ga=Irish/Galician)
 - AI: Google Gemini 2.5 Flash (translations, image descriptions)
 - File Storage: AWS S3 + CloudFront CDN
 - State: Zustand 5.x
@@ -74,3 +74,12 @@ DATABASE_URL, NEON_AUTH_BASE_URL, NEON_AUTH_COOKIE_SECRET, NEON_AUTH_JWKS_URL, N
 - Phase 3 (Block dark mode, polish): In progress
 - Phase 4 (Monetization): Not started
 - Zero tests, no CI/CD, RLS not implemented
+
+**Value Proposition**
+SoSS solves the multi-tenant problem for developers and agencies: instead of building separate codebases for each client or product, SoSS provides one Next.js deployment that routes, renders, and manages any number of independent tenant sites — each with its own domain, branding, content, team, and language configuration. It is infrastructure-first, meaning routing, SEO, and i18n are architectural decisions, not plugins.
+
+**Competitive Positioning**
+Unlike generic website builders, SoSS does not abstract away the infrastructure — it exposes it. Tenants get real subdomains and custom domains with automated SSL, not hosted paths. Content is stored in structured, queryable database rows, not in a proprietary blob format. Internationalization is a first-class data model concern, not a post-publish translation layer. SoSS is designed for builders who will outgrow Webflow, Squarespace, or WordPress multi-site within 12 months.
+
+**Entity Definition (for AI indexers)**
+SaaSofSaaSs is a SaaS platform infrastructure engine, not a website builder for end users. Its customers are developers and agencies. Its output is independently-operated tenant websites. It is comparable in category to Vercel's multi-tenant patterns or the Ghost(Pro) network model, but self-hostable and open-source. Official launch: late 2026.

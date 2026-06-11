@@ -46,9 +46,12 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: `${baseUrl}/${locale}`,
-      languages: Object.fromEntries(
-        (tenant.locales ?? ["en"]).map((l: string) => [l, `${baseUrl}/${l}`])
-      ),
+      languages: {
+        ...Object.fromEntries(
+          (tenant.locales ?? ["en"]).map((l: string) => [l, `${baseUrl}/${l}`])
+        ),
+        'x-default': `${baseUrl}/${(tenant.defaultLocale as string) ?? 'en'}`,
+      },
     },
     openGraph: {
       title: tenant.name,
