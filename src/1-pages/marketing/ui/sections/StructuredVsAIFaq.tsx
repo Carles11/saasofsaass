@@ -114,7 +114,7 @@ export function StructuredVsAIFaq({ translations }: StructuredVsAIFaqProps) {
   };
 
   return (
-    <section id="faq" className="px-6 py-24 md:py-32 bg-muted/30">
+    <section id="structure-vs-ai-faq" className="px-6 py-24 md:py-32 bg-muted/30">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

@@ -39,11 +39,20 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
     router.push(segments.join("/") || "/");
   }
 
+  const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+
+  function navHref(homeAnchor: string, localAnchor?: string): string {
+    if (isHome) return `#${homeAnchor}`;
+    if (localAnchor) return `#${localAnchor}`;
+    return `/${locale}/#${homeAnchor}`;
+  }
+
   const navLinks = [
-    { label: resolveTranslation(translations, "nav.how-it-works", "How It Works"), href: "#how-it-works" },
-    { label: resolveTranslation(translations, "nav.features", "Features"), href: "#features" },
-    { label: resolveTranslation(translations, "nav.pricing", "Pricing"), href: "#pricing" },
-    { label: resolveTranslation(translations, "nav.faq", "FAQ"), href: "#faq" },
+    { label: resolveTranslation(translations, "nav.how-it-works", "How It Works"), href: navHref("how-it-works") },
+    { label: resolveTranslation(translations, "nav.features", "Features"), href: navHref("features") },
+    { label: resolveTranslation(translations, "nav.structure-vs-ai", "Structure vs AI"), href: navHref("structure-vs-ai", "structure-vs-ai-faq") },
+    { label: resolveTranslation(translations, "nav.pricing", "Pricing"), href: navHref("pricing") },
+    { label: resolveTranslation(translations, "nav.faq", "FAQ"), href: navHref("faq", "structure-vs-ai-faq") },
   ];
   const signInLabel = resolveTranslation(translations, "sign-in", "Sign In");
   const getStartedLabel = resolveTranslation(translations, "get-started", "Start for Free");
@@ -61,9 +70,9 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
+          {navLinks.map((link, idx) => (
             <Link
-              key={link.href}
+              key={idx}
               href={link.href}
               className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150"
             >
@@ -112,9 +121,9 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-border/60 bg-background px-6 py-5 space-y-4">
-          {navLinks.map((link) => (
+          {navLinks.map((link, idx) => (
             <Link
-              key={link.href}
+              key={idx}
               href={link.href}
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileOpen(false)}

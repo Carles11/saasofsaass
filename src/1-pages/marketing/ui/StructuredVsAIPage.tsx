@@ -61,7 +61,7 @@ export async function StructuredVsAIPage() {
       <MarketingHeader translations={translations["marketing.header"]} />
 
       <main>
-        {/* ── HERO ───────────────────────────────────────────────────────── */}
+        {/* -- HERO --------------------------------------------------------- */}
         <section className="relative overflow-hidden px-6 pt-28 pb-20 md:pt-40 md:pb-28">
           <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,hsl(var(--primary)/0.06),transparent)]" />
           <div className="mx-auto max-w-4xl text-center">
@@ -91,7 +91,7 @@ export async function StructuredVsAIPage() {
                 </Link>
               </Button>
               <Button variant="outline" size="lg" asChild className="px-8 h-12 text-base border-border/60">
-                <Link href="#how-it-works">
+                <Link href={`/${locale}/#how-it-works`}>
                   {resolveTranslation(t, "hero.cta.secondary", "See How It Works")}
                 </Link>
               </Button>
@@ -99,7 +99,7 @@ export async function StructuredVsAIPage() {
           </div>
         </section>
 
-        {/* ── STRUCTURE BEFORE CONTENT ─────────────────────────────────── */}
+        {/* -- STRUCTURE BEFORE CONTENT ----------------------------------- */}
         <section className="px-6 py-24 md:py-32 bg-muted/30">
           <div className="mx-auto max-w-4xl">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3 text-center">
@@ -139,7 +139,7 @@ export async function StructuredVsAIPage() {
           </div>
         </section>
 
-        {/* ── HIDDEN WORK ────────────────────────────────────────────────── */}
+        {/* -- HIDDEN WORK -------------------------------------------------- */}
         <section className="px-6 py-24 md:py-32">
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-12 md:grid-cols-2 md:gap-16 items-center">
@@ -200,7 +200,7 @@ export async function StructuredVsAIPage() {
           </div>
         </section>
 
-        {/* ── COMPARISON TABLE ──────────────────────────────────────────── */}
+        {/* -- COMPARISON TABLE -------------------------------------------- */}
         <section className="px-6 py-24 md:py-32 bg-muted/30">
           <div className="mx-auto max-w-5xl">
             <div className="text-center mb-14">
@@ -257,7 +257,7 @@ export async function StructuredVsAIPage() {
           </div>
         </section>
 
-        {/* ── BUILT FOR SEARCH ──────────────────────────────────────────── */}
+        {/* -- BUILT FOR SEARCH -------------------------------------------- */}
         <section className="px-6 py-24 md:py-32">
           <div className="mx-auto max-w-4xl">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3 text-center">
@@ -296,7 +296,7 @@ export async function StructuredVsAIPage() {
           </div>
         </section>
 
-        {/* ── AI WHERE IT MATTERS ───────────────────────────────────────── */}
+        {/* -- AI WHERE IT MATTERS ----------------------------------------- */}
         <section className="px-6 py-24 md:py-32 bg-muted/30">
           <div className="mx-auto max-w-4xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-medium text-primary mb-6">
@@ -333,10 +333,10 @@ export async function StructuredVsAIPage() {
           </div>
         </section>
 
-        {/* ── FAQ ───────────────────────────────────────────────────────── */}
+        {/* -- FAQ --------------------------------------------------------- */}
         <StructuredVsAIFaq translations={t} />
 
-        {/* ── FINAL CTA ─────────────────────────────────────────────────── */}
+        {/* -- FINAL CTA --------------------------------------------------- */}
         <section className="px-6 py-24 md:py-32">
           <div className="mx-auto max-w-3xl">
             <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-linear-to-br from-primary/8 via-background to-accent/8 p-12 md:p-16 text-center">

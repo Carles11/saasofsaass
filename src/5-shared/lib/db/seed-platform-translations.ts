@@ -163,6 +163,20 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   },
   {
     namespace: "marketing.header",
+    key: "nav.structure-vs-ai",
+    translations: t({
+      en: "Structure vs AI",
+      es: "Estructura vs IA",
+      ca: "Estructura vs IA",
+      fr: "Structure vs IA",
+      de: "Struktur vs KI",
+      it: "Struttura vs IA",
+      eu: "Egitura vs AI",
+      ga: "Estrutura vs IA",
+    }),
+  },
+  {
+    namespace: "marketing.header",
     key: "sign-in",
     translations: t({
       en: "Sign In",
