@@ -15,7 +15,7 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 
 **Architecture**
 - Feature-Sliced Design (FSD): `1-pages` → `2-widgets` → `3-features` → `4-entities` → `5-shared`
-- Proxy middleware (`src/proxy.ts`) routes by hostname: marketing (localhost:3000), dashboard (app.localhost:3000), tenants (*.lvh.me:3000)
+- Proxy middleware (`src/proxy.ts`) routes by hostname: marketing (localhost:3000), dashboard (app.localhost:3000), tenants (*.localhost:3000)
 
 **Key Source Files**
 - `src/5-shared/lib/db/schema.ts` — Core tables: tenants, blocks, tenant_entities, tenant_translations, transactions, platform_translations
@@ -66,7 +66,7 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 - Contact block — not yet built
 
 **Env Vars Required**
-DATABASE_URL, NEON_AUTH_BASE_URL, NEON_AUTH_COOKIE_SECRET, NEON_AUTH_JWKS_URL, NEXT_PUBLIC_ROOT_DOMAIN, NEXT_PUBLIC_APP_DOMAIN, NEXT_PUBLIC_DEV_ROOT_DOMAIN, GEMINI_API_KEY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET, NEXT_PUBLIC_AWS_CLOUDFRONT_URL
+DATABASE_URL, NEON_AUTH_BASE_URL, NEON_AUTH_COOKIE_SECRET, NEON_AUTH_JWKS_URL, NEXT_PUBLIC_ROOT_DOMAIN, NEXT_PUBLIC_APP_DOMAIN, GEMINI_API_KEY, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION, AWS_S3_BUCKET, NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 
 **Project Status**
 - Phase 1 (Foundation): Complete

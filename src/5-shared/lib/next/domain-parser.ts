@@ -35,13 +35,11 @@ export function normalizeHostname(rawHostname: string): string {
  * @param rawHostname  – value from the `Host` header (may include port)
  * @param rootDomain   – e.g. "saasofsaass.com"
  * @param appDomain    – e.g. "app.saasofsaass.com"
- * @param devRootDomain – optional secondary root for local dev (e.g. "lvh.me")
  */
 export function parseDomain(
   rawHostname: string,
   rootDomain: string,
   appDomain: string,
-  devRootDomain?: string
 ): ParsedDomain {
   const hostname = normalizeHostname(rawHostname)
   const root = rootDomain.toLowerCase()
@@ -72,18 +70,6 @@ export function parseDomain(
   const prodMatch = hostname.match(subdomainPattern)
   if (prodMatch) {
     return { type: 'TENANT_SUBDOMAIN', tenantKey: prodMatch[1] }
-  }
-
-  // ── Dev tenant subdomain: <slug>.lvh.me (or custom devRootDomain) ─────────
-  if (devRootDomain) {
-    const devRoot = devRootDomain.toLowerCase()
-    const devPattern = new RegExp(
-      `^([a-z0-9][a-z0-9-]{0,61}[a-z0-9]?)\\.${escapeRegex(devRoot)}$`
-    )
-    const devMatch = hostname.match(devPattern)
-    if (devMatch) {
-      return { type: 'TENANT_SUBDOMAIN', tenantKey: devMatch[1] }
-    }
   }
 
   // ── Custom domain: anything else ───────────────────────────────────────────

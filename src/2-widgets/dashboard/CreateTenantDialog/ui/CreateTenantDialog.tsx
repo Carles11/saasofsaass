@@ -135,7 +135,7 @@ export function CreateTenantDialog({ translations }: CreateTenantDialogProps) {
                 title="3-63 characters, only lowercase letters, numbers, and hyphens. Must start and end with a letter or number."
               />
               <span className="text-xs text-muted-foreground ml-2 shrink-0">
-                .{typeof window !== "undefined" && window.location.hostname.includes("localhost") ? "lvh.me:3000" : "saasofsaass.com"}
+                .{typeof window !== "undefined" && window.location.hostname.includes("localhost") ? "localhost:3000" : "saasofsaass.com"}
               </span>
             </div>
             <p className="text-xs text-muted-foreground">

@@ -14,8 +14,7 @@ export default async function TenantLayout({
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com";
   const isSubdomain =
     (domain.endsWith(`.${rootDomain}`) && domain !== rootDomain) ||
-    /^[a-z0-9][a-z0-9-]*\.localhost$/.test(domain) ||
-    domain.endsWith(".lvh.me");
+    /^[a-z0-9][a-z0-9-]*\.localhost$/.test(domain);
   const tenantKey = isSubdomain ? domain.split(".")[0] : domain;
 
   const tenant = await getTenantByDomain({

@@ -8,8 +8,6 @@ import { tenantCache } from './5-shared/lib/next/tenant-cache'
 // ── Constants — resolved once per worker instance ──────────────────────────────
 const rootDomain   = (process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'saasofsaass.com').toLowerCase()
 const appDomain    = (process.env.NEXT_PUBLIC_APP_DOMAIN  || `app.${rootDomain}`).toLowerCase()
-const devRootDomain = (process.env.NEXT_PUBLIC_DEV_ROOT_DOMAIN || 'lvh.me').toLowerCase()
-
 const TENANT_NOT_FOUND_URL = `https://${rootDomain}`
 const TENANT_CACHE_TTL_MS  = 5 * 60 * 1000 // 5 minutes
 
@@ -74,7 +72,7 @@ export default async function middleware(req: NextRequest) {
   // ── Step 4: Classify hostname → route to correct app section ──────────────
   // Route groups (marketing), (dashboard), (tenants) are transparent to URLs —
   // Next.js resolves them from the filesystem. Do NOT include them in rewrites.
-  const parsed = parseDomain(rawHostname, rootDomain, appDomain, devRootDomain)
+  const parsed = parseDomain(rawHostname, rootDomain, appDomain)
 
   switch (parsed.type) {
     case 'MARKETING': {

@@ -189,7 +189,7 @@ Handles 3 routing cases via hostname detection:
 ```
 saasofsaass.com / localhost:3000        → /(marketing)
 app.saasofsaass.com / app.localhost:3000 → /(dashboard)
-*.saasofsaass.com / *.lvh.me / custom domains → /(tenants)/[domain]
+*.saasofsaass.com / *.localhost / custom domains → /(tenants)/[domain]
 ```
 
 **Key rules:**
@@ -206,7 +206,6 @@ NEON_AUTH_COOKIE_SECRET
 NEON_AUTH_JWKS_URL
 NEXT_PUBLIC_ROOT_DOMAIN
 NEXT_PUBLIC_APP_DOMAIN
-NEXT_PUBLIC_DEV_ROOT_DOMAIN     # e.g. lvh.me:3000
 GEMINI_API_KEY
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY
@@ -231,7 +230,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 
 ### 3. Auth Pattern
 - **Neon Auth** handles user sessions. API proxy at `/api/auth/[...path]/route.ts` forwards to `NEON_AUTH_BASE_URL`.
-- **Origin override:** In local dev, the proxy overrides the `Origin` header to `http://localhost:3000` for subdomain requests (lvh.me, app.localhost). This is required because Neon Auth's `allow_localhost` matches only the exact string `localhost`.
+- **Origin override:** In local dev, the proxy overrides the `Origin` header to `http://localhost:3000` for subdomain requests (app.localhost, *.localhost). This is required because Neon Auth's `allow_localhost` matches only the exact string `localhost`.
 - **Profile sync:** `sync-profile.ts` creates/updates a local `profiles` record when a Neon Auth user signs in (matched by email).
 - **Authorization helpers** in `src/5-shared/lib/auth/authorization.ts`:
   - `getCurrentProfile()` — returns local profile by matching session email
@@ -262,7 +261,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - Use `getServerParams()` helper which handles this automatically
 
 ### 7. Preview Link
-- SiteBuilder shows a Preview button that links to `{slug}.lvh.me:3000/{locale}` in dev or `{slug}.saasofsaass.com/{locale}` in prod
+- SiteBuilder shows a Preview button that links to `{slug}.localhost:3000/{locale}` in dev or `{slug}.saasofsaass.com/{locale}` in prod
 - The "Preview" label comes from `platform_translations` table (namespace `common`, key `preview`), fetched server-side and passed as prop
 
 ---
@@ -278,7 +277,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - [x] next-intl installed and configured with 8 locales
 - [x] `[locale]` in URL working
 - [x] `proxy.ts` middleware with 3-case DNS routing
-- [x] Marketing → `localhost:3000` | Dashboard → `app.localhost:3000` | Tenant → `*.lvh.me:3000`
+- [x] Marketing → `localhost:3000` | Dashboard → `app.localhost:3000` | Tenant → `*.localhost:3000`
 - [x] `getServerParams` / `useClientParams` helpers
 - [x] shadcn/ui initialized (Radix, Custom theme)
 - [x] Zustand installed (store started, not complete)
@@ -380,5 +379,5 @@ npm run db:studio    # Open Drizzle Studio
 |---|---|
 | `localhost:3000` | Marketing site |
 | `app.localhost:3000` | Dashboard |
-| `agora.lvh.me:3000` | Àgora tenant (or any subdomain) |
-| `*.lvh.me:3000` | Any tenant |
+| `agora.localhost:3000` | Àgora tenant (or any subdomain) |
+| `*.localhost:3000` | Any tenant |

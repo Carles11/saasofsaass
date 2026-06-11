@@ -10,13 +10,12 @@ function wrapHandler(
     const hostname = url.hostname
     const isDev =
       hostname === "localhost" ||
-      hostname.endsWith(".localhost") ||
-      hostname.endsWith(".lvh.me")
+      hostname.endsWith(".localhost")
 
     if (!isDev) return nextHandler(req, ctx)
 
     // Neon Auth validates the Origin header against its allowlist.
-    // Local dev subdomains (app.localhost, *.lvh.me) are not in that list.
+    // Local dev subdomains (app.localhost) are not in that list.
     // Override the Origin to the root localhost so Neon Auth accepts the proxy.
     const rootOrigin = `${url.protocol}//localhost${url.port ? `:${url.port}` : ""}`
     const headers = new Headers(req.headers)

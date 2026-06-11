@@ -54,9 +54,6 @@ export function SiteBuilder({
   // Restore selectedBlock for BlockEditSheet
   const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
-const devRoot =
-  process.env.NEXT_PUBLIC_DEV_ROOT_DOMAIN || "lvh.me";
-
 const devPort =
   process.env.NEXT_PUBLIC_DEV_PORT || "3000";
 
@@ -69,7 +66,7 @@ const prodRoot = (
 const isDev = process.env.NODE_ENV === "development";
 
 const previewUrl = isDev
-  ? `http://${tenant.slug}.${devRoot}:${devPort}/${activeLocale}`
+  ? `http://${tenant.slug}.localhost:${devPort}/${activeLocale}`
   : `https://${tenant.slug}.${prodRoot}/${activeLocale}`;
 
   const subtitle = resolveTranslation(translations, "subtitle", "Site Builder");

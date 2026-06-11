@@ -53,7 +53,7 @@ NEON_AUTH_COOKIE_SECRET                 # Auth cookie secret
 NEON_AUTH_JWKS_URL                      # Auth JWKS endpoint
 NEXT_PUBLIC_ROOT_DOMAIN                 # e.g. localhost:3000 (dev)
 NEXT_PUBLIC_APP_DOMAIN                  # e.g. app.localhost:3000 (dev)
-NEXT_PUBLIC_DEV_ROOT_DOMAIN             # e.g. lvh.me:3000
+
 GEMINI_API_KEY                          # Google AI API key
 AWS_ACCESS_KEY_ID                       # S3 access key
 AWS_SECRET_ACCESS_KEY                   # S3 secret key
@@ -113,10 +113,10 @@ The proxy middleware (`src/proxy.ts`) routes hostnames to different parts of the
 |---|---|---|
 | `http://localhost:3000` | `(marketing)` | Marketing landing page |
 | `http://app.localhost:3000` | `(dashboard)` | Admin dashboard |
-| `http://agora.lvh.me:3000` | `(tenants)/[domain]` | Àgora tenant site |
-| `http://*.lvh.me:3000` | `(tenants)/[domain]` | Any tenant by subdomain |
+| `http://agora.localhost:3000` | `(tenants)/[domain]` | Àgora tenant site |
+| `http://*.localhost:3000` | `(tenants)/[domain]` | Any tenant by subdomain |
 
-`lvh.me` is a public DNS that resolves to `127.0.0.1` — it works out of the box for local multi-tenant testing.
+Subdomains of `localhost` resolve to `127.0.0.1` automatically — no external DNS service required.
 
 ---
 
