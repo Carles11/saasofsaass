@@ -180,3 +180,13 @@ export type NewTenantEntity = typeof tenantEntities.$inferInsert;
 export type TenantTranslation = typeof tenantTranslations.$inferSelect;
 export type NewTenantTranslation = typeof tenantTranslations.$inferInsert;
 export type { Profile, NewProfile, TenantMembership, NewTenantMembership } from "./schema/auth";
+
+// ============================================
+// WAITLIST
+// ============================================
+export const waitlist = pgTable("waitlist", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  locale: text("locale").notNull().default("en"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
