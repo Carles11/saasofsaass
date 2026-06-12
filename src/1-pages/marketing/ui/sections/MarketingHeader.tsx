@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { useLocale } from "next-intl";
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
-import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
+import {
+  resolveTranslation,
+  type TranslationDict,
+} from "@/5-shared/lib/translations/resolve";
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
+import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,13 +15,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { Globe, Menu, X } from "lucide-react";
+import { useLocale } from "next-intl";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
 
 const LOCALE_LABELS: Record<string, string> = {
-  en: "EN", es: "ES", ca: "CA", fr: "FR",
-  de: "DE", it: "IT", eu: "EU", ga: "GA",
+  en: "English",
+  es: "Español",
+  ca: "Català",
+  fr: "Français",
+  de: "Deutsch",
+  it: "Italiano",
+  eu: "Euskara",
+  ga: "Galego",
 };
 
 interface MarketingHeaderProps {
@@ -48,14 +57,41 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
   }
 
   const navLinks = [
-    { label: resolveTranslation(translations, "nav.how-it-works", "How It Works"), href: navHref("how-it-works") },
-    { label: resolveTranslation(translations, "nav.features", "Features"), href: navHref("features") },
-    { label: resolveTranslation(translations, "nav.structure-vs-ai", "Structure vs AI"), href: navHref("structure-vs-ai", "structure-vs-ai-faq") },
-    { label: resolveTranslation(translations, "nav.pricing", "Pricing"), href: navHref("pricing") },
-    { label: resolveTranslation(translations, "nav.faq", "FAQ"), href: navHref("faq", "structure-vs-ai-faq") },
+    {
+      label: resolveTranslation(
+        translations,
+        "nav.how-it-works",
+        "How It Works",
+      ),
+      href: navHref("how-it-works"),
+    },
+    {
+      label: resolveTranslation(translations, "nav.features", "Features"),
+      href: navHref("features"),
+    },
+    {
+      label: resolveTranslation(
+        translations,
+        "nav.structure-vs-ai",
+        "Structure vs AI",
+      ),
+      href: navHref("structure-vs-ai", "structure-vs-ai-faq"),
+    },
+    {
+      label: resolveTranslation(translations, "nav.pricing", "Pricing"),
+      href: navHref("pricing"),
+    },
+    {
+      label: resolveTranslation(translations, "nav.faq", "FAQ"),
+      href: navHref("faq", "structure-vs-ai-faq"),
+    },
   ];
   const signInLabel = resolveTranslation(translations, "sign-in", "Sign In");
-  const getStartedLabel = resolveTranslation(translations, "get-started", "Start for Free");
+  const getStartedLabel = resolveTranslation(
+    translations,
+    "get-started",
+    "Start for Free",
+  );
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/95 backdrop-blur-md">
@@ -84,12 +120,12 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
         {/* Right side controls */}
         <div className="flex items-center gap-2">
           <Select defaultValue={locale} onValueChange={handleLocaleChange}>
-            <SelectTrigger className="h-8 w-16 text-xs border-border/60 bg-transparent">
-              <SelectValue />
+            <SelectTrigger className="h-8 w-fit gap-1 border-border/60 bg-transparent pe-1">
+              <Globe className="size-4" />
             </SelectTrigger>
-            <SelectContent position="popper" className="min-w-[4rem]">
+            <SelectContent position="popper" className="w-max">
               {SUPPORTED_LOCALES.map((l) => (
-                <SelectItem key={l} value={l} className="text-xs">
+                <SelectItem key={l} value={l} className="text-xs w-full">
                   {LOCALE_LABELS[l] ?? l.toUpperCase()}
                 </SelectItem>
               ))}

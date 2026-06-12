@@ -1,7 +1,7 @@
 "use client";
 
 import { AuthView } from "@neondatabase/auth-ui";
-import "@neondatabase/auth-ui/css";
+import "@neondatabase/auth-ui/tailwind";
 
 export function AuthViewClient({ pathname }: { pathname: string }) {
   return <AuthView pathname={pathname} />;
