@@ -16,10 +16,20 @@ export default async function DashboardLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+
+  let session = null;
+
+try {
   const sessionResult = await authServer.getSession()
+  session = sessionResult.data
+} catch (error) {
+  console.error("Auth session fallback in layout:", error)
+  redirect(`/${locale}/auth/login`)
+}
 
-
-const session = sessionResult.data
+if (!session?.user) {
+  redirect(`/${locale}/auth/login`)
+}
 
   if (!session?.user) {
     redirect(`/${locale}/auth/login`)
