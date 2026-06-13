@@ -20,20 +20,67 @@ import {
   blocks,
   tenantEntities,
   tenantTranslations,
+  workspaces,
 } from './schema'
 import { profiles, tenantMemberships } from './schema/auth'
+import { getSiteLimit } from '../billing/plans'
 
 const sql = neon(process.env.DATABASE_URL!)
 const db = drizzle(sql, {
-  schema: { tenants, blocks, tenantEntities, tenantTranslations, profiles, tenantMemberships },
+  schema: { tenants, blocks, tenantEntities, tenantTranslations, workspaces, profiles, tenantMemberships },
 })
 
 async function main() {
   console.log('🌱  Seeding Àgora pilot tenant…\n')
 
-  // ── 1. Tenant ──────────────────────────────────────────────────────────────
+  // ── 1. Owner profile ────────────────────────────────────────────────────────
+  const ownerEmail = 'admin@agora-association.org'
+  const [ownerProfile] = await db
+    .insert(profiles)
+    .values({ email: ownerEmail, name: 'Àgora Admin', role: 'user' })
+    .onConflictDoNothing({ target: profiles.email })
+    .returning()
+
+  const ownerProfileId = ownerProfile?.id ?? (
+    await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.email, ownerEmail)).limit(1)
+  )[0]?.id
+
+  if (!ownerProfileId) {
+    console.error('  ✗ Could not resolve owner profile ID')
+    process.exit(1)
+  }
+  console.log(`  ✓ Owner profile ready (${ownerEmail})`)
+
+  // ── 2. Workspace ────────────────────────────────────────────────────────────
+  const [existingWs] = await db
+    .select({ id: workspaces.id })
+    .from(workspaces)
+    .where(eq(workspaces.ownerProfileId, ownerProfileId))
+    .limit(1)
+
+  let workspaceId: string
+
+  if (existingWs) {
+    workspaceId = existingWs.id
+    console.log(`  ✓ Workspace already exists (id: ${workspaceId}) — skipped.`)
+  } else {
+    const [ws] = await db
+      .insert(workspaces)
+      .values({
+        name: "Àgora's Account",
+        ownerProfileId: ownerProfileId,
+        plan: 'free',
+        siteLimit: getSiteLimit('free'),
+      })
+      .returning({ id: workspaces.id })
+
+    workspaceId = ws.id
+    console.log(`  ✓ Workspace created (id: ${workspaceId})`)
+  }
+
+  // ── 3. Tenant ───────────────────────────────────────────────────────────────
   const [existing] = await db
-    .select({ id: tenants.id })
+    .select({ id: tenants.id, workspaceId: tenants.workspaceId })
     .from(tenants)
     .where(eq(tenants.slug, 'agora'))
     .limit(1)
@@ -42,7 +89,16 @@ async function main() {
 
   if (existing) {
     tenantId = existing.id
-    console.log(`  ✓ Tenant already exists (id: ${tenantId}) — skipping insert.`)
+    // Backfill workspace_id for pre-migration tenants
+    if (!existing.workspaceId) {
+      await db
+        .update(tenants)
+        .set({ workspaceId })
+        .where(eq(tenants.id, tenantId))
+      console.log(`  ✓ Tenant already existed — workspace_id backfilled.`)
+    } else {
+      console.log(`  ✓ Tenant already exists (id: ${tenantId}) — skipping insert.`)
+    }
   } else {
     const [inserted] = await db
       .insert(tenants)
@@ -53,6 +109,7 @@ async function main() {
         defaultLocale: 'en',
         isActive:      true,
         branding:      {},
+        workspaceId,
       })
       .returning({ id: tenants.id })
 
@@ -60,7 +117,7 @@ async function main() {
     console.log(`  ✓ Tenant inserted (id: ${tenantId})`)
   }
 
-  // ── 2. Blocks ──────────────────────────────────────────────────────────────
+  // ── 4. Blocks ──────────────────────────────────────────────────────────────
   const existingBlocks = await db
     .select({ id: blocks.id, type: blocks.type })
     .from(blocks)
@@ -148,7 +205,7 @@ async function main() {
 
   console.log(`  ✓ Blog-feed block inserted (id: ${blogBlock.id})`)
 
-  // ── 3. Sample blog post entity ─────────────────────────────────────────────
+  // ── 5. Sample blog post entity ─────────────────────────────────────────────
   const [postEntity] = await db
     .insert(tenantEntities)
     .values({
@@ -201,26 +258,16 @@ async function main() {
   console.log('  ✓ Translation rows seeded (en: translated, es/ca: pending)')
   }
 
-  // ── 4. Profiles + Memberships ───────────────────────────────────────────────
+  // ── 6. Memberships ─────────────────────────────────────────────────────────
 
-  const ownerEmail = 'admin@agora-association.org'
-  const [ownerProfile] = await db
-    .insert(profiles)
-    .values({ email: ownerEmail, name: 'Àgora Admin', role: 'user' })
-    .onConflictDoNothing({ target: profiles.email })
-    .returning()
-
-  const ownerProfileId = ownerProfile?.id ?? (
-    await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.email, ownerEmail)).limit(1)
-  )[0]?.id
-
+  // Owner membership
   if (ownerProfileId) {
     await db.insert(tenantMemberships).values({
       tenantId,
       profileId: ownerProfileId,
       role: 'owner',
     }).onConflictDoNothing({ target: [tenantMemberships.tenantId, tenantMemberships.profileId] })
-    console.log(`  ✓ Owner profile ready (admin@agora-association.org)`)
+    console.log(`  ✓ Owner membership ready (admin@agora-association.org)`)
   }
 
   // 3 Editors

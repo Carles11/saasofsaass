@@ -1,6 +1,36 @@
 import { authApiHandler } from "@neondatabase/auth/next/server"
 
+const ROOT_DOMAIN = (
+  process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com"
+).toLowerCase()
+
 const handler = authApiHandler()
+
+async function patchCookieDomain(
+  response: Response,
+  rootDomain: string,
+): Promise<Response> {
+  const setCookies = response.headers.getSetCookie?.()
+  if (!setCookies?.length) return response
+
+  const newHeaders = new Headers(response.headers)
+  newHeaders.delete("Set-Cookie")
+
+  for (const cookie of setCookies) {
+    if (/Domain=/i.test(cookie)) {
+      newHeaders.append("Set-Cookie", cookie)
+    } else {
+      newHeaders.append("Set-Cookie", `${cookie}; Domain=${rootDomain}`)
+    }
+  }
+
+  const body = await response.text()
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  })
+}
 
 function wrapHandler(
   nextHandler: (req: Request, ctx: { params: Promise<{ path: string[] }> }) => Promise<Response>,
@@ -12,7 +42,10 @@ function wrapHandler(
       hostname === "localhost" ||
       hostname.endsWith(".localhost")
 
-    if (!isDev) return nextHandler(req, ctx)
+    if (!isDev) {
+      const response = await nextHandler(req, ctx)
+      return patchCookieDomain(response, `.${ROOT_DOMAIN}`)
+    }
 
     // Neon Auth validates the Origin header against its allowlist.
     // Local dev subdomains (app.localhost) are not in that list.
@@ -31,7 +64,8 @@ function wrapHandler(
       body,
     })
 
-    return nextHandler(newReq, ctx)
+    const response = await nextHandler(newReq, ctx)
+    return patchCookieDomain(response, ".localhost")
   }
 }
 

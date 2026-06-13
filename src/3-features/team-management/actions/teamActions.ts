@@ -2,7 +2,7 @@
 
 import { db } from "@/5-shared/lib/db";
 import { profiles, tenantMemberships } from "@/5-shared/lib/db/schema/auth";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireProfile, assertTenantRole } from "@/5-shared/lib/auth/authorization";
 
@@ -52,6 +52,30 @@ export async function inviteMember(tenantId: string, email: string, role: "owner
 /** Remove a member from a tenant (owner only). */
 export async function removeMember(tenantId: string, membershipId: string) {
   await assertTenantRole(tenantId, "owner");
+
+  const [target] = await db
+    .select({ role: tenantMemberships.role })
+    .from(tenantMemberships)
+    .where(eq(tenantMemberships.id, membershipId))
+    .limit(1);
+
+  if (!target) throw new Error("Membership not found");
+
+  if (target.role === "owner") {
+    const [ownerCount] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(tenantMemberships)
+      .where(
+        and(
+          eq(tenantMemberships.tenantId, tenantId),
+          eq(tenantMemberships.role, "owner"),
+        ),
+      );
+
+    if (Number(ownerCount?.count ?? 0) <= 1) {
+      throw new Error("Cannot remove the last owner. Transfer ownership first.");
+    }
+  }
 
   await db
     .delete(tenantMemberships)

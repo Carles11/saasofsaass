@@ -2,10 +2,11 @@
 
 import { requireProfile } from "@/5-shared/lib/auth/authorization";
 import { db } from "@/5-shared/lib/db";
-import { tenants } from "@/5-shared/lib/db/schema";
+import { tenants, workspaces } from "@/5-shared/lib/db/schema";
 import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
-import { eq } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { getSiteLimit } from "@/5-shared/lib/billing/plans";
 
 const SLUG_REGEX = /^[a-z0-9]([a-z0-9-]{1,61})[a-z0-9]$/;
 const ALLOWED_LOCALES = ["en", "es", "ca", "fr", "de", "it", "eu", "ga"] as const;
@@ -40,6 +41,43 @@ function validate(input: CreateTenantInput): Record<string, string> {
   return errors;
 }
 
+async function findOrCreateWorkspace(profileId: string, profileName: string | null) {
+  // Fast path: check if workspace already exists
+  const [existing] = await db
+    .select()
+    .from(workspaces)
+    .where(eq(workspaces.ownerProfileId, profileId))
+    .limit(1);
+
+  if (existing) return existing;
+
+  // Create workspace — unique constraint on owner_profile_id prevents duplicates
+  const name = profileName ? `${profileName}'s Account` : "My Account";
+  try {
+    const [ws] = await db
+      .insert(workspaces)
+      .values({
+        name,
+        ownerProfileId: profileId,
+        plan: "free",
+        siteLimit: getSiteLimit("free"),
+      })
+      .returning();
+    return ws;
+  } catch (error: any) {
+    // PostgreSQL unique violation (23505) — another request created a workspace first
+    if (error?.cause?.code === "23505") {
+      const [existingWs] = await db
+        .select()
+        .from(workspaces)
+        .where(eq(workspaces.ownerProfileId, profileId))
+        .limit(1);
+      if (existingWs) return existingWs;
+    }
+    throw error;
+  }
+}
+
 export async function createTenant(raw: FormData | CreateTenantInput) {
   const profile = await requireProfile();
 
@@ -63,7 +101,33 @@ export async function createTenant(raw: FormData | CreateTenantInput) {
     throw new Error(`A tenant with slug "${slug}" already exists.`);
   }
 
-  // Insert tenant
+  // Find or auto-create workspace for the profile
+  const workspace = await findOrCreateWorkspace(profile.id, profile.name || null);
+
+  // Check subscription status
+  if (workspace.subscriptionStatus === "past_due" || workspace.subscriptionStatus === "unpaid" || workspace.subscriptionStatus === "incomplete_expired") {
+    throw new Error("Subscription is past due. Please update your billing information.");
+  }
+
+  // Count active tenants in this workspace
+  const [countResult] = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(tenants)
+    .where(
+      and(
+        eq(tenants.workspaceId, workspace.id),
+        eq(tenants.isActive, true),
+      ),
+    );
+
+  const currentCount = Number(countResult?.count ?? 0);
+  if (currentCount >= workspace.siteLimit) {
+    throw new Error(
+      `Site limit reached (${workspace.siteLimit}). Upgrade your plan to create more sites.`,
+    );
+  }
+
+  // Insert tenant with workspace_id
   const [tenant] = await db
     .insert(tenants)
     .values({
@@ -73,6 +137,7 @@ export async function createTenant(raw: FormData | CreateTenantInput) {
       locales: [defaultLocale ?? "en"],
       branding: {},
       isActive: true,
+      workspaceId: workspace.id,
     })
     .returning();
 

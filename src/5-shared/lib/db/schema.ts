@@ -15,6 +15,24 @@ import { galleryImageI18n, galleryImages } from "@/4-entities/gallery/model/imag
 import { heroImageI18n, heroImages } from "@/4-entities/hero/model/image";
 
 // ============================================
+// WORKSPACES (billing entity — owns sites)
+// ============================================
+export const workspaces = pgTable("workspaces", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  ownerProfileId: uuid("owner_profile_id").notNull(),
+  plan: text("plan").notNull().default("free"),
+  siteLimit: integer("site_limit").notNull().default(1),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionStatus: text("subscription_status"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uniqueOwnerProfile: unique().on(t.ownerProfileId),
+}));
+
+// ============================================
 // TENANTS
 // ============================================
 export const tenants = pgTable("tenants", {
@@ -28,6 +46,7 @@ export const tenants = pgTable("tenants", {
   branding: jsonb("branding").default({}), // HSL vars, logo, fonts
   templateId: text("template_id").notNull().default("default"),
   isActive: boolean("is_active").notNull().default(true),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -169,6 +188,8 @@ export { galleryImageI18n, galleryImages, heroImageI18n, heroImages };
 // ============================================
 // TYPES (inferred from schema)
 // ============================================
+export type Workspace = typeof workspaces.$inferSelect;
+export type NewWorkspace = typeof workspaces.$inferInsert;
 export type Tenant = typeof tenants.$inferSelect;
 export type NewTenant = typeof tenants.$inferInsert;
 export type Block = typeof blocks.$inferSelect;

@@ -1,4 +1,5 @@
 import { CreateTenantDialog } from "@/2-widgets/dashboard/CreateTenantDialog";
+import { BillingStatus } from "@/2-widgets/dashboard/BillingStatus";
 import { db } from "@/5-shared/lib/db";
 import { tenants } from "@/5-shared/lib/db/schema";
 import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
@@ -9,6 +10,11 @@ import {
 import { eq, inArray } from "drizzle-orm";
 import Link from "next/link";
 import { getCurrentProfile } from "@/5-shared/lib/auth/authorization";
+import {
+  getWorkspaceByProfileId,
+  countActiveTenants,
+} from "@/3-features/manage-billing/actions/billingHelpers";
+import { getNextPlan } from "@/5-shared/lib/billing/plans";
 
 export async function DashboardPage({ locale }: { locale?: string }) {
   const profile = await getCurrentProfile();
@@ -23,6 +29,9 @@ export async function DashboardPage({ locale }: { locale?: string }) {
   const userTenants = tenantIds.length > 0
     ? await db.select().from(tenants).where(inArray(tenants.id, tenantIds))
     : [];
+
+  const workspace = profile ? await getWorkspaceByProfileId(profile.id) : null;
+  const currentSites = workspace ? await countActiveTenants(workspace.id) : 0;
 
   const ownerTenantIds = memberships.filter((m) => m.role === "owner").map((m) => m.tenantId);
 
@@ -98,6 +107,17 @@ export async function DashboardPage({ locale }: { locale?: string }) {
             </div>
           </div>
         </header>
+        {workspace && (
+          <BillingStatus
+            workspaceId={workspace.id}
+            plan={workspace.plan}
+            siteLimit={workspace.siteLimit}
+            currentSites={currentSites}
+            subscriptionStatus={workspace.subscriptionStatus}
+            stripeCustomerId={workspace.stripeCustomerId}
+            nextPlan={getNextPlan(workspace.plan)}
+          />
+        )}
         <section className="grid grid-cols-1 gap-6">
           {userTenants.map((tenant) => (
             <Link

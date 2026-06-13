@@ -1,6 +1,7 @@
 "use client";
 
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
+import { useSession } from "@/5-shared/hooks/use-session";
 import {
   resolveTranslation,
   type TranslationDict,
@@ -13,7 +14,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Globe, Menu, X } from "lucide-react";
 import { useLocale } from "next-intl";
@@ -49,6 +49,8 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
   }
 
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+  const { data: session, isPending } = useSession();
+  const isLoggedIn = !isPending && !!session;
 
   function navHref(homeAnchor: string, localAnchor?: string): string {
     if (isHome) return `#${homeAnchor}`;
@@ -120,7 +122,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
         {/* Right side controls */}
         <div className="flex items-center gap-2">
           <Select defaultValue={locale} onValueChange={handleLocaleChange}>
-            <SelectTrigger className="h-8 w-fit gap-1 border-border/60 bg-transparent pe-1">
+            <SelectTrigger className="h-8 w-fit gap-1 border-border/60 bg-transparent pe-1 cursor-pointer">
               <Globe className="size-4" />
             </SelectTrigger>
             <SelectContent position="popper" className="w-max">
@@ -136,12 +138,22 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
           <PaletteSwitcher />
 
           <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border/60">
-            <Button variant="ghost" size="sm" asChild className="text-sm">
-              <Link href={`/${locale}/auth/sign-in`}>{signInLabel}</Link>
-            </Button>
-            <Button size="sm" asChild className="text-sm px-4">
-              <Link href={`/${locale}/auth/sign-up`}>{getStartedLabel}</Link>
-            </Button>
+            {isLoggedIn ? (
+              <Button size="sm" asChild className="text-sm px-4">
+                <Link href={`/${locale}/dashboard`}>Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild className="text-sm">
+                  <Link href={`/${locale}/auth/sign-in`}>{signInLabel}</Link>
+                </Button>
+                <Button size="sm" asChild className="text-sm px-4">
+                  <Link href={`/${locale}/auth/sign-up`}>
+                    {getStartedLabel}
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <button
@@ -168,12 +180,27 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
             </Link>
           ))}
           <div className="flex gap-2 pt-2 border-t border-border/60">
-            <Button variant="outline" size="sm" asChild className="flex-1">
-              <Link href={`/${locale}/auth/sign-in`}>{signInLabel}</Link>
-            </Button>
-            <Button size="sm" asChild className="flex-1">
-              <Link href={`/${locale}/auth/sign-up`}>{getStartedLabel}</Link>
-            </Button>
+            {isLoggedIn ? (
+              <Button size="sm" asChild className="flex-1">
+                <Link
+                  href={`/${locale}/dashboard`}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" asChild className="flex-1">
+                  <Link href={`/${locale}/auth/sign-in`}>{signInLabel}</Link>
+                </Button>
+                <Button size="sm" asChild className="flex-1">
+                  <Link href={`/${locale}/auth/sign-up`}>
+                    {getStartedLabel}
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

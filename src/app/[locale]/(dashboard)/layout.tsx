@@ -1,9 +1,11 @@
 import { DashboardSidebar } from "@/2-widgets/dashboard/ui/sidebar/DashboardSidebar";
+import { MobileBottomNav } from "@/2-widgets/dashboard/ui/sidebar/MobileBottomNav";
 import { TranslationProgressBar } from "@/3-features/translations/ui/translationProgressBar";
 import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
 import { authServer } from "@/5-shared/lib/auth/server";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
+import { resolveRoles } from "@/5-shared/config/permissions/roles";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -19,30 +21,31 @@ export default async function DashboardLayout({
 
   let session = null;
 
-try {
-  const sessionResult = await authServer.getSession()
-  session = sessionResult.data
-} catch (error) {
-  console.error("Auth session fallback in layout:", error)
-  redirect(`/${locale}/auth/login`)
-}
-
-if (!session?.user) {
-  redirect(`/${locale}/auth/login`)
-}
-
-  if (!session?.user) {
-    redirect(`/${locale}/auth/login`)
+  try {
+    const sessionResult = await authServer.getSession();
+    session = sessionResult.data;
+  } catch (error) {
+    console.error("Auth session fallback in layout:", error);
+    redirect(`/${locale}/auth/login`);
   }
 
-  // Sync Neon Auth user with local profiles table
+  if (!session?.user) {
+    redirect(`/${locale}/auth/login`);
+  }
+
   await syncProfile(session);
+
+  const resolvedRoles = await resolveRoles(session);
+
+  if (!resolvedRoles) {
+    redirect(`/${locale}/auth/login`);
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
       <TranslationProgressBar />
-      <DashboardSidebar session={session} />
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <DashboardSidebar session={session} resolvedRoles={resolvedRoles} />
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden pb-16 md:pb-0">
         <div className="flex items-center justify-end gap-2 px-6 pt-4">
           <ThemeToggle />
           <PaletteSwitcher />
@@ -51,6 +54,7 @@ if (!session?.user) {
           {children}
         </div>
       </main>
+      <MobileBottomNav resolvedRoles={resolvedRoles} />
     </div>
   );
 }

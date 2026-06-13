@@ -159,8 +159,11 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 
 #### `profiles`
 - `id` (UUID, PK), `email` (unique), `name`, `avatarUrl`
+- `role` (`user` | `super_admin`, default `user`)
 - `createdAt`, `updatedAt`
 - Synced from Neon Auth via `sync-profile.ts`
+- `super_admin` bypasses all tenant permission checks (see `authorization.ts`)
+- Assigned via `seed-super-admin.ts` — run `npx dotenv -e .env.local -- npx tsx src/5-shared/lib/db/seed-super-admin.ts`
 
 #### `tenant_memberships`
 - `id`, `tenantId` (FK → tenants), `profileId` (FK → profiles)
