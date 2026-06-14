@@ -7,7 +7,7 @@ export function useClientParams() {
   const params = useParams()
   const locale = useLocale() as SupportedLocaleType
 
-  const domain = (params?.domain as string) || 'localhost:3000'
+  const domain = (params?.domain as string) || 'localhost'
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'saasofsaass.com'
 
   const isSubdomain = domain.endsWith(rootDomain) && domain !== rootDomain

@@ -9,6 +9,7 @@ import {
   parseDomain,
 } from "./5-shared/lib/next/domain-parser";
 import { tenantCache } from "./5-shared/lib/next/tenant-cache";
+import { SIDEBAR_TABS } from "./5-shared/config/sidebar-tabs";
 
 // ── Constants — resolved once per worker instance ──────────────────────────────
 const rootDomain = (
@@ -19,6 +20,10 @@ const appDomain = (
 ).toLowerCase();
 const TENANT_NOT_FOUND_URL = `https://${rootDomain}`;
 const TENANT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+// Dashboard route prefixes derived from the canonical sidebar-tabs config.
+// Used to enforce domain isolation — these routes are only valid on DASHBOARD host.
+const DASHBOARD_ROUTE_PREFIXES = SIDEBAR_TABS.map((tab) => tab.href);
 
 // Edge-compatible Neon HTTP client (instantiated once, reused across requests)
 const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
@@ -108,6 +113,20 @@ export default async function proxy(req: NextRequest) {
   // ── Step 6: Execute Target Path Rewrites ──────────────────────────────────
   switch (parsed.type) {
     case "MARKETING": {
+      // Dashboard routes must never be served from the marketing domain.
+      // Redirect to the canonical dashboard host, preserving locale and path.
+      if (strippedPath !== "/") {
+        const isDashboardRoute = DASHBOARD_ROUTE_PREFIXES.some(
+          (prefix) => strippedPath === prefix || strippedPath.startsWith(prefix + "/"),
+        );
+        if (isDashboardRoute) {
+          const url = req.nextUrl.clone();
+          url.hostname = appDomain;
+          url.pathname = `/${locale}${strippedPath}`;
+          return NextResponse.redirect(url, { status: 308 });
+        }
+      }
+
       const url = req.nextUrl.clone();
       url.pathname = `/${locale}${strippedPath === "/" ? "" : strippedPath}`;
       return NextResponse.rewrite(url, { headers });
@@ -115,9 +134,12 @@ export default async function proxy(req: NextRequest) {
 
     case "DASHBOARD": {
       const url = req.nextUrl.clone();
-      // Bare root '/' has no page — dashboard home lives at /{locale}/dashboard.
-      // All other sub-paths (e.g. /dashboard/site-builder/123) pass through as-is.
-      url.pathname = `/${locale}${strippedPath === "/" ? "/dashboard" : strippedPath}`;
+      // Bare /{locale} has no page — redirect to canonical /{locale}/dashboard.
+      if (strippedPath === "/") {
+        url.pathname = `/${locale}/dashboard`;
+        return NextResponse.redirect(url, { status: 308 });
+      }
+      url.pathname = `/${locale}${strippedPath}`;
       return NextResponse.rewrite(url, { headers });
     }
 

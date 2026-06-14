@@ -11,7 +11,7 @@ export async function getServerParams(
   const params = await paramsPromise
   const searchParams = await searchParamsPromise
 
-  const domain = params.domain || 'localhost:3000'
+  const domain = params.domain || 'localhost'
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'saasofsaass.com'
 
   // Mirror the same subdomain detection logic as domain-parser.ts:

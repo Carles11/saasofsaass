@@ -52,6 +52,14 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
   const { data: session, isPending } = useSession();
   const isLoggedIn = !isPending && !!session;
 
+  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.localhost";
+  const isDev = process.env.NODE_ENV === "development";
+  const dashboardHref = `${
+    isDev ? "http:" : "https:"
+  }//${appDomain}${
+    isDev ? `:${process.env.NEXT_PUBLIC_DEV_PORT || "3000"}` : ""
+  }/${locale}/dashboard`;
+
   function navHref(homeAnchor: string, localAnchor?: string): string {
     if (isHome) return `#${homeAnchor}`;
     if (localAnchor) return `#${localAnchor}`;
@@ -140,7 +148,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
           <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border/60">
             {isLoggedIn ? (
               <Button size="sm" asChild className="text-sm px-4">
-                <Link href={`/${locale}/dashboard`}>Dashboard</Link>
+                <Link href={dashboardHref}>Dashboard</Link>
               </Button>
             ) : (
               <>
@@ -183,7 +191,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
             {isLoggedIn ? (
               <Button size="sm" asChild className="flex-1">
                 <Link
-                  href={`/${locale}/dashboard`}
+                  href={dashboardHref}
                   onClick={() => setMobileOpen(false)}
                 >
                   Dashboard

@@ -9,8 +9,9 @@ import { getStripe } from "@/5-shared/lib/billing/stripe";
 import { getPlan, getStripePriceId, getSiteLimit } from "@/5-shared/lib/billing/plans";
 
 function getBaseUrl(): string {
-  const host = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.localhost:3000";
-  return `https://${host}`;
+  const host = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.localhost";
+  const port = process.env.NEXT_PUBLIC_DEV_PORT;
+  return `https://${host}${port ? `:${port}` : ""}`;
 }
 
 async function getOrCreateCustomer(workspaceId: string): Promise<string> {
