@@ -1,9 +1,11 @@
-import { db } from "@/5-shared/lib/db";
-import { tenants } from "@/5-shared/lib/db/schema";
-import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
-import { eq, and, sql } from "drizzle-orm";
+import {
+  countActiveTenants,
+  getWorkspaceByProfileId,
+} from "@/3-features/manage-billing/actions/billingHelpers";
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
-import { getWorkspaceByProfileId, countActiveTenants } from "@/3-features/manage-billing/actions/billingHelpers";
+import { db } from "@/5-shared/lib/db";
+import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
+import { eq, sql } from "drizzle-orm";
 
 function StatCard({
   label,
@@ -15,14 +17,12 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+    <div className="bg-card border border-border p-6 shadow-sm">
       <p className="text-sm text-muted-foreground font-medium">{label}</p>
       <p className="text-3xl font-black text-foreground tracking-tighter mt-1">
         {value}
       </p>
-      {sub && (
-        <p className="text-xs text-muted-foreground mt-1">{sub}</p>
-      )}
+      {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
     </div>
   );
 }
@@ -77,7 +77,11 @@ export async function DashboardOverview({ locale }: { locale?: string }) {
           <StatCard
             label="Site Usage"
             value={`${currentSites} / ${siteLimit}`}
-            sub={siteLimit > 0 ? `${Math.round((currentSites / siteLimit) * 100)}% used` : undefined}
+            sub={
+              siteLimit > 0
+                ? `${Math.round((currentSites / siteLimit) * 100)}% used`
+                : undefined
+            }
           />
           <StatCard
             label="Recent Activity"

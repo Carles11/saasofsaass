@@ -1,9 +1,20 @@
 "use client";
 
-import { createEntity, publishEntity, updateEntityTranslation } from "@/3-features/manage-entities";
-import type { Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
+import {
+  createEntity,
+  publishEntity,
+  updateEntityTranslation,
+} from "@/3-features/manage-entities";
+import type {
+  Tenant,
+  TenantEntity,
+  TenantTranslation,
+} from "@/5-shared/lib/db/schema";
 import { isRtl } from "@/5-shared/lib/next/rtl";
-import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import {
+  resolveTranslation,
+  type TranslationDict,
+} from "@/5-shared/lib/translations/resolve";
 import type { SupportedLocaleType } from "@/5-shared/types";
 import type { EntityKind } from "@/5-shared/types/tenants/entities";
 import { Button } from "@/components/tenant/ui/button";
@@ -27,9 +38,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
-type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
+type EntityRow = {
+  entity: TenantEntity;
+  translation: TenantTranslation | null;
+};
 
 interface CollectionManagerProps {
   tenant: Tenant;
@@ -50,14 +64,20 @@ export function CollectionManager({
 }: CollectionManagerProps) {
   const [isPending, startTransition] = useTransition();
   // Always set newKind to the only valid kind for the block when blockType changes
-  let entityKinds: EntityKind[] = ["blog_post", "podcast_episode", "award_item"];
+  let entityKinds: EntityKind[] = [
+    "blog_post",
+    "podcast_episode",
+    "award_item",
+  ];
   if (blockType === "blog-feed") entityKinds = ["blog_post"];
   else if (blockType === "podcast-feed") entityKinds = ["podcast_episode"];
   else if (blockType === "awards") entityKinds = ["award_item"];
 
   // Derive effective kind from entityKinds; if blockType changed, reset to first
   const [newKind, setNewKind] = useState<EntityKind>(entityKinds[0]);
-  const effectiveKind = entityKinds.includes(newKind) ? newKind : entityKinds[0];
+  const effectiveKind = entityKinds.includes(newKind)
+    ? newKind
+    : entityKinds[0];
   const [newSlug, setNewSlug] = useState("");
   const dir = isRtl(activeLocale) ? "rtl" : "ltr";
 
@@ -65,18 +85,24 @@ export function CollectionManager({
   let filteredEntities = initialEntities;
   if (blockId) {
     filteredEntities = initialEntities.filter(
-      (row) => row.entity.blockId === blockId && entityKinds.includes(row.entity.kind as EntityKind)
+      (row) =>
+        row.entity.blockId === blockId &&
+        entityKinds.includes(row.entity.kind as EntityKind),
     );
   } else {
     filteredEntities = initialEntities.filter((row) =>
-      entityKinds.includes(row.entity.kind as EntityKind)
+      entityKinds.includes(row.entity.kind as EntityKind),
     );
   }
 
   const newItemLabel = resolveTranslation(translations, "new-item", "New Item");
   const kindLabel = resolveTranslation(translations, "label.kind", "Kind");
   const slugLabel = resolveTranslation(translations, "label.slug", "Slug");
-  const slugPlaceholder = resolveTranslation(translations, "placeholder.slug", "my-first-post");
+  const slugPlaceholder = resolveTranslation(
+    translations,
+    "placeholder.slug",
+    "my-first-post",
+  );
   const createLabel = resolveTranslation(translations, "create", "Create");
   const emptyLabel = resolveTranslation(
     translations,
@@ -87,7 +113,12 @@ export function CollectionManager({
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!newSlug.trim()) return;
-    await createEntity({ tenantId: tenant.id, kind: newKind, slug: newSlug.trim(), blockId });
+    await createEntity({
+      tenantId: tenant.id,
+      kind: newKind,
+      slug: newSlug.trim(),
+      blockId,
+    });
     setNewSlug("");
   }
 
@@ -98,14 +129,19 @@ export function CollectionManager({
       {/* Only show the Kind dropdown if more than one kind is possible */}
       <form
         onSubmit={handleCreate}
-        className="flex flex-col gap-3 p-4 bg-muted rounded-xl border border-dashed border-border"
+        className="flex flex-col gap-3 p-4 bg-muted border border-dashed border-border"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{newItemLabel}</p>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {newItemLabel}
+        </p>
         <div className="flex flex-wrap gap-3 items-end">
           {entityKinds.length > 1 && (
             <div className="flex flex-col gap-1 min-w-35">
               <Label>{kindLabel}</Label>
-              <Select value={newKind} onValueChange={(v) => setNewKind(v as EntityKind)}>
+              <Select
+                value={newKind}
+                onValueChange={(v) => setNewKind(v as EntityKind)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -129,7 +165,11 @@ export function CollectionManager({
               title="lowercase letters, numbers and hyphens only"
             />
           </div>
-          <Button type="submit" tenantVariant="default" disabled={isPending || !newSlug.trim()}>
+          <Button
+            type="submit"
+            tenantVariant="default"
+            disabled={isPending || !newSlug.trim()}
+          >
             {createLabel}
           </Button>
         </div>
@@ -172,7 +212,14 @@ interface EntityRowProps {
   translations?: TranslationDict;
 }
 
-function EntityRow({ entity, translation, tenantId, activeLocale, dir, translations }: EntityRowProps) {
+function EntityRow({
+  entity,
+  translation,
+  tenantId,
+  activeLocale,
+  dir,
+  translations,
+}: EntityRowProps) {
   const [isPending, startTransition] = useTransition();
   const payload = (translation?.payload ?? {}) as Record<string, string>;
   const displayTitle = payload.title ?? entity.slug ?? entity.id;
@@ -210,7 +257,10 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir, translati
             {entity.status}
           </Badge>
           {translation ? (
-            <TranslationStatusBadge status={translation.translationStatus} translations={translations} />
+            <TranslationStatusBadge
+              status={translation.translationStatus}
+              translations={translations}
+            />
           ) : (
             <span className="text-xs text-amber-500">{noTranslationLabel}</span>
           )}
@@ -228,7 +278,9 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir, translati
           <DialogContent>
             <div dir={dir}>
               <DialogHeader>
-                <DialogTitle>Edit Translation &mdash; {activeLocale.toUpperCase()}</DialogTitle>
+                <DialogTitle>
+                  Edit Translation &mdash; {activeLocale.toUpperCase()}
+                </DialogTitle>
               </DialogHeader>
               <TranslationForm
                 entity={entity}
@@ -247,7 +299,9 @@ function EntityRow({ entity, translation, tenantId, activeLocale, dir, translati
           <Button
             size="sm"
             disabled={isPending}
-            onClick={() => startTransition(() => publishEntity(entity.id, tenantId))}
+            onClick={() =>
+              startTransition(() => publishEntity(entity.id, tenantId))
+            }
           >
             {publishLabel}
           </Button>
@@ -290,9 +344,15 @@ function TranslationForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4" dir={dir}>
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-4 mt-4"
+      dir={dir}
+    >
       <div className="flex flex-col gap-1">
-        <Label htmlFor="et-title">{resolveTranslation(translations, "label.title", "Title")}</Label>
+        <Label htmlFor="et-title">
+          {resolveTranslation(translations, "label.title", "Title")}
+        </Label>
         <Input
           id="et-title"
           name="title"
@@ -307,13 +367,19 @@ function TranslationForm({
           <Label htmlFor="et-excerpt">
             {isBlog
               ? resolveTranslation(translations, "label.excerpt", "Excerpt")
-              : resolveTranslation(translations, "label.description", "Description")}
+              : resolveTranslation(
+                  translations,
+                  "label.description",
+                  "Description",
+                )}
           </Label>
           <Textarea
             id="et-excerpt"
             name={isBlog ? "excerpt" : "description"}
             defaultValue={
-              isBlog ? (currentPayload.excerpt ?? "") : (currentPayload.description ?? "")
+              isBlog
+                ? (currentPayload.excerpt ?? "")
+                : (currentPayload.description ?? "")
             }
             rows={3}
             dir={dir}
@@ -323,7 +389,13 @@ function TranslationForm({
 
       {!isBlog && !isPodcast && (
         <div className="flex flex-col gap-1">
-          <Label htmlFor="et-desc">{resolveTranslation(translations, "label.description", "Description")}</Label>
+          <Label htmlFor="et-desc">
+            {resolveTranslation(
+              translations,
+              "label.description",
+              "Description",
+            )}
+          </Label>
           <Textarea
             id="et-desc"
             name="description"
@@ -337,7 +409,11 @@ function TranslationForm({
       {isBlog && (
         <div className="flex flex-col gap-1">
           <Label htmlFor="et-slug">
-            {resolveTranslation(translations, "label.localized-slug", "Localized Slug")}
+            {resolveTranslation(
+              translations,
+              "label.localized-slug",
+              "Localized Slug",
+            )}
           </Label>
           <Input
             id="et-slug"
@@ -349,7 +425,11 @@ function TranslationForm({
 
       <DialogClose asChild>
         <Button type="submit" className="mt-2">
-          {resolveTranslation(translations, "save-translation", "Save Translation")}
+          {resolveTranslation(
+            translations,
+            "save-translation",
+            "Save Translation",
+          )}
         </Button>
       </DialogClose>
     </form>
@@ -362,7 +442,11 @@ type TranslationStatus = "pending" | "translated" | "failed" | "locked";
 
 const STATUS_CONFIG: Record<
   TranslationStatus,
-  { label: string; icon: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  {
+    label: string;
+    icon: string;
+    variant: "default" | "secondary" | "destructive" | "outline";
+  }
 > = {
   pending: { label: "pending", icon: "⏳", variant: "secondary" },
   translated: { label: "translated", icon: "✓", variant: "default" },

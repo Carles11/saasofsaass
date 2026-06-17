@@ -36,7 +36,9 @@ export function GalleryManager({
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingCaptions, setPendingCaptions] = useState<Record<string, string>>({});
+  const [pendingCaptions, setPendingCaptions] = useState<
+    Record<string, string>
+  >({});
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -53,13 +55,15 @@ export function GalleryManager({
         setImages(config.images ?? []);
       })
       .finally(() => setLoading(false));
-     
   }, [blockId]);
 
   if (loading) return <div>Loading gallery...</div>;
   if (!block) return <div>Block not found.</div>;
 
-  const config = (block.config ?? {}) as { galleryName?: string; images?: GalleryImage[] };
+  const config = (block.config ?? {}) as {
+    galleryName?: string;
+    images?: GalleryImage[];
+  };
 
   // Drag-and-drop logic
   async function handleDragEnd(event: any) {
@@ -72,7 +76,10 @@ export function GalleryManager({
       onImagesChange(newImages);
       // Persist new order
       if (block) {
-        await updateBlockConfig(block.id, tenant.id, { ...config, images: newImages });
+        await updateBlockConfig(block.id, tenant.id, {
+          ...config,
+          images: newImages,
+        });
       }
     }
   }
@@ -123,14 +130,20 @@ export function GalleryManager({
             },
           },
         });
-        toast({ title: `Image '${file.name}' added to gallery.`, status: "success" });
+        toast({
+          title: `Image '${file.name}' added to gallery.`,
+          status: "success",
+        });
       }
       if (newImages.length > 0) {
         const allImages = [...images, ...newImages].slice(0, 11);
         setImages(allImages);
         onImagesChange(allImages);
         if (block) {
-          await updateBlockConfig(block.id, tenant.id, { ...config, images: allImages });
+          await updateBlockConfig(block.id, tenant.id, {
+            ...config,
+            images: allImages,
+          });
         }
       }
     } catch (err: any) {
@@ -156,9 +169,12 @@ export function GalleryManager({
   async function handleRemoveImage(s3Key: string) {
     setError(null);
     try {
-      const res = await fetch(`/api/gallery/delete?s3Key=${encodeURIComponent(s3Key)}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/gallery/delete?s3Key=${encodeURIComponent(s3Key)}`,
+        {
+          method: "DELETE",
+        },
+      );
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         setError(err.error || "Failed to delete image");
@@ -169,7 +185,10 @@ export function GalleryManager({
       onImagesChange(newImages);
       // Persist removal in block config
       if (block) {
-        await updateBlockConfig(block.id, tenant.id, { ...config, images: newImages });
+        await updateBlockConfig(block.id, tenant.id, {
+          ...config,
+          images: newImages,
+        });
       }
       toast({ title: "Image removed from gallery.", status: "success" });
     } catch (e) {
@@ -196,7 +215,11 @@ export function GalleryManager({
       const res = await fetch("/api/gallery/captions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blockId, captions: payload, locale: activeLocale }),
+        body: JSON.stringify({
+          blockId,
+          captions: payload,
+          locale: activeLocale,
+        }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -220,13 +243,20 @@ export function GalleryManager({
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm rounded-lg">
           <div className="flex flex-col items-center gap-2">
             <Spinner className="size-8 text-blue-600" />
-            <span className="text-sm text-blue-700 font-medium mt-2">Uploading image...</span>
+            <span className="text-sm text-blue-700 font-medium mt-2">
+              Uploading image...
+            </span>
           </div>
         </div>
       )}
       <div className="flex flex-col gap-2">
         <Label htmlFor="gallery-name">Gallery Name</Label>
-        <Input id="gallery-name" value={galleryName} onChange={handleNameChange} maxLength={64} />
+        <Input
+          id="gallery-name"
+          value={galleryName}
+          onChange={handleNameChange}
+          maxLength={64}
+        />
       </div>
       <Separator />
       <div className="flex flex-col gap-2">
@@ -260,7 +290,9 @@ export function GalleryManager({
                   onRemove={() => handleRemoveImage(img.s3Key)}
                   onCaptionChange={handleCaptionChange}
                   captionValue={
-                    pendingCaptions[img.s3Key] ?? img.i18n?.[activeLocale]?.caption ?? ""
+                    pendingCaptions[img.s3Key] ??
+                    img.i18n?.[activeLocale]?.caption ??
+                    ""
                   }
                   deleting={isUploading}
                 />
@@ -321,9 +353,10 @@ function GalleryImageCard({
   captionValue,
   deleting,
 }: GalleryImageCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-    id: img.s3Key,
-  });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: img.s3Key,
+    });
   const cloudfrontDomain = getCloudFrontUrl(img.s3Key);
 
   function handleRemoveClick(e: React.MouseEvent) {
@@ -335,10 +368,12 @@ function GalleryImageCard({
     <div
       ref={setNodeRef}
       style={{
-        transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+        transform: transform
+          ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+          : undefined,
         transition,
       }}
-      className="relative border rounded-lg p-2 bg-white flex flex-col gap-2 shadow-sm"
+      className="relative border rounded-xs p-2 bg-white flex flex-col gap-2 shadow-sm"
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -348,7 +383,10 @@ function GalleryImageCard({
         {...attributes}
         {...listeners}
       />
-      <Label htmlFor={`caption-${img.s3Key}`} className="text-xs font-medium pl-1">
+      <Label
+        htmlFor={`caption-${img.s3Key}`}
+        className="text-xs font-medium pl-1"
+      >
         Image title*
       </Label>
       <Input

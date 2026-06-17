@@ -4,12 +4,17 @@ import {
   deleteBlock,
   toggleBlockVisibility,
 } from "@/3-features/manage-site-blocks";
-import type { Block, Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
-import type { SupportedLocaleType } from "@/5-shared/types";
+import type {
+  Block,
+  Tenant,
+  TenantEntity,
+  TenantTranslation,
+} from "@/5-shared/lib/db/schema";
 import {
   resolveTranslation,
   type TranslationDict,
 } from "@/5-shared/lib/translations/resolve";
+import type { SupportedLocaleType } from "@/5-shared/types";
 import { Button } from "@/components/tenant/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,12 +28,15 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
 import { useState, useTransition } from "react";
-import { BlockExpandedArea } from "./BlockExpandedArea";
 import { BlockEditForm } from "./BlockEditForm";
+import { BlockExpandedArea } from "./BlockExpandedArea";
 import { CollectionManager } from "./CollectionManager";
 import { GalleryManager } from "./GalleryManager";
 
-type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
+type EntityRow = {
+  entity: TenantEntity;
+  translation: TenantTranslation | null;
+};
 
 interface BlockCardProps {
   block: Block;
@@ -52,9 +60,12 @@ export function BlockCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const isCollectionBlock = ["blog-feed", "podcast-feed", "awards", "image-gallery"].includes(
-    block.type,
-  );
+  const isCollectionBlock = [
+    "blog-feed",
+    "podcast-feed",
+    "awards",
+    "image-gallery",
+  ].includes(block.type);
 
   const {
     attributes,
@@ -82,8 +93,16 @@ export function BlockCard({
     "Manage Content",
   );
   const closeLabel = resolveTranslation(translations, "action.close", "Close");
-  const hiddenLabel = resolveTranslation(translations, "status.hidden", "hidden");
-  const deleteLabel = resolveTranslation(translations, "action.delete", "Delete");
+  const hiddenLabel = resolveTranslation(
+    translations,
+    "status.hidden",
+    "hidden",
+  );
+  const deleteLabel = resolveTranslation(
+    translations,
+    "action.delete",
+    "Delete",
+  );
   const deleteTitle = resolveTranslation(
     translations,
     "delete-confirm.title",
@@ -106,7 +125,7 @@ export function BlockCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-card border border-border transition-opacity rounded-xl ${
+      className={`bg-card border border-border transition-opacity ${
         isExpanded ? "rounded-b-none border-b-0" : ""
       } ${isDragging ? "opacity-50 z-10" : ""} ${isPending ? "opacity-50 pointer-events-none" : ""}`}
     >
@@ -153,19 +172,33 @@ export function BlockCard({
 
           {/* Edit / Manage Content — toggle expansion */}
           <Button
-            tenantVariant={isExpanded ? "secondary" : isCollectionBlock ? "default" : "outline"}
+            tenantVariant={
+              isExpanded
+                ? "secondary"
+                : isCollectionBlock
+                  ? "default"
+                  : "outline"
+            }
             size="sm"
             disabled={isPending}
             onClick={() => setIsExpanded((prev) => !prev)}
           >
-            {isExpanded ? closeLabel : isCollectionBlock ? manageContentLabel : editLabel}
+            {isExpanded
+              ? closeLabel
+              : isCollectionBlock
+                ? manageContentLabel
+                : editLabel}
           </Button>
 
           {/* Delete — owner only */}
           {userRole === "owner" && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button tenantVariant="destructive" size="sm" disabled={isPending}>
+                <Button
+                  tenantVariant="destructive"
+                  size="sm"
+                  disabled={isPending}
+                >
                   {deleteLabel}
                 </Button>
               </DialogTrigger>
@@ -173,7 +206,9 @@ export function BlockCard({
                 <DialogHeader>
                   <DialogTitle>{deleteTitle}</DialogTitle>
                 </DialogHeader>
-                <p className="text-sm text-muted-foreground mb-4">{deleteWarning}</p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {deleteWarning}
+                </p>
                 <div className="flex gap-2 justify-end">
                   <DialogClose asChild>
                     <Button tenantVariant="outline">{cancelLabel}</Button>
@@ -181,7 +216,9 @@ export function BlockCard({
                   <DialogClose asChild>
                     <Button
                       tenantVariant="destructive"
-                      onClick={() => startTransition(() => deleteBlock(block.id, tenantId))}
+                      onClick={() =>
+                        startTransition(() => deleteBlock(block.id, tenantId))
+                      }
                     >
                       {deleteConfirm}
                     </Button>
