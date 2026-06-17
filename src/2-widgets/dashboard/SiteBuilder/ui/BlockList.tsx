@@ -121,6 +121,7 @@ interface BlockListProps {
   initialEntities: EntityRow[];
   userRole?: "owner" | "editor" | null;
   translations?: TranslationDict;
+  onLocaleChange?: (locale: SupportedLocaleType) => void;
 }
 
 export function BlockList({
@@ -131,6 +132,7 @@ export function BlockList({
   initialEntities,
   userRole,
   translations,
+  onLocaleChange,
 }: BlockListProps) {
   const [newKind, setNewKind] = useState<BlockKind>(ALL_BLOCK_KINDS[0]);
   const [orderedBlocks, setOrderedBlocks] = useState<Block[]>(blocks);
@@ -220,6 +222,7 @@ export function BlockList({
               initialEntities={initialEntities}
               userRole={userRole}
               translations={translations}
+              onLocaleChange={onLocaleChange}
             />
           ))}
         </SortableContext>

@@ -9,11 +9,8 @@ import type { SupportedLocaleType } from "@/5-shared/types";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { AutoTranslateButton } from "./AutoTranslateButton";
+import { useCallback, useState, useTransition } from "react";
 import { BlockList } from "./BlockList";
-import { LanguageSelector } from "./LanguageSelector";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 type UserRole = "owner" | "editor" | null;
@@ -36,14 +33,19 @@ export function SiteBuilder({
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType
   );
-  const router = useRouter();
-  const pathname = usePathname();
   const [locales, setLocales] = useState<string[]>(tenant.locales);
   const [isSaving, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<string>("blocks");
   const [previewTemplateId, setPreviewTemplateId] = useState<
     import("@/5-shared/config/templates").TenantTemplateId
   >(tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId);
+
+  const handleLocaleChange = useCallback(
+    (locale: SupportedLocaleType) => {
+      setActiveLocale(locale);
+    },
+    [],
+  );
 
 const devPort =
   process.env.NEXT_PUBLIC_DEV_PORT || "3000";
@@ -85,7 +87,6 @@ const previewUrl = isDev
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
-          <AutoTranslateButton tenantId={tenant.id} />
           <a
             href={previewUrl}
             target="_blank"
@@ -94,18 +95,6 @@ const previewUrl = isDev
           >
             {translations?.preview ?? "Preview"}
           </a>
-          <LanguageSelector
-            locales={tenant.locales}
-            activeLocale={activeLocale}
-            onChange={(locale) => {
-              setActiveLocale(locale);
-              const segments = pathname.split("/");
-              if (segments[1] && tenant.locales.includes(locale)) {
-                segments[1] = locale;
-                router.push(segments.join("/"));
-              }
-            }}
-          />
         </div>
       </div>
 
@@ -127,6 +116,7 @@ const previewUrl = isDev
                 initialEntities={initialEntities}
                 userRole={userRole}
                 translations={translations}
+                onLocaleChange={handleLocaleChange}
               />
             </TenantLayoutResolver>
           </div>

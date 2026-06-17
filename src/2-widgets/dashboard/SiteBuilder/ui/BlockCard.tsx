@@ -28,7 +28,9 @@ import {
 import { useSortable } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
 import { useState, useTransition } from "react";
+import { Spinner } from "@/components/ui/spinner";
 import { BlockEditForm } from "./BlockEditForm";
+import { BlockEditorHeader } from "./BlockEditorHeader";
 import { BlockExpandedArea } from "./BlockExpandedArea";
 import { CollectionManager } from "./CollectionManager";
 import { GalleryManager } from "./GalleryManager";
@@ -46,6 +48,7 @@ interface BlockCardProps {
   initialEntities: EntityRow[];
   userRole?: "owner" | "editor" | null;
   translations?: TranslationDict;
+  onLocaleChange?: (locale: SupportedLocaleType) => void;
 }
 
 export function BlockCard({
@@ -56,8 +59,10 @@ export function BlockCard({
   initialEntities,
   userRole,
   translations,
+  onLocaleChange,
 }: BlockCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const isCollectionBlock = [
@@ -232,35 +237,57 @@ export function BlockCard({
 
       {/* ── Expanded inline editor ──────────────────────────────────── */}
       <BlockExpandedArea isExpanded={isExpanded}>
-        <div className="border-t border-border">
-          {block.type === "image-gallery" ? (
-            <div className="p-3 sm:p-4">
-              <GalleryManager
-                blockId={block.id}
+        <div className="border-t border-border relative">
+          <BlockEditorHeader
+            tenantId={tenantId}
+            blockId={block.id}
+            locales={tenant.locales}
+            activeLocale={activeLocale}
+            onLocaleChange={
+              onLocaleChange ?? (() => {})
+            }
+            defaultLocale={tenant.defaultLocale}
+            onTranslate={setIsTranslating}
+          />
+          <div className={
+            "border-t border-border" +
+            (isTranslating ? " pointer-events-none" : "")
+          }>
+            {block.type === "image-gallery" ? (
+              <div className="p-3 sm:p-4">
+                <GalleryManager
+                  blockId={block.id}
+                  tenant={tenant}
+                  activeLocale={activeLocale}
+                  onImagesChange={() => {}}
+                />
+              </div>
+            ) : isCollectionBlock ? (
+              <div className="p-3 sm:p-4">
+                <CollectionManager
+                  tenant={tenant}
+                  activeLocale={activeLocale}
+                  initialEntities={initialEntities}
+                  blockType={block.type}
+                  blockId={block.id}
+                  translations={translations}
+                />
+              </div>
+            ) : (
+              <BlockEditForm
+                block={block}
                 tenant={tenant}
                 activeLocale={activeLocale}
-                onImagesChange={() => {}}
-              />
-            </div>
-          ) : isCollectionBlock ? (
-            <div className="p-3 sm:p-4">
-              <CollectionManager
-                tenant={tenant}
-                activeLocale={activeLocale}
-                initialEntities={initialEntities}
-                blockType={block.type}
-                blockId={block.id}
                 translations={translations}
+                onSuccess={() => setIsExpanded(false)}
               />
+            )}
+          </div>
+
+          {isTranslating && (
+            <div className="absolute inset-0 bg-background/60 flex items-center justify-center z-10">
+              <Spinner className="size-6" />
             </div>
-          ) : (
-            <BlockEditForm
-              block={block}
-              tenant={tenant}
-              activeLocale={activeLocale}
-              translations={translations}
-              onSuccess={() => setIsExpanded(false)}
-            />
           )}
         </div>
       </BlockExpandedArea>

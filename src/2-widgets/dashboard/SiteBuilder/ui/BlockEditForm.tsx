@@ -116,7 +116,7 @@ export function BlockEditForm({
     <div className="flex flex-col gap-4 p-4" dir={dir}>
       {/* ── Translation fields ─────────────────────────────────────── */}
       {fields.length > 0 && (
-        <form onSubmit={handleTranslationSubmit} className="flex flex-col gap-4" dir={dir}>
+        <form key={activeLocale} onSubmit={handleTranslationSubmit} className="flex flex-col gap-4" dir={dir}>
           <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {sectionTranslations}
           </p>

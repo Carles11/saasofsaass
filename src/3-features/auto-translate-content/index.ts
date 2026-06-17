@@ -1,3 +1,6 @@
 export { triggerTenantTranslation } from './actions/triggerTenantTranslation'
 export type { TranslationResult } from './actions/triggerTenantTranslation'
+export { triggerBlockTranslation } from './actions/triggerBlockTranslation'
+export type { BlockTranslationResult } from './actions/triggerBlockTranslation'
+export { generateBlockContent } from './actions/generateBlockContent'
 export { translatePayload, TranslationError, RateLimitError } from './api/translateWithGemini'

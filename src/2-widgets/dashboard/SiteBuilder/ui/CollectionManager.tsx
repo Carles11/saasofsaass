@@ -2,6 +2,7 @@
 
 import {
   createEntity,
+  getEntityTranslations,
   publishEntity,
   updateEntityTranslation,
 } from "@/3-features/manage-entities";
@@ -38,7 +39,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 type EntityRow = {
   entity: TenantEntity;
@@ -81,19 +82,86 @@ export function CollectionManager({
   const [newSlug, setNewSlug] = useState("");
   const dir = isRtl(activeLocale) ? "rtl" : "ltr";
 
-  // Filter entities by blockId and kind (if blockId is provided)
-  let filteredEntities = initialEntities;
-  if (blockId) {
-    filteredEntities = initialEntities.filter(
-      (row) =>
-        row.entity.blockId === blockId &&
-        entityKinds.includes(row.entity.kind as EntityKind),
-    );
-  } else {
-    filteredEntities = initialEntities.filter((row) =>
-      entityKinds.includes(row.entity.kind as EntityKind),
-    );
+  // ── Locale-reactive entity rows ──────────────────────────────────────
+  // Start with initialEntities filtered by blockId
+  const initialFiltered = useMemo(() => {
+    return blockId
+      ? initialEntities.filter(
+          (row) =>
+            row.entity.blockId === blockId &&
+            entityKinds.includes(row.entity.kind as EntityKind),
+        )
+      : initialEntities.filter((row) =>
+          entityKinds.includes(row.entity.kind as EntityKind),
+        );
+  }, [initialEntities, blockId, entityKinds]);
+
+  // Store locale-specific translation overrides (separate from base data)
+  const [localeOverrides, setLocaleOverrides] = useState<
+    Map<
+      string,
+      { payload: Record<string, string>; translationStatus: string } | null
+    >
+  >(new Map());
+
+  // Derive final rows by overlaying locale translations onto base data
+  const entityRows = useMemo(() => {
+    return initialFiltered.map((row) => {
+      const override = localeOverrides.get(row.entity.id);
+      if (override === undefined) return row;
+      if (override === null) return { ...row, translation: null };
+      return {
+        ...row,
+        translation: {
+          ...(row.translation ?? {
+            id: "",
+            tenantId: tenant.id,
+            entityId: row.entity.id,
+            locale: activeLocale,
+            isLocked: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
+          payload: override.payload,
+          translationStatus: override.translationStatus,
+          locale: activeLocale,
+        } as TenantTranslation,
+      };
+    });
+  }, [initialFiltered, localeOverrides, tenant.id, activeLocale]);
+
+  // Build a lookup of default-locale payloads for title fallback
+  const defaultPayloadMap = new Map<string, Record<string, string>>();
+  for (const row of initialFiltered) {
+    if (row.translation?.payload) {
+      defaultPayloadMap.set(
+        row.entity.id,
+        row.translation.payload as Record<string, string>,
+      );
+    }
   }
+
+  // Fetch translations for the active locale
+  useEffect(() => {
+    const entityIds = initialFiltered.map((r) => r.entity.id);
+    if (entityIds.length === 0) return;
+
+    getEntityTranslations(tenant.id, entityIds, activeLocale).then(
+      (localeRows) => {
+        const map = new Map<
+          string,
+          { payload: Record<string, string>; translationStatus: string } | null
+        >();
+        for (const r of localeRows) {
+          map.set(r.entityId, {
+            payload: r.payload,
+            translationStatus: r.translationStatus,
+          });
+        }
+        setLocaleOverrides(map);
+      },
+    );
+  }, [activeLocale, tenant.id, initialFiltered]);
 
   const newItemLabel = resolveTranslation(translations, "new-item", "New Item");
   const kindLabel = resolveTranslation(translations, "label.kind", "Kind");
@@ -178,18 +246,21 @@ export function CollectionManager({
       <Separator />
 
       {/* ── Entity list ────────────────────────────────────────────── */}
-      {filteredEntities.length === 0 && (
+      {entityRows.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-8">
           {emptyLabel}
         </p>
       )}
 
       <div className="flex flex-col gap-3">
-        {filteredEntities.map(({ entity, translation }) => (
+        {entityRows.map(({ entity, translation }) => (
           <EntityRow
             key={entity.id}
             entity={entity}
             translation={translation}
+            defaultPayload={
+              (defaultPayloadMap.get(entity.id) ?? {}) as Record<string, string>
+            }
             tenantId={tenant.id}
             activeLocale={activeLocale}
             dir={dir}
@@ -206,6 +277,7 @@ export function CollectionManager({
 interface EntityRowProps {
   entity: TenantEntity;
   translation: TenantTranslation | null;
+  defaultPayload: Record<string, string>;
   tenantId: string;
   activeLocale: SupportedLocaleType;
   dir: "ltr" | "rtl";
@@ -215,6 +287,7 @@ interface EntityRowProps {
 function EntityRow({
   entity,
   translation,
+  defaultPayload,
   tenantId,
   activeLocale,
   dir,
@@ -222,7 +295,8 @@ function EntityRow({
 }: EntityRowProps) {
   const [isPending, startTransition] = useTransition();
   const payload = (translation?.payload ?? {}) as Record<string, string>;
-  const displayTitle = payload.title ?? entity.slug ?? entity.id;
+  const displayTitle =
+    payload.title ?? defaultPayload.title ?? entity.slug ?? entity.id;
 
   const noTranslationLabel = resolveTranslation(
     translations,
@@ -345,6 +419,7 @@ function TranslationForm({
 
   return (
     <form
+      key={activeLocale}
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 mt-4"
       dir={dir}

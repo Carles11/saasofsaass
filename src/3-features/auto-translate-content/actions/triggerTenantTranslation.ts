@@ -18,7 +18,8 @@ export interface TranslationResult {
   succeeded: number;
   failed: number;
   remaining: number;
-  /** Set when Gemini returned 429. Client should wait this many seconds and retry. */
+  totalJobCount: number;
+  needsSeed?: boolean;
   rateLimitRetryAfter?: number;
 }
 
@@ -221,6 +222,19 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
   }
 
   const totalJobs = jobs.length;
+
+  // Detect if any block/entity has content at all
+  let needsSeed = false;
+  if (totalJobs === 0) {
+    const hasAnyContent = tenantBlocks.some((b) => {
+      const trans = (b.translations ?? {}) as Record<string, Record<string, string>>;
+      return Object.values(trans).some((t) =>
+        Object.values(t).some((v) => typeof v === "string" && v.trim().length > 0),
+      );
+    });
+    needsSeed = !hasAnyContent;
+  }
+
   const batch = jobs.slice(0, BATCH_LIMIT);
   const remaining = Math.max(0, totalJobs - BATCH_LIMIT);
 
@@ -275,6 +289,8 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
           succeeded,
           failed,
           remaining: totalJobs - succeeded,
+          totalJobCount: totalJobs,
+          needsSeed,
           rateLimitRetryAfter: err.retryAfterSeconds,
         };
       }
@@ -297,5 +313,5 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
 
   revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, "page");
 
-  return { succeeded, failed, remaining };
+  return { succeeded, failed, remaining, totalJobCount: totalJobs, needsSeed };
 }
