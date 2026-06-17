@@ -13,6 +13,7 @@ import {
 
 import { galleryImageI18n, galleryImages } from "@/4-entities/gallery/model/image";
 import { heroImageI18n, heroImages } from "@/4-entities/hero/model/image";
+import { profiles } from "./schema/auth";
 
 // ============================================
 // WORKSPACES (billing entity — owns sites)
@@ -140,6 +141,28 @@ export const tenantDomains = pgTable("tenant_domains", {
     .notNull()
     .references(() => tenants.id, { onDelete: "cascade" }),
   domain: text("domain").notNull().unique(),
+  status: text("status").notNull().default("pending"), // pending | pending_certificate | verified | error
+  isPrimary: boolean("is_primary").notNull().default(true),
+  dnsInstructions: text("dns_instructions"),
+  lastError: text("last_error"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ============================================
+// TENANT DOMAIN LOGS (audit trail)
+// ============================================
+export const tenantDomainLogs = pgTable("tenant_domain_logs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "cascade" }),
+  profileId: uuid("profile_id")
+    .references(() => profiles.id, { onDelete: "set null" }),
+  oldDomain: text("old_domain"),
+  newDomain: text("new_domain"),
+  event: text("event").notNull(), // "add" | "remove" | "verify"
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 // ============================================
@@ -200,4 +223,8 @@ export type TenantEntity = typeof tenantEntities.$inferSelect;
 export type NewTenantEntity = typeof tenantEntities.$inferInsert;
 export type TenantTranslation = typeof tenantTranslations.$inferSelect;
 export type NewTenantTranslation = typeof tenantTranslations.$inferInsert;
+export type TenantDomain = typeof tenantDomains.$inferSelect;
+export type NewTenantDomain = typeof tenantDomains.$inferInsert;
+export type TenantDomainLog = typeof tenantDomainLogs.$inferSelect;
+export type NewTenantDomainLog = typeof tenantDomainLogs.$inferInsert;
 export type { Profile, NewProfile, TenantMembership, NewTenantMembership } from "./schema/auth";

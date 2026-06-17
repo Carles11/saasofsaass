@@ -1714,6 +1714,172 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     key: "settings.template",
     translations: t({ en: "Site Template" }),
   },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.title",
+    translations: t({ en: "Custom Domain" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.description",
+    translations: t({
+      en: "Connect your own domain to this site. Available on the Pro plan.",
+      es: "Conecta tu propio dominio a este sitio. Disponible en el plan Pro.",
+      ca: "Connecta el teu propi domini a aquest lloc. Disponible al pla Pro.",
+      fr: "Connectez votre propre domaine à ce site. Disponible sur le plan Pro.",
+      de: "Verbinden Sie Ihre eigene Domain mit dieser Website. Verfügbar im Pro-Tarif.",
+      it: "Collega il tuo dominio a questo sito. Disponibile nel piano Pro.",
+      eu: "Konektatu zure domeinua gune honetara. Pro planean eskuragarri.",
+      ga: "Conecta o teu propio dominio a este sitio. Dispoñible no plan Pro.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.input-placeholder",
+    translations: t({ en: "example.com" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.add-button",
+    translations: t({ en: "Add Domain" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.check-status",
+    translations: t({ en: "Check Status" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.remove",
+    translations: t({ en: "Remove" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.visit-site",
+    translations: t({ en: "Visit Site" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.view-dns",
+    translations: t({ en: "View DNS Settings" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.status.pending",
+    translations: t({ en: "Pending — configure DNS" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.status.pending-certificate",
+    translations: t({ en: "DNS configured, issuing SSL certificate..." }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.status.verified",
+    translations: t({ en: "Verified & Active" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.status.error",
+    translations: t({ en: "Error" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.upgrade-prompt",
+    translations: t({
+      en: "Custom domains are available on the Pro plan. Upgrade to connect your own domain.",
+      es: "Los dominios personalizados están disponibles en el plan Pro. Actualiza para conectar tu propio dominio.",
+      ca: "Els dominis personalitzats estan disponibles al pla Pro. Actualitza per connectar el teu propi domini.",
+      fr: "Les domaines personnalisés sont disponibles sur le plan Pro. Mettez à niveau pour connecter votre propre domaine.",
+      de: "Benutzerdefinierte Domains sind im Pro-Tarif verfügbar. Aktualisieren Sie, um Ihre eigene Domain zu verbinden.",
+      it: "I domini personalizzati sono disponibili nel piano Pro. Aggiorna per collegare il tuo dominio.",
+      eu: "Domeinu pertsonalizatuak Pro planean daude eskuragarri. Eguneratu zure domeinua konektatzeko.",
+      ga: "Os dominios personalizados están dispoñibles no plan Pro. Actualiza para conectar o teu propio dominio.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.upgrade-button",
+    translations: t({ en: "Upgrade to Pro" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.confirm-remove.title",
+    translations: t({ en: "Remove custom domain?" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.confirm-remove.description",
+    translations: t({
+      en: "This will disconnect your domain. Visitors will see your site at the default subdomain.",
+      es: "Esto desconectará tu dominio. Los visitantes verán tu sitio en el subdominio predeterminado.",
+      ca: "Això desconnectarà el teu domini. Els visitants veuran el teu lloc al subdomini predeterminat.",
+      fr: "Cela déconnectera votre domaine. Les visiteurs verront votre site sur le sous-domaine par défaut.",
+      de: "Dadurch wird Ihre Domain getrennt. Besucher sehen Ihre Site unter der Standard-Subdomain.",
+      it: "Questo scollegherà il tuo dominio. I visitatori vedranno il tuo sito nel sottodominio predefinito.",
+      eu: "Honek zure domeinua deskonektatuko du. Bisitariek zure gunea azpidomeinu lehenetsian ikusiko dute.",
+      ga: "Isto desconectará o teu dominio. Os visitantes verán o teu sitio no subdominio predeterminado.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.confirm-remove.confirm",
+    translations: t({ en: "Remove" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.error.already-exists",
+    translations: t({ en: "Another domain is already connected. Remove it first." }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.error.invalid-format",
+    translations: t({ en: "Invalid domain format. Enter a valid domain like example.com." }),
+  },
+
+  // ── Dashboard: Subdomain ───────────────────────────────────────────────
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.title",
+    translations: t({ en: "Subdomain" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.input-label",
+    translations: t({ en: "Subdomain slug" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.save-button",
+    translations: t({ en: "Save" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.saving",
+    translations: t({ en: "Saving..." }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.success",
+    translations: t({ en: "Subdomain updated" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.error.invalid-format",
+    translations: t({
+      en: "Slug must be 3-63 characters, only lowercase letters, numbers, and hyphens. Must start and end with a letter or number.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.error.already-exists",
+    translations: t({ en: "This slug is already taken." }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.subdomain.error.reserved-word",
+    translations: t({ en: "This slug is reserved." }),
+  },
 
   // ── Dashboard: Block List ───────────────────────────────────────────────
   {

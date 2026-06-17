@@ -7,15 +7,10 @@ import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getSiteLimit } from "@/5-shared/lib/billing/plans";
+import { SLUG_REGEX } from "./shared";
+import type { CreateTenantInput } from "./shared";
 
-const SLUG_REGEX = /^[a-z0-9]([a-z0-9-]{1,61})[a-z0-9]$/;
 const ALLOWED_LOCALES = ["en", "es", "ca", "fr", "de", "it", "eu", "ga"] as const;
-
-export interface CreateTenantInput {
-  name: string;
-  slug: string;
-  defaultLocale?: string;
-}
 
 function parseFormData(form: FormData): CreateTenantInput {
   const name = form.get("name")?.toString().trim() ?? "";

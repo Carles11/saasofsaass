@@ -36,7 +36,8 @@ async function isTenantActive(
   tenantKey: string,
   isSubdomain: boolean,
 ): Promise<boolean> {
-  const cached = await tenantCache.get(tenantKey);
+  const cacheKey = isSubdomain ? `slug:${tenantKey}` : `domain:${tenantKey}`;
+  const cached = await tenantCache.get(cacheKey);
   if (cached !== null) return cached.exists;
 
   if (!sql) return true; // No DB configured — let the page handle it
@@ -44,10 +45,10 @@ async function isTenantActive(
   try {
     // neon driver requires tagged template literals — use separate queries per lookup type
     const rows = isSubdomain
-      ? await sql`SELECT id FROM tenants WHERE slug   = ${tenantKey} AND is_active = true LIMIT 1`
-      : await sql`SELECT id FROM tenants WHERE domain = ${tenantKey} AND is_active = true LIMIT 1`;
+      ? await sql`SELECT id FROM tenants WHERE slug = ${tenantKey} AND is_active = true LIMIT 1`
+      : await sql`SELECT td.tenant_id FROM tenant_domains td WHERE td.domain = ${tenantKey} AND td.status = 'verified' LIMIT 1`;
     const exists = rows.length > 0;
-    await tenantCache.set(tenantKey, { exists }, TENANT_CACHE_TTL_MS);
+    await tenantCache.set(cacheKey, { exists }, TENANT_CACHE_TTL_MS);
     return exists;
   } catch {
     // DB error: fail open — TenantPage.notFound() handles the miss gracefully

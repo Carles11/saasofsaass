@@ -5,6 +5,9 @@ import { getEntitiesByTenant } from "@/4-entities/tenant-content";
 import { StoreHydrator } from "@/5-shared/store/StoreHydrator";
 import { getCurrentProfile, getTenantRole } from "@/5-shared/lib/auth/authorization";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
+import { tenantDomains, workspaces } from "@/5-shared/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { db } from "@/5-shared/lib/db";
 import type { SupportedLocaleType } from "@/5-shared/types";
 import { notFound } from "next/navigation";
 
@@ -20,7 +23,7 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
   const profile = await getCurrentProfile();
   const role = profile ? await getTenantRole(tenantId, profile.id) : null;
 
-  const [blocks, entities, namespacedTranslations] = await Promise.all([
+  const [blocks, entities, namespacedTranslations, domainRows, workspace] = await Promise.all([
     getBlocksByTenantId(tenant.id),
     getEntitiesByTenant({ tenantId: tenant.id, locale }),
     getPlatformTranslationsByNamespaces(
@@ -33,7 +36,18 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
       ],
       locale,
     ),
+    db.select().from(tenantDomains).where(eq(tenantDomains.tenantId, tenant.id)),
+    tenant.workspaceId
+      ? db
+          .select({ plan: workspaces.plan })
+          .from(workspaces)
+          .where(eq(workspaces.id, tenant.workspaceId))
+          .limit(1)
+          .then((r) => r[0] ?? null)
+      : Promise.resolve(null),
   ]);
+
+  const plan = workspace?.plan ?? "free";
 
   const translations = {
     ...(namespacedTranslations.common ?? {}),
@@ -53,6 +67,8 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
             initialEntities={entities}
             userRole={role}
             translations={translations}
+            domainRows={domainRows}
+            plan={plan}
           />
         </StoreHydrator>
       </div>

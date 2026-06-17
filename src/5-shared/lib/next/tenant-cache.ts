@@ -8,6 +8,7 @@
 export interface TenantCacheAdapter {
   get(key: string): Promise<{ exists: boolean } | null>
   set(key: string, value: { exists: boolean }, ttlMs: number): Promise<void>
+  delete(key: string): Promise<void>
 }
 
 // ── Default: in-process Map (per edge-worker instance) ────────────────────────
@@ -33,6 +34,9 @@ export const inMemoryCache: TenantCacheAdapter = {
   },
   async set(key, value, ttlMs) {
     store.set(key, { ...value, expiresAt: Date.now() + ttlMs })
+  },
+  async delete(key) {
+    store.delete(key)
   },
 }
 

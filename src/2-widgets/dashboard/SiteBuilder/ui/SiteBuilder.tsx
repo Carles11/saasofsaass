@@ -4,13 +4,15 @@ import TenantLayoutResolver from "@/2-widgets/tenant/ui/TenantLayoutResolver";
 import { updateTenantLocales } from "@/3-features/manage-site-blocks/actions/blockActions";
 import { TemplatePicker } from "@/3-features/manage-site-blocks/ui/TemplatePicker";
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
-import type { Block, Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
+import type { Block, Tenant, TenantDomain, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
 import type { SupportedLocaleType } from "@/5-shared/types";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCallback, useState, useTransition } from "react";
 import { BlockList } from "./BlockList";
+import { CustomDomainSection } from "./CustomDomainSection";
+import { SubdomainSection } from "./SubdomainSection";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 type UserRole = "owner" | "editor" | null;
@@ -21,6 +23,8 @@ interface SiteBuilderProps {
   initialEntities: EntityRow[];
   userRole?: UserRole;
   translations?: Record<string, string>;
+  domainRows: TenantDomain[];
+  plan: string;
 }
 
 export function SiteBuilder({
@@ -29,11 +33,14 @@ export function SiteBuilder({
   initialEntities,
   userRole,
   translations,
+  domainRows,
+  plan,
 }: SiteBuilderProps) {
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType
   );
   const [locales, setLocales] = useState<string[]>(tenant.locales);
+  const [currentSlug, setCurrentSlug] = useState(tenant.slug);
   const [isSaving, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<string>("blocks");
   const [previewTemplateId, setPreviewTemplateId] = useState<
@@ -59,8 +66,8 @@ const prodRoot = (
 const isDev = process.env.NODE_ENV === "development";
 
 const previewUrl = isDev
-  ? `http://${tenant.slug}.localhost:${devPort}/${activeLocale}`
-  : `https://${tenant.slug}.${prodRoot}/${activeLocale}`;
+  ? `http://${currentSlug}.localhost:${devPort}/${activeLocale}`
+  : `https://${currentSlug}.${prodRoot}/${activeLocale}`;
 
   const subtitle = resolveTranslation(translations, "subtitle", "Site Builder");
   const tabBlocks = resolveTranslation(translations, "tab.blocks", "Blocks");
@@ -160,6 +167,22 @@ const previewUrl = isDev
               setPreviewTemplateId={setPreviewTemplateId}
             />
           </div>
+          <CustomDomainSection
+            tenantId={tenant.id}
+            initialDomainRows={domainRows}
+            plan={plan}
+            translations={translations}
+          />
+          <SubdomainSection
+            tenantId={tenant.id}
+            initialSlug={tenant.slug}
+            translations={translations}
+            onSlugChange={setCurrentSlug}
+            isDev={isDev}
+            devPort={devPort}
+            prodRoot={prodRoot}
+            activeLocale={activeLocale}
+          />
         </TabsContent>
       </Tabs>
     </div>
