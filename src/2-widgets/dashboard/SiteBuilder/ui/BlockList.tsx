@@ -1,11 +1,16 @@
 "use client";
 
-import { addBlock } from "@/3-features/manage-site-blocks";
-import type { Block } from "@/5-shared/lib/db/schema";
-import type { BlockKind } from "@/5-shared/types/tenants/blocks";
-import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { addBlock, reorderBlocks } from "@/3-features/manage-site-blocks";
+import type { Block, Tenant, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
+import type { SupportedLocaleType } from "@/5-shared/types";
+import {
+  resolveTranslation,
+  type TranslationDict,
+} from "@/5-shared/lib/translations/resolve";
 import { cn } from "@/5-shared/lib/utils";
+import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import { Button } from "@/components/tenant/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogClose,
@@ -14,18 +19,34 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
-import { BlockCard } from "./BlockCard";
 import {
-  Menu,
-  Sparkles,
-  Newspaper,
-  Mic2,
-  Trophy,
-  Mail,
+  DndContext,
+  DragOverlay,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import {
+  GripVertical,
   Images,
+  Mail,
+  Menu,
+  Mic2,
+  Newspaper,
+  Sparkles,
+  Trophy,
   type LucideIcon,
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { BlockCard } from "./BlockCard";
 
 const BLOCK_PICKER_ITEMS: {
   kind: BlockKind;
@@ -73,7 +94,8 @@ const BLOCK_PICKER_ITEMS: {
     kind: "contact",
     icon: Mail,
     name: "Contact Section",
-    description: "Contact information with email, phone, address, and optional form",
+    description:
+      "Contact information with email, phone, address, and optional form",
     hint: "Add your contact details and set up email forwarding",
   },
   {
@@ -85,13 +107,18 @@ const BLOCK_PICKER_ITEMS: {
   },
 ];
 
-const ALL_BLOCK_KINDS: BlockKind[] = BLOCK_PICKER_ITEMS.map((item) => item.kind);
+const ALL_BLOCK_KINDS: BlockKind[] = BLOCK_PICKER_ITEMS.map(
+  (item) => item.kind,
+);
+
+type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 
 interface BlockListProps {
   blocks: Block[];
   tenantId: string;
-  onEdit: (blockId: string) => void;
-  setActiveTab?: (tab: string) => void;
+  tenant: Tenant;
+  activeLocale: SupportedLocaleType;
+  initialEntities: EntityRow[];
   userRole?: "owner" | "editor" | null;
   translations?: TranslationDict;
 }
@@ -99,14 +126,59 @@ interface BlockListProps {
 export function BlockList({
   blocks,
   tenantId,
-  onEdit,
-  setActiveTab,
+  tenant,
+  activeLocale,
+  initialEntities,
   userRole,
   translations,
 }: BlockListProps) {
   const [newKind, setNewKind] = useState<BlockKind>(ALL_BLOCK_KINDS[0]);
+  const [orderedBlocks, setOrderedBlocks] = useState<Block[]>(blocks);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Sync local order when blocks prop changes (e.g. after add/delete)
+  useEffect(() => {
+    setOrderedBlocks(blocks);
+  }, [blocks]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor),
+  );
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  }, []);
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveId(null);
+
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = orderedBlocks.findIndex((b) => b.id === active.id);
+      const newIndex = orderedBlocks.findIndex((b) => b.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const reordered = arrayMove(orderedBlocks, oldIndex, newIndex);
+      setOrderedBlocks(reordered);
+      await reorderBlocks(
+        tenantId,
+        reordered.map((b) => b.id),
+      );
+    },
+    [orderedBlocks, tenantId],
+  );
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null);
+  }, []);
 
   const selectedItem = BLOCK_PICKER_ITEMS.find((item) => item.kind === newKind);
+  const activeBlock = activeId
+    ? (orderedBlocks.find((b) => b.id === activeId) ?? null)
+    : null;
 
   const emptyState = resolveTranslation(
     translations,
@@ -114,31 +186,57 @@ export function BlockList({
     "No blocks yet. Add your first block below.",
   );
   const addBlockLabel = resolveTranslation(translations, "add", "+ Add Block");
-  const addDialogTitle = resolveTranslation(translations, "add-dialog.title", "Add a New Block");
+  const addDialogTitle = resolveTranslation(
+    translations,
+    "add-dialog.title",
+    "Add a New Block",
+  );
   const addDialogConfirm = resolveTranslation(
     translations,
     "add-dialog.confirm",
-    "Add \"{name}\"",
+    'Add "{name}"',
     { name: selectedItem?.name ?? newKind },
   );
 
   return (
-    <div className="flex flex-col gap-3">
-      {blocks.map((block, i) => (
-        <BlockCard
-          key={block.id}
-          block={block}
-          tenantId={tenantId}
-          isFirst={i === 0}
-          isLast={i === blocks.length - 1}
-          onEdit={onEdit}
-          setActiveTab={setActiveTab}
-          userRole={userRole}
-          translations={translations}
-        />
-      ))}
+    <div className="flex flex-col gap-3 w-full">
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <SortableContext
+          items={orderedBlocks.map((b) => b.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {orderedBlocks.map((block) => (
+            <BlockCard
+              key={block.id}
+              block={block}
+              tenantId={tenantId}
+              tenant={tenant}
+              activeLocale={activeLocale}
+              initialEntities={initialEntities}
+              userRole={userRole}
+              translations={translations}
+            />
+          ))}
+        </SortableContext>
 
-      {blocks.length === 0 && (
+        <DragOverlay>
+          {activeBlock && (
+            <div className="flex items-center gap-2 p-3 sm:p-4 bg-card rounded-xl border-2 border-primary shadow-lg opacity-90">
+              <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
+              <Badge variant="secondary" className="font-mono text-xs shrink-0">
+                {activeBlock.type}
+              </Badge>
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
+
+      {orderedBlocks.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-8">
           {emptyState}
         </p>

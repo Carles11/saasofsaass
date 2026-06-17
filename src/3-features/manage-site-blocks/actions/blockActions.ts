@@ -98,6 +98,19 @@ export async function reorderBlock(
   revalidateSiteBuilder(tenantId)
 }
 
+export async function reorderBlocks(tenantId: string, orderedBlockIds: string[]) {
+  await assertCanManageStructure(tenantId)
+
+  for (let i = 0; i < orderedBlockIds.length; i++) {
+    await db
+      .update(blocks)
+      .set({ order: i, updatedAt: new Date() })
+      .where(eq(blocks.id, orderedBlockIds[i]))
+  }
+
+  revalidateSiteBuilder(tenantId)
+}
+
 export async function addBlock(tenantId: string, type: BlockKind) {
   await assertCanManageStructure(tenantId)
 

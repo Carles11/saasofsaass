@@ -14,6 +14,6 @@ export const TEMPLATES: Record<
   },
   classic: {
     themeClass: "theme-bentley-classic font-serif",
-    containerClass: "max-w-5xl mx-auto px-12",
+    containerClass: "max-w-5xl mx-auto px-2",
   },
 } as const;

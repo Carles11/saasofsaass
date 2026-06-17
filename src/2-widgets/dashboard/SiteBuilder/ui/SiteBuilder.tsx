@@ -9,13 +9,10 @@ import type { SupportedLocaleType } from "@/5-shared/types";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { AutoTranslateButton } from "./AutoTranslateButton";
-import { BlockEditSheet } from "./BlockEditSheet";
 import { BlockList } from "./BlockList";
-import { CollectionManager } from "./CollectionManager";
-import { GalleryManager } from "./GalleryManager";
 import { LanguageSelector } from "./LanguageSelector";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
@@ -41,18 +38,12 @@ export function SiteBuilder({
   );
   const router = useRouter();
   const pathname = usePathname();
-  const params = useParams();
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [locales, setLocales] = useState<string[]>(tenant.locales);
   const [isSaving, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<string>("blocks");
-  // Live preview state (fix type)
   const [previewTemplateId, setPreviewTemplateId] = useState<
     import("@/5-shared/config/templates").TenantTemplateId
   >(tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId);
-
-  // Restore selectedBlock for BlockEditSheet
-  const selectedBlock = blocks.find((b) => b.id === selectedBlockId) ?? null;
 
 const devPort =
   process.env.NEXT_PUBLIC_DEV_PORT || "3000";
@@ -71,19 +62,7 @@ const previewUrl = isDev
 
   const subtitle = resolveTranslation(translations, "subtitle", "Site Builder");
   const tabBlocks = resolveTranslation(translations, "tab.blocks", "Blocks");
-  const tabContent = resolveTranslation(translations, "tab.content", "Content");
   const tabSettings = resolveTranslation(translations, "tab.settings", "Settings");
-  const blockNotFound = resolveTranslation(translations, "block-not-found", "Block not found.");
-  const noContentToManage = resolveTranslation(
-    translations,
-    "no-content-to-manage",
-    "This block has no content to manage.",
-  );
-  const selectBlock = resolveTranslation(
-    translations,
-    "select-block",
-    "Select a block to manage its content.",
-  );
   const enabledLanguages = resolveTranslation(
     translations,
     "settings.languages",
@@ -120,9 +99,6 @@ const previewUrl = isDev
             activeLocale={activeLocale}
             onChange={(locale) => {
               setActiveLocale(locale);
-              // Replace the locale in the URL and navigate
-              // Path: /[locale]/(dashboard)/dashboard/site-builder/[tenantId]
-              // params: { locale, tenantId }
               const segments = pathname.split("/");
               if (segments[1] && tenant.locales.includes(locale)) {
                 segments[1] = locale;
@@ -137,67 +113,23 @@ const previewUrl = isDev
       <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="blocks">
         <TabsList>
           <TabsTrigger value="blocks">{tabBlocks}</TabsTrigger>
-          <TabsTrigger value="content">{tabContent}</TabsTrigger>
           {userRole === "owner" && <TabsTrigger value="settings">{tabSettings}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="blocks" className="mt-4">
-          {/* Only the block preview area uses the tenant template styles */}
           <div className="rounded-2xl border border-border bg-card p-4">
             <TenantLayoutResolver templateId={previewTemplateId}>
               <BlockList
                 blocks={blocks}
                 tenantId={tenant.id}
-                onEdit={setSelectedBlockId}
-                setActiveTab={setActiveTab}
+                tenant={tenant}
+                activeLocale={activeLocale}
+                initialEntities={initialEntities}
                 userRole={userRole}
                 translations={translations}
               />
             </TenantLayoutResolver>
           </div>
-        </TabsContent>
-
-        <TabsContent value="content" className="mt-4">
-          {/* Context-sensitive content manager */}
-          {selectedBlockId ? (
-            (() => {
-              const selectedBlock = blocks.find((b) => b.id === selectedBlockId);
-              if (!selectedBlock) {
-                return <div className="text-muted-foreground text-center py-8">{blockNotFound}</div>;
-              }
-              if (selectedBlock.type === "image-gallery") {
-                return (
-                  <GalleryManager
-                    blockId={selectedBlockId}
-                    tenant={tenant}
-                    activeLocale={activeLocale}
-                    onImagesChange={() => {}}
-                  />
-                );
-              }
-              if (["blog-feed", "podcast-feed", "awards"].includes(selectedBlock.type)) {
-                return (
-                  <CollectionManager
-                    tenant={tenant}
-                    activeLocale={activeLocale}
-                    initialEntities={initialEntities}
-                    blockType={selectedBlock.type}
-                    blockId={selectedBlock.id}
-                    translations={translations}
-                  />
-                );
-              }
-              return (
-                <div className="text-muted-foreground text-center py-8">
-                  {noContentToManage}
-                </div>
-              );
-            })()
-          ) : (
-            <div className="text-muted-foreground text-center py-8">
-              {selectBlock}
-            </div>
-          )}
         </TabsContent>
 
         <TabsContent value="settings" className="mt-4">
@@ -238,19 +170,8 @@ const previewUrl = isDev
               setPreviewTemplateId={setPreviewTemplateId}
             />
           </div>
-          {/* Future: dark mode, subdomain, custom domain, etc. */}
         </TabsContent>
       </Tabs>
-
-      {/* ── Block edit side sheet ────────────────────────────────────── */}
-      <BlockEditSheet
-        block={selectedBlock}
-        tenant={tenant}
-        activeLocale={activeLocale}
-        open={selectedBlockId !== null}
-        onClose={() => setSelectedBlockId(null)}
-        translations={translations}
-      />
     </div>
   );
 }
