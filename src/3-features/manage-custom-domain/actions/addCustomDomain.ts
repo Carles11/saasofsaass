@@ -1,17 +1,29 @@
 "use server";
 
-import { assertCanManageStructure } from "@/5-shared/lib/auth/authorization";
+import {
+  assertCanManageStructure,
+  requireProfile,
+} from "@/5-shared/lib/auth/authorization";
 import { db } from "@/5-shared/lib/db";
-import { tenants, workspaces, tenantDomains, tenantDomainLogs } from "@/5-shared/lib/db/schema";
-import { eq, and } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { toApexDomain, toWwwDomain, isValidDomainFormat } from "@/5-shared/lib/utils/domain";
+import {
+  tenantDomainLogs,
+  tenantDomains,
+  tenants,
+  workspaces,
+} from "@/5-shared/lib/db/schema";
+import { encodeDnsColumn } from "@/5-shared/lib/utils/dnsRecords";
+import {
+  isValidDomainFormat,
+  toApexDomain,
+  toWwwDomain,
+} from "@/5-shared/lib/utils/domain";
+import { patchDomainToRedirect } from "@/5-shared/lib/vercel/patchDomainToRedirect";
 import {
   addDomainToVercelProject,
-  mapVercelErrorMessage,
+  getVercelDomainStatus,
 } from "@/5-shared/lib/vercel/vercel-domains";
-import { patchDomainToRedirect } from "@/5-shared/lib/vercel/patchDomainToRedirect";
-import { requireProfile } from "@/5-shared/lib/auth/authorization";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 export async function addCustomDomain(tenantId: string, domainInput: string) {
   await assertCanManageStructure(tenantId);
@@ -41,18 +53,16 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
     .limit(1);
 
   if (!ws || ws.plan !== "pro") {
-    throw new Error("Custom domains are available on the Pro plan. Please upgrade.");
+    throw new Error(
+      "Custom domains are available on the Pro plan. Please upgrade.",
+    );
   }
 
   // ── 3. Enforce one domain per tenant ──────────────────────────────────────
   const existingDomains = await db
     .select()
     .from(tenantDomains)
-    .where(
-      and(
-        eq(tenantDomains.tenantId, tenantId),
-      ),
-    );
+    .where(and(eq(tenantDomains.tenantId, tenantId)));
 
   const existingDifferent = existingDomains.find((d) => d.domain !== apex);
   if (existingDifferent) {
@@ -102,9 +112,7 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
       .update(tenantDomains)
       .set({ status: "error", lastError: wwwResult.error ?? "Vercel error" })
       .where(eq(tenantDomains.id, row.id));
-    throw new Error(
-      `Failed to configure www redirect: ${wwwResult.error}`,
-    );
+    throw new Error(`Failed to configure www redirect: ${wwwResult.error}`);
   }
 
   // www already exists but needs redirect patched
@@ -112,16 +120,55 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
     await patchDomainToRedirect(www, apex);
   }
 
-  // ── 8. Update DNS instructions from Vercel response ───────────────────────
-  const dnsInstructions = apexResult.status === "added"
-    ? extractDnsInstructions(apex)
-    : null;
+  // ── 8. Merge DNS instructions from POST responses (most accurate, project-specific) ─
+  const postRecords = [
+    ...(apexResult.dnsRecords ?? []),
+    ...(wwwResult.dnsRecords ?? []),
+  ];
 
-  if (dnsInstructions) {
+  // Deduplicate by type+name (e.g., an apex A and www CNAME are both valid)
+  const seen = new Set<string>();
+  const uniqueRecords: { type: string; name: string; value: string }[] = [];
+  for (const r of postRecords) {
+    const key = `${r.type}:${r.name}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueRecords.push(r);
+    }
+  }
+
+  const postInstructions = [
+    apexResult.dnsInstructions,
+    wwwResult.dnsInstructions,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const dnsData =
+    uniqueRecords.length > 0
+      ? encodeDnsColumn(postInstructions, uniqueRecords)
+      : null;
+
+  if (dnsData) {
     await db
       .update(tenantDomains)
-      .set({ dnsInstructions })
+      .set({ dnsInstructions: dnsData })
       .where(eq(tenantDomains.id, row.id));
+  } else {
+    // Fallback: GET API (queries both apex & www, synthesises standard values)
+    try {
+      const status = await getVercelDomainStatus(apex);
+      const fallbackData = encodeDnsColumn(
+        status.dnsInstructions,
+        status.dnsRecords,
+      );
+      await db
+        .update(tenantDomains)
+        .set({ dnsInstructions: fallbackData })
+        .where(eq(tenantDomains.id, row.id));
+    } catch {
+      // Non-fatal — user can still click Check Status to populate instructions
+    }
   }
 
   // ── 9. Audit log (non-fatal) ──────────────────────────────────────────────
@@ -141,16 +188,7 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
 }
 
 async function removeDomainFromVercelProject(domain: string) {
-  const { removeDomainFromVercelProject: remove } = await import(
-    "@/5-shared/lib/vercel/vercel-domains"
-  );
+  const { removeDomainFromVercelProject: remove } =
+    await import("@/5-shared/lib/vercel/vercel-domains");
   return remove(domain);
-}
-
-function extractDnsInstructions(_apex: string): string | null {
-  // Vercel returns DNS instructions in the add response verification field
-  // but we rely on getVercelDomainStatus to surface them.
-  // The add response doesn't always include structured instructions,
-  // so we return null here — the user will see them after clicking "Check Status".
-  return null;
 }

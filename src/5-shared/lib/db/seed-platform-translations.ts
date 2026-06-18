@@ -1836,6 +1836,120 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     key: "settings.domain.error.invalid-format",
     translations: t({ en: "Invalid domain format. Enter a valid domain like example.com." }),
   },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.verified-panel.heading",
+    translations: t({ en: "Your domain is live!" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.verified-panel.body",
+    translations: t({
+      en: "Everything is configured correctly, your visitors can reach your site at this address.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.verified-panel.visit-site",
+    translations: t({ en: "Visit Site" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.verified-panel.dns-settings",
+    translations: t({ en: "DNS Settings" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.pending-cert-panel.heading",
+    translations: t({ en: "Almost Ready" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.pending-cert-panel.body",
+    translations: t({
+      en: "DNS is configured correctly. We're now issuing an SSL certificate — this usually takes a few minutes. You don't need to do anything else.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.title",
+    translations: t({ en: "DNS Configuration" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.description",
+    translations: t({
+      en: "Add these DNS records at your domain registrar to connect your domain.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.step-label",
+    translations: t({ en: "Step {step}" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.type-label",
+    translations: t({ en: "{type} Record" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.name-label",
+    translations: t({ en: "Name / Host" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.value-label",
+    translations: t({ en: "Points to / Value" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.copy",
+    translations: t({ en: "Copy" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.copied",
+    translations: t({ en: "Copied!" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.guide-link",
+    translations: t({
+      en: "Open Vercel's custom domain setup guide",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.registrar-link",
+    translations: t({
+      en: "DNS instructions for common registrars",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.no-dns-heading",
+    translations: t({ en: "No idea what DNS is about?" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.dns-modal.delegate-button",
+    translations: t({
+      en: "Forward to a tech-savvy friend",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.delegate.subject",
+    translations: t({ en: "Help needed: DNS setup for my site" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.delegate.body",
+    translations: t({
+      en: "Hi,\n\nI'm setting up my website on saasofsaass and need help configuring DNS for {domain}. Could you add these records at my domain registrar?\n\n{records}\n\nThanks for your help!",
+    }),
+  },
 
   // ── Dashboard: Subdomain ───────────────────────────────────────────────
   {
@@ -2770,6 +2884,236 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.structured-vs-ai",
     key: "cta.secondary",
     translations: t({ en: "Back to Home" }),
+  },
+
+  // ── Site Builder: Typography ─────────────────────────────────────────────
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.typography.title",
+    translations: t({
+      en: "Typography",
+      es: "Tipografía",
+      ca: "Tipografia",
+      fr: "Typographie",
+      de: "Typografie",
+      it: "Tipografia",
+      eu: "Tipografia",
+      ga: "Tipografía",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.typography.title-font",
+    translations: t({
+      en: "Heading Font",
+      es: "Fuente de encabezados",
+      ca: "Font d'encapçalaments",
+      fr: "Police des titres",
+      de: "Überschrift Schriftart",
+      it: "Carattere titoli",
+      eu: "Izenburuen letra-tipoa",
+      ga: "Fonte de cabeceiros",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.typography.body-font",
+    translations: t({
+      en: "Body Font",
+      es: "Fuente del cuerpo",
+      ca: "Font del cos",
+      fr: "Police du corps",
+      de: "Text Schriftart",
+      it: "Carattere del corpo",
+      eu: "Gorputzaren letra-tipoa",
+      ga: "Fonte do corpo",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.typography.preview-label",
+    translations: t({
+      en: "Preview",
+      es: "Vista previa",
+      ca: "Vista prèvia",
+      fr: "Aperçu",
+      de: "Vorschau",
+      it: "Anteprima",
+      eu: "Aurrebista",
+      ga: "Vista previa",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.typography.saving",
+    translations: t({
+      en: "Saving...",
+      es: "Guardando...",
+      ca: "Guardant...",
+      fr: "Enregistrement...",
+      de: "Speichern...",
+      it: "Salvataggio...",
+      eu: "Gordetzen...",
+      ga: "Gardando...",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.typography.error",
+    translations: t({
+      en: "Failed to update fonts",
+      es: "Error al actualizar las fuentes",
+      ca: "Error en actualitzar les fonts",
+      fr: "Échec de la mise à jour des polices",
+      de: "Fehler beim Aktualisieren der Schriftarten",
+      it: "Errore nell'aggiornamento dei caratteri",
+      eu: "Errorea letra-tipoak eguneratzean",
+      ga: "Erro ao actualizar as fontes",
+    }),
+  },
+
+  // ── Site Builder: Color Palette ──────────────────────────────────────────
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.palette.title",
+    translations: t({
+      en: "Color Palette",
+      es: "Paleta de colores",
+      ca: "Paleta de colors",
+      fr: "Palette de couleurs",
+      de: "Farbpalette",
+      it: "Paletta colori",
+      eu: "Kolore paleta",
+      ga: "Paleta de cores",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.palette.saving",
+    translations: t({
+      en: "Saving...",
+      es: "Guardando...",
+      ca: "Guardant...",
+      fr: "Enregistrement...",
+      de: "Speichern...",
+      it: "Salvataggio...",
+      eu: "Gordetzen...",
+      ga: "Gardando...",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.palette.error",
+    translations: t({
+      en: "Failed to update palette",
+      es: "Error al actualizar la paleta",
+      ca: "Error en actualitzar la paleta",
+      fr: "Échec de la mise à jour de la palette",
+      de: "Fehler beim Aktualisieren der Palette",
+      it: "Errore nell'aggiornamento della paletta",
+      eu: "Errorea paleta eguneratzean",
+      ga: "Erro ao actualizar a paleta",
+    }),
+  },
+
+  // ── Site Builder: SEO ────────────────────────────────────────────────────
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.seo.title",
+    translations: t({
+      en: "SEO & Visibility",
+      es: "SEO y visibilidad",
+      ca: "SEO i visibilitat",
+      fr: "SEO et visibilité",
+      de: "SEO & Sichtbarkeit",
+      it: "SEO e visibilità",
+      eu: "SEO eta ikusgarritasuna",
+      ga: "SEO e visibilidade",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.seo.toggle-label",
+    translations: t({
+      en: "Search Engine Indexing",
+      es: "Indexación en buscadores",
+      ca: "Indexació en cercadors",
+      fr: "Indexation par les moteurs de recherche",
+      de: "Suchmaschinen-Indexierung",
+      it: "Indicizzazione nei motori di ricerca",
+      eu: "Bilatzaileen indexazioa",
+      ga: "Indexación en buscadores",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.seo.toggle-hint",
+    translations: t({
+      en: "Allow Google and other search engines to find this site.",
+      es: "Permite que Google y otros buscadores encuentren este sitio.",
+      ca: "Permet que Google i altres cercadors trobin aquest lloc.",
+      fr: "Autorisez Google et les autres moteurs de recherche à trouver ce site.",
+      de: "Erlauben Sie Google und anderen Suchmaschinen, diese Website zu finden.",
+      it: "Consenti a Google e agli altri motori di ricerca di trovare questo sito.",
+      eu: "Baimendu Googlek eta beste bilatzaileek gune hau aurkitzea.",
+      ga: "Permite que Google e outros buscadores atopen este sitio.",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.seo.saving",
+    translations: t({
+      en: "Saving...",
+      es: "Guardando...",
+      ca: "Guardant...",
+      fr: "Enregistrement...",
+      de: "Speichern...",
+      it: "Salvataggio...",
+      eu: "Gordetzen...",
+      ga: "Gardando...",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.seo.error",
+    translations: t({
+      en: "Failed to update SEO settings",
+      es: "Error al actualizar la configuración SEO",
+      ca: "Error en actualitzar la configuració SEO",
+      fr: "Échec de la mise à jour des paramètres SEO",
+      de: "Fehler beim Aktualisieren der SEO-Einstellungen",
+      it: "Errore nell'aggiornamento delle impostazioni SEO",
+      eu: "Errorea SEO ezarpenak eguneratzean",
+      ga: "Erro ao actualizar a configuración SEO",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.seo.pro-required",
+    translations: t({
+      en: "Upgrade to Pro to control search engine visibility",
+      es: "Actualiza a Pro para controlar la visibilidad en buscadores",
+      ca: "Actualitza a Pro per controlar la visibilitat als cercadors",
+      fr: "Passez à Pro pour contrôler la visibilité dans les moteurs de recherche",
+      de: "Upgrade auf Pro, um die Sichtbarkeit in Suchmaschinen zu steuern",
+      it: "Passa a Pro per controllare la visibilità nei motori di ricerca",
+      eu: "Eguneratu Pro-ra bilatzaileetako ikusgarritasuna kontrolatzeko",
+      ga: "Actualiza a Pro para controlar a visibilidade nos buscadores",
+    }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.seo.hidden-warning",
+    translations: t({
+      en: "Your site is currently hidden from search engines.",
+      es: "Tu sitio está actualmente oculto para los buscadores.",
+      ca: "El teu lloc està actualment ocult per als cercadors.",
+      fr: "Votre site est actuellement masqué pour les moteurs de recherche.",
+      de: "Ihre Website ist derzeit für Suchmaschinen verborgen.",
+      it: "Il tuo sito è attualmente nascosto ai motori di ricerca.",
+      eu: "Zure gunea ezkutatu egiten da bilatzaileentzat.",
+      ga: "O teu sitio está actualmente oculto para os buscadores.",
+    }),
   },
 ];
 

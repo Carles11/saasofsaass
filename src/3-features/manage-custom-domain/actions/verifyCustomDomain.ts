@@ -6,6 +6,7 @@ import { tenantDomains, tenantDomainLogs } from "@/5-shared/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { toApexDomain } from "@/5-shared/lib/utils/domain";
+import { encodeDnsColumn } from "@/5-shared/lib/utils/dnsRecords";
 import { getVercelDomainStatus } from "@/5-shared/lib/vercel/vercel-domains";
 import { requireProfile } from "@/5-shared/lib/auth/authorization";
 
@@ -25,7 +26,10 @@ export async function verifyCustomDomain(tenantId: string, domain: string) {
     .update(tenantDomains)
     .set({
       status: resolvedStatus,
-      dnsInstructions: vercelStatus.dnsInstructions ?? null,
+      dnsInstructions: encodeDnsColumn(
+        vercelStatus.dnsInstructions,
+        vercelStatus.dnsRecords,
+      ),
       lastError: vercelStatus.error ?? null,
     })
     .where(

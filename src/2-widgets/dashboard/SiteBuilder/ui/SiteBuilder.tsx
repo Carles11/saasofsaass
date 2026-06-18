@@ -13,6 +13,9 @@ import { useCallback, useState, useTransition } from "react";
 import { BlockList } from "./BlockList";
 import { CustomDomainSection } from "./CustomDomainSection";
 import { SubdomainSection } from "./SubdomainSection";
+import { TypographySection } from "./TypographySection";
+import { PaletteSection } from "./PaletteSection";
+import { SeoSection } from "./SeoSection";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 type UserRole = "owner" | "editor" | null;
@@ -25,6 +28,10 @@ interface SiteBuilderProps {
   translations?: Record<string, string>;
   domainRows: TenantDomain[];
   plan: string;
+  initialTitleFont?: string;
+  initialBodyFont?: string;
+  initialPalette?: string;
+  initialSeoEnabled?: boolean;
 }
 
 export function SiteBuilder({
@@ -35,6 +42,10 @@ export function SiteBuilder({
   translations,
   domainRows,
   plan,
+  initialTitleFont,
+  initialBodyFont,
+  initialPalette,
+  initialSeoEnabled,
 }: SiteBuilderProps) {
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType
@@ -167,6 +178,27 @@ const previewUrl = isDev
               setPreviewTemplateId={setPreviewTemplateId}
             />
           </div>
+          <TypographySection
+            tenantId={tenant.id}
+            tenantName={tenant.name}
+            initialTitleFont={initialTitleFont ?? "playfair"}
+            initialBodyFont={initialBodyFont ?? "inter"}
+            translations={translations}
+          />
+
+          <PaletteSection
+            tenantId={tenant.id}
+            initialPalette={initialPalette ?? "ocean"}
+            translations={translations}
+          />
+
+          <SeoSection
+            tenantId={tenant.id}
+            initialSeoEnabled={initialSeoEnabled ?? true}
+            plan={plan}
+            translations={translations}
+          />
+
           <CustomDomainSection
             tenantId={tenant.id}
             initialDomainRows={domainRows}

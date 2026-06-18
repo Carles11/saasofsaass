@@ -64,15 +64,12 @@ export function CollectionManager({
   translations,
 }: CollectionManagerProps) {
   const [isPending, startTransition] = useTransition();
-  // Always set newKind to the only valid kind for the block when blockType changes
-  let entityKinds: EntityKind[] = [
-    "blog_post",
-    "podcast_episode",
-    "award_item",
-  ];
-  if (blockType === "blog-feed") entityKinds = ["blog_post"];
-  else if (blockType === "podcast-feed") entityKinds = ["podcast_episode"];
-  else if (blockType === "awards") entityKinds = ["award_item"];
+  const entityKinds = useMemo((): EntityKind[] => {
+    if (blockType === "blog-feed") return ["blog_post"];
+    if (blockType === "podcast-feed") return ["podcast_episode"];
+    if (blockType === "awards") return ["award_item"];
+    return ["blog_post", "podcast_episode", "award_item"];
+  }, [blockType]);
 
   // Derive effective kind from entityKinds; if blockType changed, reset to first
   const [newKind, setNewKind] = useState<EntityKind>(entityKinds[0]);
@@ -141,9 +138,14 @@ export function CollectionManager({
     }
   }
 
+  // Stable entity ID list for the translation effect
+  const entityIds = useMemo(
+    () => initialFiltered.map((r) => r.entity.id),
+    [initialFiltered],
+  );
+
   // Fetch translations for the active locale
   useEffect(() => {
-    const entityIds = initialFiltered.map((r) => r.entity.id);
     if (entityIds.length === 0) return;
 
     getEntityTranslations(tenant.id, entityIds, activeLocale).then(
@@ -161,7 +163,7 @@ export function CollectionManager({
         setLocaleOverrides(map);
       },
     );
-  }, [activeLocale, tenant.id, initialFiltered]);
+  }, [activeLocale, tenant.id, entityIds]);
 
   const newItemLabel = resolveTranslation(translations, "new-item", "New Item");
   const kindLabel = resolveTranslation(translations, "label.kind", "Kind");

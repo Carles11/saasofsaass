@@ -1,6 +1,6 @@
 "use client";
 
-import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
+import { LanguageSwitcher } from "@/5-shared/i18n/LanguageSwitcher";
 import { useSession } from "@/5-shared/hooks/use-session";
 import {
   resolveTranslation,
@@ -9,28 +9,11 @@ import {
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
 import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
-import { Globe, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-
-const LOCALE_LABELS: Record<string, string> = {
-  en: "English",
-  es: "Español",
-  ca: "Català",
-  fr: "Français",
-  de: "Deutsch",
-  it: "Italiano",
-  eu: "Euskara",
-  ga: "Galego",
-};
 
 interface MarketingHeaderProps {
   translations?: TranslationDict;
@@ -41,12 +24,6 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  function handleLocaleChange(newLocale: string) {
-    const segments = pathname.split("/");
-    segments[1] = newLocale;
-    router.push(segments.join("/") || "/");
-  }
 
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
   const { data: session, isPending } = useSession();
@@ -129,18 +106,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
 
         {/* Right side controls */}
         <div className="flex items-center gap-2">
-          <Select defaultValue={locale} onValueChange={handleLocaleChange}>
-            <SelectTrigger className="h-8 w-fit gap-1 border-border/60 bg-transparent pe-1 cursor-pointer">
-              <Globe className="size-4" />
-            </SelectTrigger>
-            <SelectContent position="popper" className="w-max">
-              {SUPPORTED_LOCALES.map((l) => (
-                <SelectItem key={l} value={l} className="text-xs w-full">
-                  {LOCALE_LABELS[l] ?? l.toUpperCase()}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <LanguageSwitcher />
 
           <ThemeToggle />
           <PaletteSwitcher />

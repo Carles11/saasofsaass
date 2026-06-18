@@ -30,16 +30,23 @@ export function HeroBlock(props: BlockProps) {
     // Modern: split layout, image right, mono font
     return (
       <section
-        className={`flex flex-col md:flex-row items-center justify-between gap-8 px-6 py-24 font-mono`}
+        className={`flex flex-col md:flex-row items-center justify-between gap-8 px-6 py-24`}
         style={{ minHeight: "85vh" }}
       >
         <div className="flex-1 flex flex-col items-start justify-center text-left px-6 py-24">
           {t.title && (
-            <h1 className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl text-primary">
+            <h1
+              className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl text-primary"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               {t.title}
             </h1>
           )}
-          {t.subtitle && <p className="text-base text-zinc-500 max-w-2xl mt-2">{t.subtitle}</p>}
+          {t.subtitle && (
+            <p className="text-base text-zinc-500 max-w-2xl mt-2" style={{ fontFamily: "var(--font-body)" }}>
+              {t.subtitle}
+            </p>
+          )}
           {t.ctaLabel && safeCtaUrl && (
             <Button
               asChild
@@ -79,7 +86,7 @@ export function HeroBlock(props: BlockProps) {
     // Classic: overlay on image, serif font
     return (
       <section
-        className={`relative flex items-center justify-center min-h-80 px-6 py-24 font-serif bg-linear-to-b from-zinc-100 to-zinc-50`}
+        className={`relative flex items-center justify-center min-h-80 px-6 py-24 bg-linear-to-b from-zinc-100 to-zinc-50`}
         style={{ minHeight: "85vh" }}
       >
         <div className="absolute inset-0 w-full h-full rounded-xl overflow-hidden">
@@ -101,12 +108,17 @@ export function HeroBlock(props: BlockProps) {
         </div>
         <div className="relative z-10 flex flex-col items-center justify-center w-full h-full">
           {t.title && (
-            <h1 className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl text-zinc-700 drop-shadow">
+            <h1
+              className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl text-zinc-700 drop-shadow"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
               {t.title}
             </h1>
           )}
           {t.subtitle && (
-            <p className="text-lg text-zinc-600 max-w-2xl drop-shadow mt-2">{t.subtitle}</p>
+            <p className="text-lg text-zinc-600 max-w-2xl drop-shadow mt-2" style={{ fontFamily: "var(--font-body)" }}>
+              {t.subtitle}
+            </p>
           )}
           {t.ctaLabel && safeCtaUrl && (
             <Button
@@ -124,7 +136,7 @@ export function HeroBlock(props: BlockProps) {
   // Default: centered, simple, bg image if present
   return (
     <section
-      className={`relative flex flex-col ${gapClass} px-6 py-24 items-center text-center font-sans`}
+      className={`relative flex flex-col ${gapClass} px-6 py-24 items-center text-center`}
       style={{ fontFamily: "var(--font-heading)", minHeight: "85vh", width: "inherit" }}
     >
       {heroImage?.url && (

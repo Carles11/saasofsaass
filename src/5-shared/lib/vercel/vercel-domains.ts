@@ -1,6 +1,8 @@
 // ── Vercel Project Domains API wrapper ────────────────────────────────────────
 // Docs: https://vercel.com/docs/rest-api/endpoints/projects#list-project-domains
 
+import { toApexDomain, toWwwDomain } from "@/5-shared/lib/utils/domain";
+
 const VERCEL_API = "https://api.vercel.com";
 
 // Lazily-cached server-only config — validated on first call, never re-reads env
@@ -38,9 +40,17 @@ async function vercelFetch(
 
 // ── Public domain verification status helpers ──────────────────────────────────
 
+export interface DnsRecord {
+  type: string;
+  name: string;
+  value: string;
+}
+
 export interface AddDomainResult {
   status: "added" | "already_exists" | "error";
   error?: string;
+  dnsInstructions?: string;
+  dnsRecords?: DnsRecord[];
 }
 
 export interface RemoveDomainResult {
@@ -52,6 +62,7 @@ export interface DomainStatusResult {
   status: "valid" | "pending_validation" | "pending_certificate" | "error";
   error?: string;
   dnsInstructions?: string;
+  dnsRecords?: DnsRecord[];
 }
 
 // ── API methods ────────────────────────────────────────────────────────────────
@@ -73,7 +84,21 @@ export async function addDomainToVercelProject(
       body: JSON.stringify(body),
     });
 
-    if (res.ok) return { status: "added" };
+    if (res.ok) {
+      const body = await res.json().catch<Record<string, unknown>>(() => ({}));
+      const verification = body.verification as
+        | Array<{ type: string; domain: string; value: string; reason: string }>
+        | undefined;
+      const dnsInstructions = verification
+        ?.map((v) => `${v.type}: ${v.domain} — ${v.reason}`)
+        .join("\n");
+      const dnsRecords = verification?.map((v) => ({
+        type: v.type,
+        name: v.domain === name ? "@" : v.domain.slice(0, -(name.length + 1)),
+        value: v.value,
+      }));
+      return { status: "added", dnsInstructions, dnsRecords };
+    }
 
     const data = await res.json().catch(() => ({}));
     const errMsg = data?.error?.message ?? data?.message ?? `HTTP ${res.status}`;
@@ -178,15 +203,86 @@ export async function updateVercelProjectDomain(
   }
 }
 
+interface VercelVerification {
+  type: string;
+  domain: string;
+  value: string;
+  reason: string;
+}
+
+/** Merge verification records from both apex and www queries, deduplicate by type+domain. */
+function mergeVerification(
+  ...sources: (VercelVerification[] | undefined)[]
+): VercelVerification[] {
+  const seen = new Set<string>();
+  const result: VercelVerification[] = [];
+  for (const arr of sources) {
+    if (!arr) continue;
+    for (const v of arr) {
+      const key = `${v.type}:${v.domain}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        result.push(v);
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Synthesise standard Vercel DNS records when the API doesn't return
+ * explicit verification instructions (common for pending_certificate / verified states).
+ */
+function synthesizeDnsRecords(
+  apex: string,
+  www: string,
+): { dnsInstructions: string; dnsRecords: DnsRecord[] } {
+  const dnsInstructions = [
+    `A: ${apex} — alias to 76.76.21.21`,
+    `CNAME: ${www} — alias to cname.vercel-dns.com`,
+  ].join("\n");
+
+  const dnsRecords: DnsRecord[] = [
+    { type: "A", name: "@", value: "76.76.21.21" },
+    { type: "CNAME", name: "www", value: "cname.vercel-dns.com" },
+  ];
+
+  return { dnsInstructions, dnsRecords };
+}
+
+/**
+ * Convert Vercel verification entries into our DnsRecord format.
+ * Uses the apex as the base for computing record names (e.g. "@" for apex, "www" for www).
+ */
+function verificationToRecords(
+  verification: VercelVerification[],
+  apex: string,
+): { dnsInstructions: string; dnsRecords: DnsRecord[] } {
+  const dnsInstructions = verification
+    .map((v) => `${v.type}: ${v.domain} — ${v.reason}`)
+    .join("\n");
+
+  const dnsRecords: DnsRecord[] = verification.map((v) => ({
+    type: v.type,
+    name: v.domain === apex ? "@" : v.domain.slice(0, -(apex.length + 1)),
+    value: v.value,
+  }));
+
+  return { dnsInstructions, dnsRecords };
+}
+
 /**
  * Two-phase Vercel domain status check:
- * 1. Check the `verified` flag and `verification` instructions from v9 domains endpoint.
+ * 1. Query BOTH the apex and www subdomain for DNS verification records.
  * 2. If verified, also check `/v6/domains/{domain}/config` to confirm DNS points to Vercel.
+ * 3. Always returns combined DNS instructions — falls back to standard values when the API omits them.
  */
 export async function getVercelDomainStatus(
   domain: string,
 ): Promise<DomainStatusResult> {
   const name = normalizeDomain(domain);
+  const apex = toApexDomain(name);
+  const www = toWwwDomain(apex);
 
   try {
     const domainRecord = await getVercelProjectDomain(name);
@@ -194,20 +290,36 @@ export async function getVercelDomainStatus(
       return { status: "error", error: "Domain not found on Vercel project." };
     }
 
-    const verified = domainRecord.verified === true;
-    const verification = domainRecord.verification as
-      | Array<{ type: string; domain: string; reason: string }>
+    // Query www subdomain for its verification records (414 ok if not added)
+    const wwwRecord =
+      www !== name ? await getVercelProjectDomain(www) : null;
+
+    const apexVerification = domainRecord.verification as
+      | VercelVerification[]
+      | undefined;
+    const wwwVerification = wwwRecord?.verification as
+      | VercelVerification[]
       | undefined;
 
-    const dnsInstructions = verification
-      ?.map((v) => `${v.type}: ${v.domain} — ${v.reason}`)
-      .join("\n");
+    // Merge verification from both queries, deduplicated
+    const verification = mergeVerification(
+      apexVerification,
+      wwwVerification,
+    );
+
+    // Convert to our format — or use fallback if Vercel returned nothing
+    const { dnsInstructions, dnsRecords } =
+      verification.length > 0
+        ? verificationToRecords(verification, apex)
+        : synthesizeDnsRecords(apex, www);
+
+    const verified = domainRecord.verified === true;
 
     if (!verified) {
       return {
         status: "pending_validation",
-        dnsInstructions:
-          dnsInstructions ?? "Verify domain ownership in your DNS provider.",
+        dnsInstructions,
+        dnsRecords,
       };
     }
 
@@ -223,6 +335,7 @@ export async function getVercelDomainStatus(
         status: "pending_validation",
         dnsInstructions,
         error: "DNS configuration not fully propagated.",
+        dnsRecords,
       };
     }
 
@@ -233,9 +346,8 @@ export async function getVercelDomainStatus(
     if (misconfigured) {
       return {
         status: "pending_validation",
-        dnsInstructions:
-          dnsInstructions ??
-          "Domain verified but DNS not pointing to Vercel. Add the required A/CNAME records.",
+        dnsInstructions,
+        dnsRecords,
       };
     }
 
@@ -245,10 +357,11 @@ export async function getVercelDomainStatus(
       return {
         status: "pending_certificate",
         dnsInstructions,
+        dnsRecords,
       };
     }
 
-    return { status: "valid", dnsInstructions };
+    return { status: "valid", dnsInstructions, dnsRecords };
   } catch (err) {
     return {
       status: "error",

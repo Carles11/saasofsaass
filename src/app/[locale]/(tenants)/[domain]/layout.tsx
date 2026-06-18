@@ -23,10 +23,19 @@ export default async function TenantLayout({
     isSubdomain,
   });
 
+  const palette =
+    typeof tenant?.branding === "object" &&
+    tenant?.branding !== null &&
+    "palette" in (tenant.branding as Record<string, unknown>)
+      ? ((tenant.branding as Record<string, string>).palette ?? "ocean")
+      : "ocean";
+
   return (
     <StoreHydrator tenant={tenant ?? null}>
       {tenant && <TenantHeader />}
-      <div className="min-h-screen selection:bg-zinc-900 selection:text-white">{children}</div>
+      <div className={`min-h-screen selection:bg-zinc-900 selection:text-white theme-${palette}`}>
+        {children}
+      </div>
     </StoreHydrator>
   );
 }

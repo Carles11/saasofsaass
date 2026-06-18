@@ -1,0 +1,1 @@
+ALTER TABLE "tenants" ADD COLUMN "seo_enabled" boolean DEFAULT true NOT NULL;

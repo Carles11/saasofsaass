@@ -6,6 +6,7 @@ import { StoreHydrator } from "@/5-shared/store/StoreHydrator";
 import { getCurrentProfile, getTenantRole } from "@/5-shared/lib/auth/authorization";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
 import { tenantDomains, workspaces } from "@/5-shared/lib/db/schema";
+import { getFontIdByVariableRef } from "@/5-shared/lib/fonts/fontRegistry";
 import { eq } from "drizzle-orm";
 import { db } from "@/5-shared/lib/db";
 import type { SupportedLocaleType } from "@/5-shared/types";
@@ -49,6 +50,16 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
 
   const plan = workspace?.plan ?? "free";
 
+  const branding = (tenant.branding ?? {}) as Record<string, string>;
+  const initialTitleFont = branding.fontHeading
+    ? getFontIdByVariableRef(branding.fontHeading)
+    : undefined;
+  const initialBodyFont = branding.fontBody
+    ? getFontIdByVariableRef(branding.fontBody)
+    : undefined;
+  const initialPalette = branding.palette ?? undefined;
+  const initialSeoEnabled = tenant.seoEnabled ?? true;
+
   const translations = {
     ...(namespacedTranslations.common ?? {}),
     ...(namespacedTranslations["dashboard.site-builder"] ?? {}),
@@ -69,6 +80,10 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
             translations={translations}
             domainRows={domainRows}
             plan={plan}
+            initialTitleFont={initialTitleFont}
+            initialBodyFont={initialBodyFont}
+            initialPalette={initialPalette}
+            initialSeoEnabled={initialSeoEnabled}
           />
         </StoreHydrator>
       </div>

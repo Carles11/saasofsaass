@@ -47,6 +47,7 @@ export const tenants = pgTable("tenants", {
   branding: jsonb("branding").default({}), // HSL vars, logo, fonts
   templateId: text("template_id").notNull().default("default"),
   isActive: boolean("is_active").notNull().default(true),
+  seoEnabled: boolean("seo_enabled").notNull().default(true),
   workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

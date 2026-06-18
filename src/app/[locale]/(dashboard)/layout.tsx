@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from "@/5-shared/i18n/LanguageSwitcher";
 import { DashboardSidebar } from "@/2-widgets/dashboard/ui/sidebar/DashboardSidebar";
 import { MobileBottomNav } from "@/2-widgets/dashboard/ui/sidebar/MobileBottomNav";
 import { TranslationProgressBar } from "@/3-features/translations/ui/translationProgressBar";
@@ -47,6 +48,7 @@ export default async function DashboardLayout({
       <DashboardSidebar session={session} resolvedRoles={resolvedRoles} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden pb-16 md:pb-0">
         <div className="flex items-center justify-end gap-2 px-6 pt-4">
+          <LanguageSwitcher />
           <ThemeToggle />
           <PaletteSwitcher />
         </div>

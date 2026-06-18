@@ -14,8 +14,14 @@ export async function TenantPage({ context }: TenantPageProps) {
   const tenantBlocks = await getBlocksByTenantId(tenantData.id);
 
   // Build CSS custom properties from tenant branding (e.g. { primary: '239 84% 67%' })
+  // fontHeading/fontBody are stored as CSS var refs like "var(--font-playfair-display)"
+  // They are NOT emitted as root-level CSS vars (blocks use --font-heading/--font-body
+  // which are set via TenantLayoutResolver inline styles instead)
   const branding = (tenantData.branding ?? {}) as Record<string, string>;
+  const fontHeading = branding.fontHeading;
+  const fontBody = branding.fontBody;
   const cssVars = Object.entries(branding)
+    .filter(([k]) => k !== "fontHeading" && k !== "fontBody" && k !== "palette")
     .map(([k, v]) => `--${k}: ${v}`)
     .join("; ");
 
@@ -27,6 +33,8 @@ export async function TenantPage({ context }: TenantPageProps) {
           (tenantData.templateId as import("@/5-shared/config/templates").TenantTemplateId) ||
           "default"
         }
+        titleFont={fontHeading}
+        bodyFont={fontBody}
       >
         <BlockRenderer blocks={tenantBlocks} locale={locale} tenant={tenantData} />
       </TenantLayoutResolver>

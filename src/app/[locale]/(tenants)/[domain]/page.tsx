@@ -64,8 +64,8 @@ export async function generateMetadata({
       description,
     },
     robots: {
-      index: true,
-      follow: true,
+      index: tenant.seoEnabled !== false,
+      follow: tenant.seoEnabled !== false,
     },
   };
 }

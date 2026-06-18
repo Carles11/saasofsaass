@@ -4,10 +4,9 @@ import { cn } from "@/5-shared/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/5-shared/lib/auth/provider";
 import { ThemeProvider } from "@/5-shared/theme/ThemeProvider";
+import { fontVariables } from "@/5-shared/lib/fonts/fontLoader";
 
 import "./globals.css";
-
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +17,8 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "SoSS Engine",
@@ -32,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable, fontVariables)}
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
