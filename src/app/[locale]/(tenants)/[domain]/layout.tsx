@@ -33,7 +33,7 @@ export default async function TenantLayout({
   return (
     <StoreHydrator tenant={tenant ?? null}>
       {tenant && <TenantHeader />}
-      <div className={`min-h-screen selection:bg-zinc-900 selection:text-white theme-${palette}`}>
+      <div className={`min-h-screen selection:bg-foreground selection:text-background theme-${palette}`}>
         {children}
       </div>
     </StoreHydrator>

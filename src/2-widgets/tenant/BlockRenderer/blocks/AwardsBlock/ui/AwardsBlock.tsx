@@ -9,7 +9,7 @@ export async function AwardsBlock({ block, locale }: BlockProps) {
     return (
       <section className="py-16 px-6 text-center">
         <h2 className="text-xl font-bold mb-2">Awards</h2>
-        <p className="text-zinc-400 text-sm">No awards to display yet.</p>
+        <p className="text-muted-foreground text-sm">No awards to display yet.</p>
       </section>
     );
   }
@@ -25,10 +25,10 @@ export async function AwardsBlock({ block, locale }: BlockProps) {
           return (
             <article
               key={entity.id}
-              className="rounded-lg border border-zinc-200 overflow-hidden hover:shadow-md transition-shadow bg-white p-4 flex flex-col gap-2"
+              className="rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow bg-card p-4 flex flex-col gap-2"
             >
-              <h3 className="font-semibold text-zinc-900 line-clamp-2 text-lg">{title}</h3>
-              {description && <p className="text-sm text-zinc-500 line-clamp-3">{description}</p>}
+              <h3 className="font-semibold text-card-foreground line-clamp-2 text-lg">{title}</h3>
+              {description && <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>}
             </article>
           );
         })}

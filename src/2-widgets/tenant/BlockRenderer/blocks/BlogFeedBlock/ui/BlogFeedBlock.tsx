@@ -13,7 +13,7 @@ export async function BlogFeedBlock({ block, config, locale }: BlockProps) {
   if (items.length === 0) {
     return (
       <section className="py-16 px-6 text-center">
-        <p className="text-zinc-400 text-sm">No posts published yet.</p>
+        <p className="text-muted-foreground text-sm">No posts published yet.</p>
       </section>
     );
   }
@@ -34,7 +34,7 @@ export async function BlogFeedBlock({ block, config, locale }: BlockProps) {
           return (
             <article
               key={entity.id}
-              className="rounded-lg border border-zinc-200 overflow-hidden hover:shadow-md transition-shadow"
+              className="rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
             >
               {entity.coverImageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -46,8 +46,8 @@ export async function BlogFeedBlock({ block, config, locale }: BlockProps) {
                 />
               )}
               <div className="p-4">
-                <h2 className="font-semibold text-zinc-900 line-clamp-2">{title}</h2>
-                {excerpt && <p className="mt-2 text-sm text-zinc-500 line-clamp-3">{excerpt}</p>}
+                <h2 className="font-semibold text-card-foreground line-clamp-2">{title}</h2>
+                {excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{excerpt}</p>}
                 {slug && (
                   <a
                     href={`/blog/${slug}`}

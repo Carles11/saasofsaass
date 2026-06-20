@@ -10,8 +10,9 @@ import type { BlockComponent, BlockProps, BlockRegistry } from "./types";
 
 const adaptImageGalleryBlock: BlockComponent = function AdaptImageGalleryBlock(props: BlockProps) {
   return React.createElement(ImageGalleryBlock, {
-    images: props.config.images ?? [],
-    lang: props.config.lang ?? props.locale,
+    images: (props.config.images ?? []) as import("@/5-shared/types/tenants/blocks").GalleryImage[],
+    lang: (props.config.lang as string) ?? props.locale,
+    galleryName: props.config.galleryName as string | undefined,
   });
 };
 

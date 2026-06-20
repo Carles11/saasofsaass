@@ -10,7 +10,7 @@ import { Button, Input, Label, Separator, Spinner } from "@/components/ui";
 
 import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 // Placeholder for upload and update actions
 // import { uploadGalleryImages, updateGalleryConfig } from "@/3-features/manage-site-blocks";
@@ -40,6 +40,7 @@ export function GalleryManager({
     Record<string, string>
   >({});
   const [isSaving, setIsSaving] = useState(false);
+  const galleryNameTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     setLoading(true);
@@ -159,10 +160,20 @@ export function GalleryManager({
     handleUpload(files);
   }
 
-  // Gallery name change
+  // Gallery name change (debounced persist)
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setGalleryName(e.target.value);
-    // Optionally: debounce and persist
+    const value = e.target.value;
+    setGalleryName(value);
+    if (galleryNameTimer.current) clearTimeout(galleryNameTimer.current);
+    galleryNameTimer.current = setTimeout(async () => {
+      if (block) {
+        await updateBlockConfig(block.id, tenant.id, {
+          ...config,
+          galleryName: value,
+          images,
+        });
+      }
+    }, 600);
   }
 
   // Remove image (calls API to delete from S3/DB, then updates UI)

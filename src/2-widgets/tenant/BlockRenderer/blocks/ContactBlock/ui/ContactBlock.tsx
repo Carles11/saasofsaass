@@ -17,33 +17,33 @@ export function ContactBlock({ config, t }: BlockProps) {
           <h2 className="text-3xl font-bold text-center mb-4">{t.title}</h2>
         )}
         {t.description && (
-          <p className="text-zinc-500 text-center max-w-2xl mx-auto mb-10">{t.description}</p>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">{t.description}</p>
         )}
         {hasDetails && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {email && (
-              <div className="rounded-xl border border-zinc-200 bg-white p-6 text-center">
+              <div className="rounded-xl border border-border bg-card p-6 text-center">
                 <div className="text-2xl mb-2">✉</div>
-                <h3 className="font-semibold text-sm text-zinc-400 uppercase tracking-wider mb-1">Email</h3>
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">Email</h3>
                 <a href={`mailto:${email}`} className="text-sm text-primary hover:underline break-all">
                   {email}
                 </a>
               </div>
             )}
             {phone && (
-              <div className="rounded-xl border border-zinc-200 bg-white p-6 text-center">
+              <div className="rounded-xl border border-border bg-card p-6 text-center">
                 <div className="text-2xl mb-2">📞</div>
-                <h3 className="font-semibold text-sm text-zinc-400 uppercase tracking-wider mb-1">Phone</h3>
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">Phone</h3>
                 <a href={`tel:${phone}`} className="text-sm text-primary hover:underline">
                   {phone}
                 </a>
               </div>
             )}
             {address && (
-              <div className="rounded-xl border border-zinc-200 bg-white p-6 text-center">
+              <div className="rounded-xl border border-border bg-card p-6 text-center">
                 <div className="text-2xl mb-2">📍</div>
-                <h3 className="font-semibold text-sm text-zinc-400 uppercase tracking-wider mb-1">Address</h3>
-                <p className="text-sm text-zinc-700">{address}</p>
+                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">Address</h3>
+                <p className="text-sm text-card-foreground">{address}</p>
               </div>
             )}
           </div>

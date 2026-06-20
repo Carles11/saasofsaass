@@ -19,7 +19,7 @@ export function NavbarBlock({ config, t, tenant, locale }: BlockProps & { locale
   const branding = (tenant.branding as { logoUrl?: string; primaryColor?: string }) || {};
 
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-zinc-100">
+    <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="flex items-center gap-4">
         {branding.logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -32,7 +32,7 @@ export function NavbarBlock({ config, t, tenant, locale }: BlockProps & { locale
             }}
           />
         ) : (
-          <span className="font-black text-xl tracking-tighter uppercase text-zinc-900">
+          <span className="font-black text-xl tracking-tighter uppercase text-foreground">
             {siteTitle}
           </span>
         )}
@@ -44,7 +44,7 @@ export function NavbarBlock({ config, t, tenant, locale }: BlockProps & { locale
             <a
               key={l}
               href={`/${l}${pathAfterLocale ? "/" + pathAfterLocale : ""}`.replace(/\/$/, "")}
-              className={`uppercase text-xs font-bold px-3 py-1 rounded transition-colors ${l === locale ? "bg-primary text-white" : "text-zinc-700 hover:bg-zinc-100"}`}
+              className={`uppercase text-xs font-bold px-3 py-1 rounded transition-colors ${l === locale ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"}`}
               aria-current={l === locale ? "page" : undefined}
             >
               {l}
@@ -57,7 +57,7 @@ export function NavbarBlock({ config, t, tenant, locale }: BlockProps & { locale
               <li key={i}>
                 <a
                   href={sanitizeHref(link.href)}
-                  className="text-sm text-zinc-600 hover:text-zinc-900 transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {link.label}
                 </a>

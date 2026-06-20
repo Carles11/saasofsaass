@@ -21,7 +21,7 @@ export const TenantHeader = () => {
     // Classic: Center logo, nav below
     return (
       <header
-        className="w-full bg-white border-b border-zinc-100 py-6 px-4 flex flex-col items-center"
+        className="w-full bg-background border-b border-border py-6 px-4 flex flex-col items-center"
         style={{ fontFamily: "var(--font-heading)" }}
       >
         <div className="flex flex-col items-center">
@@ -36,19 +36,19 @@ export const TenantHeader = () => {
               }}
             />
           ) : (
-            <span className="font-black text-2xl tracking-tighter uppercase text-zinc-900 mb-2">
+            <span className="font-black text-2xl tracking-tighter uppercase text-foreground mb-2">
               {tenant.name}
             </span>
           )}
           {/* Navigation below logo (placeholder) */}
           <nav className="mt-2 flex gap-6">
-            <a className="text-zinc-700 hover:text-primary transition" href="#">
+            <a className="text-muted-foreground hover:text-primary transition" href="#">
               Home
             </a>
-            <a className="text-zinc-700 hover:text-primary transition" href="#">
+            <a className="text-muted-foreground hover:text-primary transition" href="#">
               About
             </a>
-            <a className="text-zinc-700 hover:text-primary transition" href="#">
+            <a className="text-muted-foreground hover:text-primary transition" href="#">
               Contact
             </a>
           </nav>
@@ -61,7 +61,7 @@ export const TenantHeader = () => {
     // Modern: Sticky, slim, glassmorphism bar with sharp corners
     return (
       <header
-        className="h-16 flex items-center justify-between px-8 bg-white/70 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-50 rounded-none shadow-sm"
+        className="h-16 flex items-center justify-between px-8 bg-background/70 backdrop-blur-md border-b border-border sticky top-0 z-50 rounded-none shadow-sm"
         style={{ fontFamily: "var(--font-heading)", borderRadius: "0px" }}
       >
         <div className="flex items-center gap-4">
@@ -76,25 +76,25 @@ export const TenantHeader = () => {
               }}
             />
           ) : (
-            <span className="font-black text-xl tracking-tighter uppercase text-zinc-900">
+            <span className="font-black text-xl tracking-tighter uppercase text-foreground">
               {tenant.name}
             </span>
           )}
         </div>
         <nav className="flex gap-6">
-          <a className="text-zinc-700 hover:text-primary transition" href="#">
+          <a className="text-muted-foreground hover:text-primary transition" href="#">
             Home
           </a>
-          <a className="text-zinc-700 hover:text-primary transition" href="#">
+          <a className="text-muted-foreground hover:text-primary transition" href="#">
             About
           </a>
-          <a className="text-zinc-700 hover:text-primary transition" href="#">
+          <a className="text-muted-foreground hover:text-primary transition" href="#">
             Contact
           </a>
         </nav>
         <div className="hidden md:flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">
+          <span className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
             Live Site
           </span>
         </div>
@@ -104,39 +104,39 @@ export const TenantHeader = () => {
 
   // Default: Original layout
   return (
-    <header
-      className="h-20 flex items-center justify-between px-8 bg-white border-b border-zinc-100 sticky top-0 z-50"
-      style={{ fontFamily: "var(--font-heading)" }}
-    >
-      <div className="flex items-center gap-4">
-        {branding.logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={branding.logoUrl}
-            alt={tenant.name}
-            className="h-8 w-auto object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
-          />
-        ) : (
-          <span className="font-black text-xl tracking-tighter uppercase text-zinc-900">
-            {tenant.name}
-          </span>
-        )}
-      </div>
-      <div className="flex items-center gap-6">
-        <div className="hidden md:flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">
-            Live Site
-          </span>
+      <header
+        className="h-20 flex items-center justify-between px-8 bg-background border-b border-border sticky top-0 z-50"
+        style={{ fontFamily: "var(--font-heading)" }}
+      >
+        <div className="flex items-center gap-4">
+          {branding.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={branding.logoUrl}
+              alt={tenant.name}
+              className="h-8 w-auto object-contain"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          ) : (
+            <span className="font-black text-xl tracking-tighter uppercase text-foreground">
+              {tenant.name}
+            </span>
+          )}
         </div>
-        <div className="h-8 w-[1px] bg-zinc-100" />
-        <div className="text-[10px] font-mono text-zinc-400">
-          Engine: <span className="text-zinc-900 font-bold uppercase">Turbo v16.2</span>
+        <div className="flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">
+              Live Site
+            </span>
+          </div>
+          <div className="h-8 w-[1px] bg-border" />
+          <div className="text-[10px] font-mono text-muted-foreground">
+            Engine: <span className="text-foreground font-bold uppercase">Turbo v16.2</span>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
   );
 };

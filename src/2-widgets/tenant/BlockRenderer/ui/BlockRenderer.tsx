@@ -23,8 +23,8 @@ export function BlockRenderer({ blocks, locale, tenant }: BlockRendererProps) {
   // 2. Handle empty state
   if (visibleBlocks.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[40vh] border-2 border-dashed border-zinc-100 rounded-[3rem] m-6">
-        <p className="text-zinc-400 text-sm font-medium italic">
+      <div className="flex items-center justify-center min-h-[40vh] border-2 border-dashed border-border rounded-[3rem] m-6">
+        <p className="text-muted-foreground text-sm font-medium italic">
           "The workshop is ready. No blocks have been deployed yet."
         </p>
       </div>
@@ -66,9 +66,9 @@ function RegistryBlock({
   // 1. Handle missing implementation in registry
   if (!entry) {
     return (
-      <section className="py-12 px-6 text-center border-b border-zinc-50 bg-zinc-50/30">
-        <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
-          Engine Warning: Block <span className="text-zinc-800 font-bold">{block.type}</span> is not
+      <section className="py-12 px-6 text-center border-b border-border bg-muted/30">
+        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+          Engine Warning: Block <span className="text-foreground font-bold">{block.type}</span> is not
           registered.
         </p>
       </section>
