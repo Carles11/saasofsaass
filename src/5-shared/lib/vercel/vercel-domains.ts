@@ -351,16 +351,11 @@ export async function getVercelDomainStatus(
       };
     }
 
-    // Check if SSL certificate is still being issued
-    const certReady = domainRecord.ready === true;
-    if (!certReady) {
-      return {
-        status: "pending_certificate",
-        dnsInstructions,
-        dnsRecords,
-      };
-    }
-
+    // Verified, DNS is correct, and Vercel can issue TLS — domain is fully valid.
+    // Note: there is no separate certificate-ready field in either Vercel API
+    // endpoint (GET /v9/projects/.../domains/:domain has no `ready` field, and
+    // GET /v6/domains/:domain/config returns misconfigured which already covers
+    // whether TLS can be auto-issued).
     return { status: "valid", dnsInstructions, dnsRecords };
   } catch (err) {
     return {

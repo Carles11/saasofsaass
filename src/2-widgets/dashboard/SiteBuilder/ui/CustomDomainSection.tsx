@@ -220,7 +220,6 @@ export function CustomDomainSection({
 
   function renderDomainPanel() {
     if (!currentDomain) return null;
-    console.log("Current domain:", currentDomain);
     switch (currentDomain.status) {
       case "verified":
         return (
