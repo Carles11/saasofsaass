@@ -31,10 +31,17 @@ async function isTenantActive(
   if (!sql) return true // No DB configured — let the page handle it
 
   try {
-    // neon driver requires tagged template literals — use separate queries per lookup type
+    // neon driver requires tagged template literals
     const rows = isSubdomain
       ? await sql`SELECT id FROM tenants WHERE slug   = ${tenantKey} AND is_active = true LIMIT 1`
-      : await sql`SELECT id FROM tenants WHERE domain = ${tenantKey} AND is_active = true LIMIT 1`
+      : await sql`
+          SELECT t.id
+          FROM tenants t
+          LEFT JOIN tenant_domains td ON td.tenant_id = t.id
+          WHERE t.is_active = true
+            AND (t.domain = ${tenantKey} OR (td.domain = ${tenantKey} AND td.status = 'verified'))
+          LIMIT 1
+        `
     const exists = rows.length > 0
     await tenantCache.set(tenantKey, { exists }, TENANT_CACHE_TTL_MS)
     return exists
