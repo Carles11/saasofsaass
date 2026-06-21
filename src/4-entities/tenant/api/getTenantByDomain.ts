@@ -1,6 +1,6 @@
 import { db } from '@/5-shared/lib/db'
-import { tenants } from '@/5-shared/lib/db/schema'
-import { eq } from 'drizzle-orm'
+import { tenants, tenantDomains } from '@/5-shared/lib/db/schema'
+import { eq, or, and } from 'drizzle-orm'
 
 interface LookupParams {
   tenant: string
@@ -9,15 +9,26 @@ interface LookupParams {
 }
 
 export async function getTenantByDomain({ tenant, domain, isSubdomain }: LookupParams) {
-  const condition = isSubdomain
-    ? eq(tenants.slug, tenant)
-    : eq(tenants.domain, domain)
+  if (isSubdomain) {
+    const result = await db
+      .select()
+      .from(tenants)
+      .where(eq(tenants.slug, tenant))
+      .limit(1)
+    return result[0] ?? null
+  }
 
   const result = await db
     .select()
     .from(tenants)
-    .where(condition)
+    .leftJoin(tenantDomains, eq(tenantDomains.tenantId, tenants.id))
+    .where(
+      or(
+        eq(tenants.domain, domain),
+        and(eq(tenantDomains.domain, domain), eq(tenantDomains.status, 'verified'))
+      )
+    )
     .limit(1)
 
-  return result[0] ?? null
+  return result[0]?.tenants ?? null
 }
