@@ -25,7 +25,7 @@ export function MarketingPage({ translations }: MarketingPageProps) {
   const geoLanguagesBody = resolveTranslation(
     translations,
     "geo.languages-body",
-    "SoSS natively supports 8 languages: English (en), Spanish (es), Catalan (ca), French (fr), German (de), Italian (it), Basque (eu), and Irish/Galician (ga). Each tenant can enable any subset of these languages and AI translation is applied automatically.",
+    "SoSS natively supports 8 languages: English (en), Spanish (es), Catalan (ca), French (fr), German (de), Italian (it), Basque (eu), and Galician (ga). Each tenant can enable any subset of these languages and AI translation is applied automatically.",
   );
   const geoCapabilitiesHeading = resolveTranslation(translations, "geo.capabilities-heading", "Core infrastructure capabilities");
   const capabilityRouting = resolveTranslation(
