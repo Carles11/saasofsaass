@@ -16,6 +16,9 @@ This file defines the strict coding standards, architectural rules, and current 
 - **Multi-tenancy:** Single-codebase, data-driven rendering via proxy middleware
 - **Template Architecture:** TypeScript source of truth (`config/templates.ts`). Text slug on tenant. Appearance-only presets. No DB storage, no UUID FK, no seed script.
 - **Theme:** Platform-wide dark/light via `ThemeProvider` (`next-themes`), semantic shadcn CSS vars
+- **Tenant Palettes:** Per-tenant site palette (`ocean` | `sunset` | `forest`), stored in `tenants.branding.palette`, applied as a CSS class on the tenant layout wrapper — independent from the platform-wide dark/light toggle
+- **Custom Domains:** Tenants can attach an external domain via the Vercel Domains API; tracked in `tenant_domains` (status: pending/pending_certificate/verified/error) with an audit trail in `tenant_domain_logs`. Routing resolves `TENANT_CUSTOM` hostnames through `tenant_domains` (status = verified), not through the unused `tenants.domain` column.
+- **Blocks (current):** `navbar`, `hero`, `blog-feed`, `podcast-feed`, `awards`, `contact`, `image-gallery` — see `src/5-shared/types/tenants/blocks.ts` for the live `BlockKind` union
 
 ---
 
@@ -105,6 +108,7 @@ drizzle.config.ts
 ```
 
 **Key paths:**
+
 - Auth pages: `src/app/[locale]/(marketing)/auth/{sign-in,sign-up,login,register,forgot-password}/page.tsx`
 - Auth API proxy: `src/app/api/auth/[...path]/route.ts`
 - Schema (core): `src/5-shared/lib/db/schema.ts`
@@ -120,6 +124,7 @@ drizzle.config.ts
 Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/auth.ts`:
 
 ### `tenants`
+
 - `id`, `name`, `slug`, `domain`
 - `locales` (text array — enabled languages per tenant)
 - `defaultLocale`, `branding` (JSONB — HSL vars, logo, fonts)
@@ -127,29 +132,34 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 - `isActive`, `createdAt`, `updatedAt`
 
 ### `blocks`
+
 - `id`, `tenantId` (FK → tenants), `type` (navbar/hero/blog-feed/awards/podcast-feed/contact)
 - `order`, `isVisible`, `config` (JSONB — block settings)
 - `translations` (JSONB — `{ en: { title, subtitle }, es: { ... } }`)
 - `createdAt`, `updatedAt`
 
 ### `tenant_entities`
+
 - `id`, `tenantId` (FK → tenants), `blockId` (FK → blocks, nullable)
 - `kind` (blog_post/podcast_episode/award_item), `status` (draft/published/archived)
 - `order`, `slug`, `coverImageUrl`, `metadata` (JSONB)
 - `publishedAt`, `createdAt`, `updatedAt`
 
 ### `tenant_translations`
+
 - `id`, `tenantId` (FK → tenants), `entityId` (FK → tenant_entities)
 - `locale`, `payload` (JSONB — { title, body, excerpt }), `translationStatus`, `isLocked`
 - Unique on `(entityId, locale)`
 
 ### `transactions`
+
 - `id`, `tenantId` (FK → tenants)
 - `amount`, `currency`, `platformFee` (1% in cents)
 - `status`, `stripeId`, `metadata` (JSONB)
 - `createdAt`, `updatedAt`
 
 ### `platform_translations`
+
 - `id`, `namespace` (common/dashboard/errors/auth), `key`, `locale`, `value`
 - **Unique constraint** on `(namespace, key, locale)`
 - `createdAt`, `updatedAt`
@@ -158,6 +168,7 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 ### Auth tables (`schema/auth.ts`)
 
 #### `profiles`
+
 - `id` (UUID, PK), `email` (unique), `name`, `avatarUrl`
 - `role` (`user` | `super_admin`, default `user`)
 - `createdAt`, `updatedAt`
@@ -166,6 +177,7 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 - Assigned via `seed-super-admin.ts` — run `npx dotenv -e .env.local -- npx tsx src/5-shared/lib/db/seed-super-admin.ts`
 
 #### `tenant_memberships`
+
 - `id`, `tenantId` (FK → tenants), `profileId` (FK → profiles)
 - `role` (owner | editor)
 - `createdAt`, `updatedAt`
@@ -196,12 +208,14 @@ app.saasofsaass.com / app.localhost:3000 → /(dashboard)
 ```
 
 **Key rules:**
+
 - next-intl runs first to handle locale redirect (307/308)
 - Locale prefix is stripped before rewriting (`/en/dashboard` → `/dashboard`)
 - Then DNS rewrite is applied with intl headers forwarded
 - File is named `proxy.ts` (not `middleware.ts`) — renamed in Next.js 16.2
 
 **Env vars required:**
+
 ```
 DATABASE_URL
 NEON_AUTH_BASE_URL
@@ -222,18 +236,21 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 ## 🛠️ Mandatory Coding Rules
 
 ### 1. FSD Gravity & Scoping
+
 - **Downward imports only:** `app` → `1-pages` → `2-widgets` → `3-features` → `4-entities` → `5-shared`
 - **No cross-slice imports** on the same layer
 - **Namespacing:** `/soss` marketing, `/admin` dashboard, `/tenant` public engine
 
 ### 2. Multi-tenant Safety
+
 - **No hardcoded domains:** Always use env vars or tenant context
 - **RLS mandatory:** Every Neon query MUST scope to `tenant_id`
 - **CSS variables only:** Never hardcode hex/colors on platform pages. Use semantic shadcn vars (`bg-background`, `text-foreground`, `bg-card`, `text-muted-foreground`, `border-border`, etc.). Tenant template blocks may use hardcoded zinc as they are Phase 3 for dark mode.
 
 ### 3. Auth Pattern
+
 - **Neon Auth** handles user sessions. API proxy at `/api/auth/[...path]/route.ts` forwards to `NEON_AUTH_BASE_URL`.
-- **Origin override:** In local dev, the proxy overrides the `Origin` header to `http://localhost:3000` for subdomain requests (app.localhost, *.localhost). This is required because Neon Auth's `allow_localhost` matches only the exact string `localhost`.
+- **Origin override:** In local dev, the proxy overrides the `Origin` header to `http://localhost:3000` for subdomain requests (app.localhost, \*.localhost). This is required because Neon Auth's `allow_localhost` matches only the exact string `localhost`.
 - **Profile sync:** `sync-profile.ts` creates/updates a local `profiles` record when a Neon Auth user signs in (matched by email).
 - **Authorization helpers** in `src/5-shared/lib/auth/authorization.ts`:
   - `getCurrentProfile()` — returns local profile by matching session email
@@ -243,6 +260,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - **Roles:** `owner` (full control), `editor` (content-only — cannot add/remove blocks, reorder, manage languages, invite members)
 
 ### 4. Theme System
+
 - Dark/light mode via `next-themes` wrapped in `<ThemeProvider>` at root layout
 - Toggle via `ThemeToggle` (sun/moon icon, uses `lucide-react`)
 - Platform pages (marketing, auth, dashboard) use semantic shadcn CSS vars from `globals.css`:
@@ -255,23 +273,84 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - Tenant template blocks (Bentley template) still use hardcoded zinc colors — scheduled for Phase 3 dark mode pass
 
 ### 5. Params Pattern
+
 - **Server components:** `getServerParams(params, searchParams)` from `@/5-shared/lib/next/params.server`
 - **Client components:** `useClientParams()` from `@/5-shared/lib/next/params.client`
 - Never read `params.locale` manually — next-intl owns locale
 
 ### 6. Next.js 16.2 Async Params
+
 - `params` and `searchParams` are Promises — always `await` them
 - Use `getServerParams()` helper which handles this automatically
 
 ### 7. Preview Link
+
 - SiteBuilder shows a Preview button that links to `{slug}.localhost:3000/{locale}` in dev or `{slug}.saasofsaass.com/{locale}` in prod
 - The "Preview" label comes from `platform_translations` table (namespace `common`, key `preview`), fetched server-side and passed as prop
+
+---
+
+## 🧱 Block Development Standards
+
+Standing rules for every new tenant-facing block (Tier 1–4 roadmap: simple content blocks → collection blocks → richer collection blocks → ported wedding-web entity systems). Read this section before starting any block-related session — it replaces re-explaining these constraints in each prompt.
+
+### 1. Choose the correct storage pattern first
+
+- **Config-blob pattern** (CTA banner, Footer, Map/location, Text/rich-content, any block with a small fixed set of fields and no independently add/edit/delete-able items): store all settings in the existing `blocks.config` JSONB column. No new table. Builder UI is a plain field-list form, same shape as the existing `hero`/`contact` `fields` array in the block registry.
+- **Collection pattern** (Features grid, Testimonials, Team, Logo cloud, FAQ, Pricing, Product grid, and anything where the user adds an open-ended list of items): store each item as a row in the existing `tenant_entities` table (with `blockId` pointing at the parent block) plus its translated payload in `tenant_translations`. Reuse the existing `CollectionManager` widget (`src/2-widgets/dashboard/SiteBuilder/ui/CollectionManager.tsx`) for the builder UI — do not build a new list/add/edit/delete UI from scratch. Add a new `kind` value to whatever enum/union currently lists `blog_post | podcast_episode | award_item` for `tenant_entities.kind`.
+- **New-table pattern** (reserved for blocks whose data genuinely doesn't fit "translatable named items belonging to a block" — e.g. RSVP's parties/submissions, time-ranged event schedules, payment-method-specific fields): only use this when the collection pattern is a genuine mismatch. State explicitly in the plan why the collection pattern doesn't fit before introducing a new table.
+
+If unsure which pattern applies to a given block, say so in plan mode rather than guessing.
+
+### 2. FSD placement for a new block (mirror the existing `AwardsBlock`/`BlogFeedBlock` structure exactly)
+
+- Block component: `src/2-widgets/tenant/BlockRenderer/blocks/{BlockName}/ui/{BlockName}.tsx`
+- Registry entry: `src/2-widgets/tenant/BlockRenderer/config/registry.ts` — add the component, `defaultConfig`, and `fields` (empty array if it's a collection block managed via `CollectionManager`)
+- New `BlockKind` value: `src/5-shared/types/tenants/blocks.ts`
+- Any new server actions: `src/3-features/manage-site-blocks/` (block-level concerns) or `src/3-features/manage-entities/` (collection-item CRUD) — match whichever existing feature slice already owns that kind of action, don't create a new slice per block
+- Block components are server components by default (no `"use client"`) unless the block genuinely needs interactivity (e.g. an FAQ accordion's expand/collapse, a carousel) — in that case isolate the interactive part into the smallest possible client child component and keep the data-fetching parent a server component
+- Never add a cross-slice import at the same layer; always import downward only (`app → 1-pages → 2-widgets → 3-features → 4-entities → 5-shared`)
+
+### 3. Reuse before building
+
+Before writing new UI, check for and reuse:
+
+- `CollectionManager` for any add/edit/delete list UI
+- `resolveTranslation` for every user-facing string — **never hardcode English copy directly in a block component**, including empty-states and section headings (the existing `AwardsBlock`'s hardcoded `"Awards"` heading and `"No awards to display yet."` empty-state are a known gap, not a pattern to copy — route both through `resolveTranslation` for new blocks)
+- Existing shadcn/ui primitives (`@/components/ui/*`) before reaching for a new dependency
+- The existing image pipeline (S3 + CloudFront) for any block needing images — check how `HeroBlock`/`ImageGallery` already handle upload and `next/image` usage before reinventing it
+- Semantic shadcn CSS vars (`bg-background`, `text-card-foreground`, `border-border`, etc.) — never hardcode hex colors in a new block, and respect whichever tenant palette (`ocean` / `sunset` / `forest`) and template (`bentley-default` / `bentley-modern` / `bentley-classic`) is active, the same way `TenantLayoutResolver` already applies font/palette overrides
+
+### 4. Responsive design baseline
+
+- Mobile-first Tailwind: base styles target the smallest viewport, then layer up with `sm:` / `md:` / `lg:` breakpoints — follow the existing grid pattern already used in `AwardsBlock` (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`) as the default content-grid shape unless a block's content genuinely needs a different layout (e.g. a single-column FAQ accordion, a full-bleed CTA banner)
+- Every block must render acceptably at common breakpoints (mobile ~375px, tablet ~768px, desktop ~1280px+) — no fixed pixel widths that overflow on mobile, no text that requires horizontal scroll
+- Images must use `next/image` with explicit `width`/`height` or `fill` + a sized container — never an unstyled `<img>` that can cause layout shift
+
+### 5. SEO & GEO (AI-crawler legibility) — non-negotiable for every content block
+
+This project's content is consumed by both traditional search crawlers and AI answer engines (LLM-based search/crawlers). Every new block must:
+
+- Use correct semantic HTML for its content type: `<section>` wrapping the block, a single meaningful heading per block (respect document heading hierarchy — a block should not assume it's always `<h2>`; accept a `headingLevel` prop or derive it from block position if the page can have more than one of the same block type), `<article>` for repeatable items in a collection block, `<dl>`/`<dt>`/`<dd>` for FAQ-style question/answer pairs (more machine-legible than generic divs for Q&A content), `<address>` for Map/location contact info
+- Add structured data (JSON-LD via a `<script type="application/ld+json">`) where a clear schema.org type applies and the data is genuinely available — `FAQPage` for the FAQ block, `Organization`/`LocalBusiness` for Map/location if address data exists, `Person` for Team members where a name/role is present, `Product`/`Offer` for the Product grid, `AggregateRating`/`Review` for Testimonials only if a rating value actually exists (never fabricate a rating). Do not add structured data for a schema with required fields the block doesn't actually collect — partial or fabricated structured data is worse than none.
+- Every image needs a real, descriptive `alt` attribute sourced from the entity's translated content (never a generic placeholder like `"image"` or the filename)
+- Write any static/example copy (placeholders, empty-states) as if it will be read literally by an AI crawler trying to understand what the site offers — avoid vague filler text, prefer concrete, specific example content
+- Internal links within blocks (e.g. a CTA banner's button, a Pricing card's CTA) should use Next.js `<Link>` for proper prefetching and crawlability, not a bare `<a>` unless linking externally
+- None of this applies to the dashboard/builder-side UI — this section is about tenant-facing rendered output only
+
+### 6. Performance baseline
+
+- Keep collection-block queries scoped and paginated/limited where the registry already supports a `maxItems`-style config (follow the existing `blog-feed`/`podcast-feed` `{ maxItems: 9 }` pattern for any new collection block where unbounded lists are plausible — Testimonials, Product grid, FAQ)
+- Avoid client components for anything that doesn't need interactivity — every unnecessary `"use client"` boundary increases the JS shipped to the tenant's visitors
+- Below-the-fold blocks with images should rely on `next/image`'s built-in lazy loading (default behavior — don't override with `priority` except for the Hero/first visible block)
+- No new client-side data fetching for tenant-facing pages — all block data must be fetched server-side as part of the existing tenant page render, consistent with how every current block already works
 
 ---
 
 ## ✅ Done
 
 ### Phase 1 — Foundation
+
 - [x] FSD folder structure
 - [x] Next.js 16.2 App Router with Turbopack
 - [x] Neon DB connected + Drizzle ORM configured
@@ -288,6 +367,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - [x] `AGENTS.md` protocol established
 
 ### Phase 2 — Auth, Dashboard & Team
+
 - [x] Neon Auth setup with API proxy route (`/api/auth/[...path]`) and Origin override for dev subdomains
 - [x] Local `profiles` + `tenant_memberships` schema with roles (owner/editor)
 - [x] Auth pages: sign-in, sign-up, login, register, forgot-password (all render `<AuthView />`)
@@ -305,6 +385,7 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - [x] Gemini AI translation flow (tenant clicks "Add Language")
 
 ### Phase 2b — SEO & Theme
+
 - [x] Marketing page `generateMetadata` — per-locale title/description (8 locales), OG, Twitter, hreflang, canonical
 - [x] Tenant page `generateMetadata` — dynamic from tenant data
 - [x] Dynamic sitemap — all locale marketing pages + all active tenant sites
@@ -316,13 +397,39 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - [x] Marketing page restructured with nav header (language selector, theme/palette toggles, sign in/up) + sections (Hero, Features, Pricing, Testimonials, FAQ, CTA, Footer)
 
 ### Phase 2c — Category & Schema Cleanup
+
 - [x] Removed category system: `TenantCategory` type, `CATEGORY_BLOCKS`/`CATEGORY_LABELS` configs, category column from tenants table
 - [x] Removed category selector from CreateTenantDialog, category filter from BlockList
 - [x] Removed TONE_PRESETS from translateWithGemini (category-based tone)
 - [x] Dropped legacy `content_items` table (migrated to `tenant_entities` + `tenant_translations`)
 - [x] Updated all docs to reflect schema/architecture changes
 
+### Phase 2d — Image Gallery Block
+
+- [x] `image-gallery` block kind added — S3-backed gallery with per-image alt/caption translations
+
+### Phase 2e — Custom Domains & Subdomain Management
+
+- [x] `tenant_domains` table (status: pending/pending_certificate/verified/error, dnsInstructions, lastError) + `tenant_domain_logs` audit table
+- [x] Vercel Domains API integration (`src/5-shared/lib/vercel/vercel-domains.ts`) — add/remove/verify, two-phase status check (ownership + DNS config)
+- [x] Apex + www redirect orchestration with rollback on failure
+- [x] `manage-custom-domain` feature slice — `addCustomDomain`, `verifyCustomDomain`, `removeCustomDomain`, `getDomains` server actions
+- [x] `CustomDomainSection` in Settings tab — pending/pending-certificate/verified/error states, DNS instructions modal, "forward to a tech-savvy friend" delegate-email flow
+- [x] Proxy + `getTenantByDomain` rewired to resolve `TENANT_CUSTOM` hostnames via `tenant_domains` (not the unused `tenants.domain` column)
+- [x] Subdomain rename — `updateTenantSlug` action (uniqueness + reserved-word validation, no plan gate), `SubdomainSection` UI, explicit tenant-cache eviction on rename
+- [x] Plan gate: custom domains are Pro-only
+
+### Phase 2f — Typography, Palette & SEO Indexing
+
+- [x] Font registry (`fontRegistry.ts`/`fontLoader.ts`) — 5 heading fonts + 4 body fonts via `next/font/google`, stored as CSS var refs in `tenants.branding`
+- [x] `TypographySection` — heading/body font selects with live preview, auto-save, available on all plans
+- [x] Third tenant palette (`forest`) added alongside `ocean`/`sunset`; `PaletteSection` UI, applied via CSS class on tenant layout wrapper (not `<html>`)
+- [x] `seoEnabled` column on `tenants` (default `true`) — drives `generateMetadata` robots index/follow on the tenant page
+- [x] `SeoSection` — toggle to disable indexing, Pro-only to turn off, Free/Starter always indexed
+- [x] `AGENTS.md` Block Development Standards section established (storage pattern decision tree, FSD placement, reuse-first, responsive/SEO-GEO/performance baselines for all future blocks)
+
 ### Bug Fixes
+
 - [x] `ga` locale changed from Irish to Galician
 - [x] `defaultLocale` validation accepts `undefined` (defaults to `"en"`)
 - [x] Auth API Origin override for dev subdomains (fixes "Invalid origin" in Neon Auth)
@@ -334,24 +441,56 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 ## 🔜 What's Next
 
 ### High Priority
+
 - [ ] Zustand tenant store (complete partial implementation)
 - [ ] Tenant resolver — `useTenant` context + `getTenant(domain)` server helper
 - [ ] RLS / row-level security on all DB queries
 
-### Phase 3 — Block System Dark Mode
-- [ ] Tenant template dark mode pass — all block components (NavbarBlock, HeroBlock, BlogFeedBlock, AwardsBlock, PodcastFeedBlock, ContactBlock) need semantic vars
-- [ ] Add theme toggle to marketing page header
-- [ ] Responsive pass on blocks
-- Seed Àgora with blocks (done)
-- [ ] Contact block implementation
+### Phase 3 — Block Roadmap
+
+New tenant-facing blocks, grouped by storage pattern and build order (see 🧱 Block Development Standards above for the storage-pattern decision tree and per-block requirements):
+
+**Tier 1 — config-blob blocks (no new tables, `blocks.config` JSONB only)**
+
+- [ ] Text/rich-content
+- [ ] CTA banner
+- [ ] Footer (confirm whether currently hardcoded per template before treating as net-new)
+- [ ] Map/location
+
+**Tier 2 — collection blocks (reuse `tenant_entities` + `CollectionManager`)**
+
+- [ ] Features/Services grid
+- [ ] Testimonials
+- [ ] Team/people grid
+- [ ] Logo cloud / "trusted by" (editable section title)
+- [ ] FAQ
+
+**Tier 3 — collection blocks with nested fields**
+
+- [ ] Pricing (tiers with nested feature checklists, configurable CTA URL — no commerce dependency)
+- [ ] Product/shop grid (external checkout link per product — no commerce dependency)
+
+**Tier 4 — ported from the reference wedding-platform app, new tables required**
+
+- [ ] Program/Events (schedule/timeline collection, time-range fields)
+- [ ] Donations (payment-method collection)
+- [ ] Recommendations (merged accommodation + points-of-interest, category-tagged)
+- [ ] RSVP (parties, submissions, settings, public-facing form route, bulk import, analytics — own dedicated session)
+
+### Phase 3b — Block System Dark Mode & Responsive
+
+- [ ] Tenant template dark mode pass — confirm remaining block components (NavbarBlock, HeroBlock, BlogFeedBlock, AwardsBlock, PodcastFeedBlock, ContactBlock, ImageGallery) all use semantic vars, not hardcoded zinc
+- [ ] Responsive pass on existing blocks
 
 ### Phase 4 — Monetization
+
 - [ ] Stripe integration
 - [ ] `transactions` table logic (1% platform fee)
 - [ ] Full marketing landing page
-- [ ] SEO — canonical links, dynamic metadata, sitemap per tenant
+- [ ] Per-tenant sitemap entries beyond the existing dynamic sitemap
 
 ### Testing & Infrastructure
+
 - [ ] Zero tests (no test framework installed)
 - [ ] No CI/CD configuration
 
@@ -378,9 +517,9 @@ npm run db:studio    # Open Drizzle Studio
 
 ## 🌐 Local Dev URLs
 
-| URL | Resolves to |
-|---|---|
-| `localhost:3000` | Marketing site |
-| `app.localhost:3000` | Dashboard |
+| URL                    | Resolves to                     |
+| ---------------------- | ------------------------------- |
+| `localhost:3000`       | Marketing site                  |
+| `app.localhost:3000`   | Dashboard                       |
 | `agora.localhost:3000` | Àgora tenant (or any subdomain) |
-| `*.localhost:3000` | Any tenant |
+| `*.localhost:3000`     | Any tenant                      |
