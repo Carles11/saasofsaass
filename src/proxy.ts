@@ -43,10 +43,17 @@ async function isTenantActive(
   if (!sql) return true; // No DB configured — let the page handle it
 
   try {
-    // neon driver requires tagged template literals — use separate queries per lookup type
+    // neon driver requires tagged template literals
     const rows = isSubdomain
       ? await sql`SELECT id FROM tenants WHERE slug = ${tenantKey} AND is_active = true LIMIT 1`
-      : await sql`SELECT td.tenant_id FROM tenant_domains td WHERE td.domain = ${tenantKey} AND td.status = 'verified' LIMIT 1`;
+      : await sql`
+          SELECT t.id
+          FROM tenants t
+          LEFT JOIN tenant_domains td ON td.tenant_id = t.id
+          WHERE t.is_active = true
+            AND (t.domain = ${tenantKey} OR (td.domain = ${tenantKey} AND td.status = 'verified'))
+          LIMIT 1
+        `;
     const exists = rows.length > 0;
     await tenantCache.set(cacheKey, { exists }, TENANT_CACHE_TTL_MS);
     return exists;
@@ -85,8 +92,13 @@ export default async function proxy(req: NextRequest) {
   // Next.js resolves them from the filesystem. Do NOT include them in rewrites.
   const parsed = parseDomain(rawHostname, rootDomain, appDomain);
 
-  // Initialize the base headers wrapper from your localized internationalization response
-  const headers = new Headers(intlResponse.headers);
+  // Response-level headers from intlMiddleware (e.g. Link for hreflang)
+  const responseHeaders = new Headers(intlResponse.headers);
+
+  // Request-level headers with the resolved locale so next-intl's server-side
+  // getRequestLocale() can read X-NEXT-INTL-LOCALE from next/headers.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("X-NEXT-INTL-LOCALE", locale);
 
   // ── Step 5: Neon Auth Network Interception (App Subdomain Only) ───────────
   // Protects everything running underneath app.saasofsaass.com (DASHBOARD)
@@ -104,9 +116,9 @@ export default async function proxy(req: NextRequest) {
     }
 
     if (authResponse) {
-      // Explicitly type value and key as strings to satisfy strict compiler rules
+      // Auth-related response headers (e.g. Set-Cookie) go on responseHeaders
       authResponse.headers.forEach((value: string, key: string) => {
-        headers.set(key, value);
+        responseHeaders.set(key, value);
       });
     }
   }
@@ -130,7 +142,10 @@ export default async function proxy(req: NextRequest) {
 
       const url = req.nextUrl.clone();
       url.pathname = `/${locale}${strippedPath === "/" ? "" : strippedPath}`;
-      return NextResponse.rewrite(url, { headers });
+      return NextResponse.rewrite(url, {
+        request: { headers: requestHeaders },
+        headers: responseHeaders,
+      });
     }
 
     case "DASHBOARD": {
@@ -141,7 +156,10 @@ export default async function proxy(req: NextRequest) {
         return NextResponse.redirect(url, { status: 308 });
       }
       url.pathname = `/${locale}${strippedPath}`;
-      return NextResponse.rewrite(url, { headers });
+      return NextResponse.rewrite(url, {
+        request: { headers: requestHeaders },
+        headers: responseHeaders,
+      });
     }
 
     case "TENANT_SUBDOMAIN":
@@ -160,7 +178,10 @@ export default async function proxy(req: NextRequest) {
       const normalizedHost = normalizeHostname(rawHostname);
       const url = req.nextUrl.clone();
       url.pathname = `/${locale}/${normalizedHost}${strippedPath === "/" ? "" : strippedPath}`;
-      return NextResponse.rewrite(url, { headers });
+      return NextResponse.rewrite(url, {
+        request: { headers: requestHeaders },
+        headers: responseHeaders,
+      });
     }
   }
 }

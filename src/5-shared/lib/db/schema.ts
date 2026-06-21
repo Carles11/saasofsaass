@@ -229,3 +229,13 @@ export type NewTenantDomain = typeof tenantDomains.$inferInsert;
 export type TenantDomainLog = typeof tenantDomainLogs.$inferSelect;
 export type NewTenantDomainLog = typeof tenantDomainLogs.$inferInsert;
 export type { Profile, NewProfile, TenantMembership, NewTenantMembership } from "./schema/auth";
+
+// ============================================
+// WAITLIST
+// ============================================
+export const waitlist = pgTable("waitlist", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  locale: text("locale").notNull().default("en"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});

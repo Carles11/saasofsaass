@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "id": "503343d6-b9b5-4121-b7e8-2f42799c3d1d",
+=======
+  "id": "b3ce5610-35f8-499c-b5c6-cb5356e93b54",
+>>>>>>> main
   "prevId": "98609f23-d9c2-4423-ae42-7ee7788f7681",
   "version": "7",
   "dialect": "postgresql",
@@ -1075,12 +1079,15 @@
           "notNull": true,
           "default": true
         },
+<<<<<<< HEAD
         "workspace_id": {
           "name": "workspace_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
+=======
+>>>>>>> main
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -1097,6 +1104,7 @@
         }
       },
       "indexes": {},
+<<<<<<< HEAD
       "foreignKeys": {
         "tenants_workspace_id_workspaces_id_fk": {
           "name": "tenants_workspace_id_workspaces_id_fk",
@@ -1112,6 +1120,9 @@
           "onUpdate": "no action"
         }
       },
+=======
+      "foreignKeys": {},
+>>>>>>> main
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "tenants_slug_unique": {
@@ -1219,8 +1230,13 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+<<<<<<< HEAD
     "public.workspaces": {
       "name": "workspaces",
+=======
+    "public.waitlist": {
+      "name": "waitlist",
+>>>>>>> main
       "schema": "",
       "columns": {
         "id": {
@@ -1230,12 +1246,18 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+<<<<<<< HEAD
         "name": {
           "name": "name",
+=======
+        "email": {
+          "name": "email",
+>>>>>>> main
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
+<<<<<<< HEAD
         "owner_profile_id": {
           "name": "owner_profile_id",
           "type": "uuid",
@@ -1273,6 +1295,14 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+=======
+        "locale": {
+          "name": "locale",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'en'"
+>>>>>>> main
         },
         "created_at": {
           "name": "created_at",
@@ -1280,6 +1310,7 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+<<<<<<< HEAD
         },
         "updated_at": {
           "name": "updated_at",
@@ -1287,12 +1318,26 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+=======
+>>>>>>> main
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
+<<<<<<< HEAD
       "uniqueConstraints": {},
+=======
+      "uniqueConstraints": {
+        "waitlist_email_unique": {
+          "name": "waitlist_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+>>>>>>> main
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
