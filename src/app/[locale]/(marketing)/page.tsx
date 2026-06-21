@@ -59,6 +59,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page() {
   const locale = await getLocale()
+  const underConstructionTranslations = await getPlatformTranslations("marketing.under-construction", locale)
 
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
@@ -156,7 +157,7 @@ export default async function Page() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
-      <MarketingPage />
+      <MarketingPage translations={underConstructionTranslations} />
     </>
   )
 }
