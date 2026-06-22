@@ -23,6 +23,11 @@ export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
     { key: "title", label: "Title", inputType: "input" },
     { key: "description", label: "Description", inputType: "textarea" },
   ],
+  "cta-banner": [
+    { key: "heading", label: "Heading", inputType: "input" },
+    { key: "subtitle", label: "Subtitle", inputType: "textarea" },
+    { key: "ctaLabel", label: "CTA Button Label", inputType: "input" },
+  ],
   "blog-feed": [],
   "text-content": [
     { key: "heading", label: "Heading", inputType: "input" },

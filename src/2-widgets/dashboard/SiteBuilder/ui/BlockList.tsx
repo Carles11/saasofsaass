@@ -35,6 +35,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
+  ArrowRightCircle,
   FileText,
   GripVertical,
   Images,
@@ -98,6 +99,13 @@ const BLOCK_PICKER_ITEMS: {
     description:
       "Contact information with email, phone, address, and optional form",
     hint: "Add your contact details and set up email forwarding",
+  },
+  {
+    kind: "cta-banner",
+    icon: ArrowRightCircle,
+    name: "CTA Banner",
+    description: "Call-to-action section with heading, supporting text, and a button",
+    hint: "Prompt visitors to take action with a clear button and message",
   },
   {
     kind: "text-content",

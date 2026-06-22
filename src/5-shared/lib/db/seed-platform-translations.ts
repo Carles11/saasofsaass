@@ -89,6 +89,20 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       ga: "Cargando...",
     }),
   },
+  {
+    namespace: "common",
+    key: "learnMore",
+    translations: t({
+      en: "Learn more",
+      es: "Más información",
+      ca: "Més informació",
+      fr: "En savoir plus",
+      de: "Mehr erfahren",
+      it: "Scopri di più",
+      eu: "Gehiago jakin",
+      ga: "Máis información",
+    }),
+  },
 
   // ── Marketing: Header ───────────────────────────────────────────────────
   {

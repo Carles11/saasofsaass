@@ -12,6 +12,7 @@ const BLOCK_TYPES_WITH_TRANSLATIONS: Set<BlockKind> = new Set([
   "hero",
   "contact",
   "text-content",
+  "cta-banner",
 ]);
 
 function titleize(slug: string): string {

@@ -1,20 +1,11 @@
 import { Button } from "@/components/tenant/ui/button";
+import { sanitizeCtaUrl } from "@/5-shared/lib/links/sanitize-url";
 import type { BlockProps } from "../../../config/types";
 
 interface HeroConfig {
   ctaUrl?: string;
   layout?: "centered" | "left-aligned";
   heroImage?: { url: string; alt?: string } | null;
-}
-
-function sanitizeCtaUrl(url?: string): string | undefined {
-  if (!url) return undefined;
-  const isSafe =
-    url.startsWith("/") ||
-    url.startsWith("www.") ||
-    url.startsWith("https://") ||
-    url.startsWith("http://");
-  return isSafe ? url : undefined;
 }
 export function HeroBlock(props: BlockProps) {
   const { config, t, templateId } = props;

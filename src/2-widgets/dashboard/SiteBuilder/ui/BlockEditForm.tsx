@@ -17,6 +17,9 @@ import { Textarea } from "@/components/ui/textarea";
 const CONFIG_FIELDS: Partial<
   Record<BlockKind, Array<{ key: string; label: string; inputType?: string }>>
 > = {
+  "cta-banner": [
+    { key: "ctaUrl", label: "CTA URL" },
+  ],
   hero: [
     { key: "ctaUrl", label: "CTA URL" },
     { key: "layout", label: "Layout (centered / left-aligned)" },

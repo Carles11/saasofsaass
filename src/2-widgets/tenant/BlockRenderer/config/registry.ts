@@ -6,6 +6,7 @@ import { HeroBlock } from "../blocks/HeroBlock/ui/HeroBlock";
 import { ImageGalleryBlock } from "../blocks/ImageGallery";
 import { NavbarBlock } from "../blocks/NavbarBlock/ui/NavbarBlock";
 import { PodcastFeedBlock } from "../blocks/PodcastFeedBlock/ui/PodcastFeedBlock";
+import { CtaBannerBlock } from "../blocks/CtaBannerBlock/ui/CtaBannerBlock";
 import { TextContentBlock } from "../blocks/TextContentBlock/ui/TextContentBlock";
 import type { BlockComponent, BlockProps, BlockRegistry } from "./types";
 
@@ -54,6 +55,15 @@ export const blockRegistry: BlockRegistry = {
     fields: [
       { key: "title", label: "Title", inputType: "input" },
       { key: "description", label: "Description", inputType: "textarea" },
+    ],
+  },
+  "cta-banner": {
+    component: CtaBannerBlock,
+    defaultConfig: { ctaUrl: "/" },
+    fields: [
+      { key: "heading", label: "Heading", inputType: "input" },
+      { key: "subtitle", label: "Subtitle", inputType: "textarea" },
+      { key: "ctaLabel", label: "CTA Button Label", inputType: "input" },
     ],
   },
   "text-content": {
