@@ -124,6 +124,11 @@ export function CustomDomainSection({
     error: t("settings.domain.status.error", "Error"),
   };
 
+  const checkingLabel = t("settings.domain.checking", "Checking...");
+  const removingLabel = t("settings.domain.removing", "Removing...");
+  const addingLabel = t("settings.domain.adding", "Adding...");
+  const cancelLabel = t("cancel", "Cancel");
+
   async function handleAdd() {
     if (!domainInput.trim()) return;
     setAdding(true);
@@ -192,7 +197,7 @@ export function CustomDomainSection({
                 variant="outline"
                 disabled={removing === currentDomain.domain}
               >
-                Cancel
+                {cancelLabel}
               </Button>
             </DialogClose>
             <Button
@@ -201,7 +206,7 @@ export function CustomDomainSection({
               onClick={() => handleRemove(currentDomain.domain)}
             >
               {removing === currentDomain.domain
-                ? "Removing..."
+                ? removingLabel
                 : confirmButton}
             </Button>
           </DialogFooter>
@@ -288,7 +293,7 @@ export function CustomDomainSection({
                     {verifying === currentDomain.domain ? (
                       <>
                         <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                        Checking...
+                        {checkingLabel}
                       </>
                     ) : (
                       checkStatus
@@ -319,7 +324,7 @@ export function CustomDomainSection({
                 onClick={() => handleVerify(currentDomain.domain)}
               >
                 {verifying === currentDomain.domain
-                  ? "Checking..."
+                  ? checkingLabel
                   : checkStatus}
               </Button>
               {renderDnsModalTrigger()}
@@ -345,7 +350,7 @@ export function CustomDomainSection({
                 onClick={() => handleVerify(currentDomain.domain)}
               >
                 {verifying === currentDomain.domain
-                  ? "Checking..."
+                  ? checkingLabel
                   : checkStatus}
               </Button>
               {renderRemoveDialog()}
@@ -407,7 +412,7 @@ export function CustomDomainSection({
                 onClick={handleAdd}
                 disabled={adding || !domainInput.trim()}
               >
-                {adding ? "Adding..." : addButton}
+                {adding ? addingLabel : addButton}
               </Button>
             </div>
           )}

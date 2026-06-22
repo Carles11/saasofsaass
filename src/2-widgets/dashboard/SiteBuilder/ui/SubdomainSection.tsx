@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { updateTenantSlug } from "@/3-features/manage-tenants/actions/updateTenantSlug";
+import {
+  resolveTranslation,
+  type TranslationDict,
+} from "@/5-shared/lib/translations/resolve";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { updateTenantSlug } from "@/3-features/manage-tenants/actions/updateTenantSlug";
-import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { useState } from "react";
 
 interface SubdomainSectionProps {
   tenantId: string;
@@ -32,15 +35,29 @@ export function SubdomainSection({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const title = resolveTranslation(translations, "settings.subdomain.title", "Subdomain");
-  const inputLabel = resolveTranslation(translations, "settings.subdomain.input-label", "Subdomain slug");
-  const saveButton = resolveTranslation(translations, "settings.subdomain.save-button", "Save");
-  const savingLabel = resolveTranslation(translations, "settings.subdomain.saving", "Saving...");
+  const title = resolveTranslation(
+    translations,
+    "settings.subdomain.title",
+    "Subdomain",
+  );
+  const inputLabel = resolveTranslation(
+    translations,
+    "settings.subdomain.input-label",
+    "Subdomain slug",
+  );
+  const saveButton = resolveTranslation(
+    translations,
+    "settings.subdomain.save-button",
+    "Save",
+  );
+  const savingLabel = resolveTranslation(
+    translations,
+    "settings.subdomain.saving",
+    "Saving...",
+  );
   const previewLabel = resolveTranslation(translations, "preview", "Preview");
 
-  const suffix = isDev
-    ? `.localhost:${devPort}`
-    : `.${prodRoot}`;
+  const suffix = isDev ? `.localhost:${devPort}` : `.${prodRoot}`;
 
   const previewUrl = isDev
     ? `http://${slug}.localhost:${devPort}/${activeLocale}`
@@ -59,7 +76,8 @@ export function SubdomainSection({
       onSlugChange(result.slug);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to update subdomain.";
+      const msg =
+        err instanceof Error ? err.message : "Failed to update subdomain.";
       setError(resolveTranslation(translations, msg, msg));
     } finally {
       setSaving(false);
@@ -72,7 +90,7 @@ export function SubdomainSection({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-end gap-2">
+        <div className="flex flex-col md:flex-row items-end gap-2">
           <div className="flex-1">
             <label className="mb-1 block text-xs font-medium text-muted-foreground">
               {inputLabel}
@@ -82,14 +100,18 @@ export function SubdomainSection({
                 type="text"
                 value={slug}
                 onChange={(e) => {
-                  setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+                  setSlug(
+                    e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                  );
                   setError(null);
                   setSuccess(false);
                 }}
                 className="flex-1 focus:outline-none"
                 disabled={saving}
               />
-              <span className="ml-2 shrink-0 text-xs text-muted-foreground">{suffix}</span>
+              <span className="ml-2 shrink-0 text-xs text-muted-foreground">
+                {suffix}
+              </span>
             </div>
           </div>
           <Button onClick={handleSave} disabled={saving || !hasChanged}>
@@ -99,7 +121,11 @@ export function SubdomainSection({
 
         {success && (
           <p className="text-sm text-green-600">
-            {resolveTranslation(translations, "settings.subdomain.success", "Subdomain updated")}
+            {resolveTranslation(
+              translations,
+              "settings.subdomain.success",
+              "Subdomain updated",
+            )}
           </p>
         )}
 

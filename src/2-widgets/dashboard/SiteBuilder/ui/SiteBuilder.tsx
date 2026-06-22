@@ -54,6 +54,7 @@ export function SiteBuilder({
   const [currentSlug, setCurrentSlug] = useState(tenant.slug);
   const [isSaving, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<string>("blocks");
+  const [settingsTab, setSettingsTab] = useState<string>("appearance");
   const [previewTemplateId, setPreviewTemplateId] = useState<
     import("@/5-shared/config/templates").TenantTemplateId
   >(tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId);
@@ -95,6 +96,9 @@ const previewUrl = isDev
   );
   const savingLabel = resolveTranslation(translations, "settings.saving", "Saving...");
   const siteTemplate = resolveTranslation(translations, "settings.template", "Site Template");
+  const tabAppearance = resolveTranslation(translations, "settings.tab.appearance", "Appearance");
+  const tabDomain = resolveTranslation(translations, "settings.tab.domain", "Domain");
+  const tabSite = resolveTranslation(translations, "settings.tab.site", "Site");
 
   return (
     <div className="flex flex-col gap-6">
@@ -141,80 +145,93 @@ const previewUrl = isDev
         </TabsContent>
 
         <TabsContent value="settings" className="mt-4">
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2">{enabledLanguages}</h3>
-            <div className="flex flex-wrap gap-2">
-              {SUPPORTED_LOCALES.map((locale) => (
-                <Badge
-                  key={locale}
-                  variant={locales.includes(locale) ? "default" : "outline"}
-                  className={
-                    "cursor-pointer select-none" +
-                    (isSaving ? " opacity-60 pointer-events-none" : "")
-                  }
-                  onClick={() => {
-                    const next = locales.includes(locale)
-                      ? locales.filter((x) => x !== locale)
-                      : [...locales, locale];
-                    setLocales(next);
-                    startTransition(() => {
-                      updateTenantLocales(tenant.id, next);
-                    });
-                  }}
-                >
-                  {locale}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              {languagesHint}
-              {isSaving && <span className="ml-2 text-blue-500">{savingLabel}</span>}
-            </p>
-          </div>
-          <div className="mb-8">
-            <h3 className="font-semibold mb-2">{siteTemplate}</h3>
-            <TemplatePicker
-              previewTemplateId={previewTemplateId}
-              setPreviewTemplateId={setPreviewTemplateId}
-            />
-          </div>
-          <TypographySection
-            tenantId={tenant.id}
-            tenantName={tenant.name}
-            initialTitleFont={initialTitleFont ?? "playfair"}
-            initialBodyFont={initialBodyFont ?? "inter"}
-            translations={translations}
-          />
+          <Tabs value={settingsTab} onValueChange={setSettingsTab} defaultValue="appearance">
+            <TabsList className="mb-6">
+              <TabsTrigger value="appearance">{tabAppearance}</TabsTrigger>
+              <TabsTrigger value="domain">{tabDomain}</TabsTrigger>
+              <TabsTrigger value="site">{tabSite}</TabsTrigger>
+            </TabsList>
 
-          <PaletteSection
-            tenantId={tenant.id}
-            initialPalette={initialPalette ?? "ocean"}
-            translations={translations}
-          />
+            <TabsContent value="appearance">
+              <div className="mb-8">
+                <h3 className="font-semibold mb-2">{siteTemplate}</h3>
+                <TemplatePicker
+                  previewTemplateId={previewTemplateId}
+                  setPreviewTemplateId={setPreviewTemplateId}
+                />
+              </div>
+              <TypographySection
+                tenantId={tenant.id}
+                tenantName={tenant.name}
+                initialTitleFont={initialTitleFont ?? "playfair"}
+                initialBodyFont={initialBodyFont ?? "inter"}
+                translations={translations}
+              />
+              <PaletteSection
+                tenantId={tenant.id}
+                initialPalette={initialPalette ?? "ocean"}
+                translations={translations}
+              />
+            </TabsContent>
 
-          <SeoSection
-            tenantId={tenant.id}
-            initialSeoEnabled={initialSeoEnabled ?? true}
-            plan={plan}
-            translations={translations}
-          />
+            <TabsContent value="domain">
+              <SubdomainSection
+                tenantId={tenant.id}
+                initialSlug={tenant.slug}
+                translations={translations}
+                onSlugChange={setCurrentSlug}
+                isDev={isDev}
+                devPort={devPort}
+                prodRoot={prodRoot}
+                activeLocale={activeLocale}
+              />
+              <CustomDomainSection
+                tenantId={tenant.id}
+                initialDomainRows={domainRows}
+                plan={plan}
+                translations={translations}
+              />
+            </TabsContent>
 
-          <CustomDomainSection
-            tenantId={tenant.id}
-            initialDomainRows={domainRows}
-            plan={plan}
-            translations={translations}
-          />
-          <SubdomainSection
-            tenantId={tenant.id}
-            initialSlug={tenant.slug}
-            translations={translations}
-            onSlugChange={setCurrentSlug}
-            isDev={isDev}
-            devPort={devPort}
-            prodRoot={prodRoot}
-            activeLocale={activeLocale}
-          />
+            <TabsContent value="site">
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">{enabledLanguages}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {SUPPORTED_LOCALES.map((locale) => (
+                    <Badge
+                      key={locale}
+                      variant={locales.includes(locale) ? "default" : "outline"}
+                      className={
+                        "cursor-pointer select-none" +
+                        (isSaving ? " opacity-60 pointer-events-none" : "")
+                      }
+                      onClick={() => {
+                        const next = locales.includes(locale)
+                          ? locales.filter((x) => x !== locale)
+                          : [...locales, locale];
+                        setLocales(next);
+                        startTransition(() => {
+                          updateTenantLocales(tenant.id, next);
+                        });
+                      }}
+                    >
+                      {locale}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {languagesHint}
+                  {isSaving && <span className="ml-2 text-blue-500">{savingLabel}</span>}
+                </p>
+              </div>
+              <SeoSection
+                tenantId={tenant.id}
+                initialSeoEnabled={initialSeoEnabled ?? true}
+                plan={plan}
+                translations={translations}
+              />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
     </div>

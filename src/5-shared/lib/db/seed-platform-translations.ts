@@ -1685,8 +1685,18 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   },
   {
     namespace: "dashboard.site-builder",
-    key: "tab.content",
-    translations: t({ en: "Content" }),
+    key: "settings.tab.appearance",
+    translations: t({ en: "Appearance" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.tab.domain",
+    translations: t({ en: "Domain" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.tab.site",
+    translations: t({ en: "Site" }),
   },
   {
     namespace: "dashboard.site-builder",
@@ -1988,6 +1998,21 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     translations: t({
       en: "Hi,\n\nI'm setting up my website on saasofsaass and need help configuring DNS for {domain}. Could you add these records at my domain registrar?\n\n{records}\n\nThanks for your help!",
     }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.checking",
+    translations: t({ en: "Checking..." }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.removing",
+    translations: t({ en: "Removing..." }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "settings.domain.adding",
+    translations: t({ en: "Adding..." }),
   },
 
   // ── Dashboard: Subdomain ───────────────────────────────────────────────
