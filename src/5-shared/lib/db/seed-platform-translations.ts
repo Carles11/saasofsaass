@@ -1710,6 +1710,31 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   },
   {
     namespace: "dashboard.site-builder",
+    key: "add-dialog.hint-selected",
+    translations: t({ en: "{count} selected — add below" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "add-dialog.hint-empty",
+    translations: t({ en: "Select blocks to add to your page" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "add-dialog.hint-mobile-selected",
+    translations: t({ en: "{count} selected" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "add-dialog.hint-mobile-empty",
+    translations: t({ en: "Tap to select blocks" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
+    key: "add-dialog.add-n",
+    translations: t({ en: "Add {count} Block(s)" }),
+  },
+  {
+    namespace: "dashboard.site-builder",
     key: "settings.languages",
     translations: t({ en: "Enabled Languages" }),
   },
@@ -3128,6 +3153,200 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       eu: "Zure gunea ezkutatu egiten da bilatzaileentzat.",
       ga: "O teu sitio está actualmente oculto para os buscadores.",
     }),
+  },
+
+  // ── Dashboard: Account ──────────────────────────────────────────────────
+  {
+    namespace: "dashboard.account",
+    key: "title",
+    translations: t({ en: "Account" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "subtitle",
+    translations: t({ en: "Manage your profile, preferences, and security settings." }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.title",
+    translations: t({ en: "Profile" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.name-label",
+    translations: t({ en: "Name" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.email-label",
+    translations: t({ en: "Email" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.edit",
+    translations: t({ en: "Edit" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.save",
+    translations: t({ en: "Save" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.cancel",
+    translations: t({ en: "Cancel" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.saving",
+    translations: t({ en: "Saving..." }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.updated",
+    translations: t({ en: "Profile updated successfully." }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "profile.error",
+    translations: t({ en: "Failed to update profile." }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "overview.title",
+    translations: t({ en: "Account Overview" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "overview.role",
+    translations: t({ en: "Role" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "overview.member-since",
+    translations: t({ en: "Member since" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "overview.tenants-title",
+    translations: t({ en: "Your Tenants" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "overview.role-owner",
+    translations: t({ en: "Owner" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "overview.role-editor",
+    translations: t({ en: "Editor" }),
+  },
+  {
+    namespace: "dashboard.account",
+    key: "overview.no-tenants",
+    translations: t({ en: "You don't belong to any tenants yet." }),
+  },
+
+  // ── Dashboard: Settings ──────────────────────────────────────────────────
+  {
+    namespace: "dashboard.settings",
+    key: "title",
+    translations: t({ en: "Settings" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "subtitle",
+    translations: t({ en: "Platform and workspace configuration." }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.title",
+    translations: t({ en: "Workspace" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.plan",
+    translations: t({ en: "Plan" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.sites-used",
+    translations: t({ en: "{used} / {limit} sites used" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.subscription-active",
+    translations: t({ en: "Active" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.subscription-past-due",
+    translations: t({ en: "Past Due" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.subscription-unpaid",
+    translations: t({ en: "Unpaid" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.subscription-canceled",
+    translations: t({ en: "Canceled" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.manage-billing",
+    translations: t({ en: "Manage Billing" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.upgrade",
+    translations: t({ en: "Upgrade to {plan}" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.no-workspace",
+    translations: t({ en: "No workspace found." }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "workspace.sign-in-required",
+    translations: t({ en: "Please sign in to manage settings." }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "preferences.title",
+    translations: t({ en: "Preferences" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "preferences.theme-label",
+    translations: t({ en: "Appearance" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "preferences.theme-description",
+    translations: t({ en: "Toggle between light and dark mode." }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "preferences.palette-label",
+    translations: t({ en: "Palette" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "preferences.palette-description",
+    translations: t({ en: "Choose your platform color palette." }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "preferences.palette-ocean",
+    translations: t({ en: "Ocean" }),
+  },
+  {
+    namespace: "dashboard.settings",
+    key: "preferences.palette-sunset",
+    translations: t({ en: "Sunset" }),
   },
 ];
 

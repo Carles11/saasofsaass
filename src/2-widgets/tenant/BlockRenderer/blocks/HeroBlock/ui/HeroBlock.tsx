@@ -1,5 +1,5 @@
-import { Button } from "@/components/tenant/ui/button";
 import { sanitizeCtaUrl } from "@/5-shared/lib/links/sanitize-url";
+import { Button } from "@/components/tenant/ui/button";
 import type { BlockProps } from "../../../config/types";
 
 interface HeroConfig {
@@ -34,7 +34,10 @@ export function HeroBlock(props: BlockProps) {
             </h1>
           )}
           {t.subtitle && (
-            <p className="text-base text-muted-foreground max-w-2xl mt-2" style={{ fontFamily: "var(--font-body)" }}>
+            <p
+              className="text-base text-muted-foreground max-w-2xl mt-2"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
               {t.subtitle}
             </p>
           )}
@@ -107,7 +110,10 @@ export function HeroBlock(props: BlockProps) {
             </h1>
           )}
           {t.subtitle && (
-            <p className="text-lg text-muted-foreground max-w-2xl drop-shadow mt-2" style={{ fontFamily: "var(--font-body)" }}>
+            <p
+              className="text-lg text-muted-foreground max-w-2xl drop-shadow mt-2"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
               {t.subtitle}
             </p>
           )}
@@ -128,7 +134,11 @@ export function HeroBlock(props: BlockProps) {
   return (
     <section
       className={`relative flex flex-col ${gapClass} px-6 py-24 items-center text-center`}
-      style={{ fontFamily: "var(--font-heading)", minHeight: "85vh", width: "inherit" }}
+      style={{
+        fontFamily: "var(--font-heading)",
+        minHeight: "85vh",
+        width: "inherit",
+      }}
     >
       {heroImage?.url && (
         <div className="absolute inset-0 w-full h-full z-0">
@@ -147,15 +157,21 @@ export function HeroBlock(props: BlockProps) {
         {t.title && (
           <h1
             className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl"
-            style={{ color: "hsl(var(--primary))", fontFamily: "var(--font-heading)" }}
+            style={{
+              color: "hsl(var(--primary))",
+              fontFamily: "var(--font-heading)",
+            }}
           >
             {t.title}
           </h1>
         )}
         {t.subtitle && (
-            <p className="text-lg text-muted-foreground max-w-2xl" style={{ fontFamily: "var(--font-body)" }}>
-              {t.subtitle}
-            </p>
+          <p
+            className="text-lg text-muted-foreground max-w-2xl"
+            style={{ fontFamily: "var(--font-body)" }}
+          >
+            {t.subtitle}
+          </p>
         )}
         {t.ctaLabel && safeCtaUrl && (
           <Button

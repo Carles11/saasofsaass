@@ -3,13 +3,18 @@ import type { PodcastWithTranslation } from "@/5-shared/types/tenants/entities";
 import type { BlockProps } from "../../../config/types";
 
 export async function PodcastFeedBlock({ block, locale }: BlockProps) {
-  const rows = (await getEntitiesByBlock(block.id, locale)) as PodcastWithTranslation[];
+  const rows = (await getEntitiesByBlock(
+    block.id,
+    locale,
+  )) as PodcastWithTranslation[];
 
   if (!rows.length) {
     return (
       <section className="py-16 px-6 text-center">
         <h2 className="text-xl font-bold mb-2">Podcast Feed</h2>
-        <p className="text-muted-foreground text-sm">No podcast episodes published yet.</p>
+        <p className="text-muted-foreground text-sm">
+          No podcast episodes published yet.
+        </p>
       </section>
     );
   }
@@ -30,10 +35,16 @@ export async function PodcastFeedBlock({ block, locale }: BlockProps) {
           return (
             <article
               key={entity.id}
-              className="rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow bg-card p-4 flex flex-col gap-2"
+              className="rounded-xs border border-border overflow-hidden hover:shadow-md transition-shadow bg-card p-4 flex flex-col gap-2"
             >
-              <h3 className="font-semibold text-card-foreground line-clamp-2 text-lg">{title}</h3>
-              {description && <p className="text-sm text-muted-foreground line-clamp-3">{description}</p>}
+              <h3 className="font-semibold text-card-foreground line-clamp-2 text-lg">
+                {title}
+              </h3>
+              {description && (
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {description}
+                </p>
+              )}
               {slug && (
                 <a
                   href={`/podcast/${slug}`}

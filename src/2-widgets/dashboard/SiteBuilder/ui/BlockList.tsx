@@ -12,13 +12,12 @@ import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import { Button } from "@/components/tenant/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   DndContext,
   DragOverlay,
@@ -45,87 +44,126 @@ import {
   Newspaper,
   Sparkles,
   Trophy,
+  XIcon,
   type LucideIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BlockCard } from "./BlockCard";
+
+// ── Block picker data ──────────────────────────────────────────────────────
 
 const BLOCK_PICKER_ITEMS: {
   kind: BlockKind;
   icon: LucideIcon;
   name: string;
   description: string;
-  hint: string;
 }[] = [
   {
-    kind: "navbar",
-    icon: Menu,
-    name: "Navigation Bar",
-    description: "Top navigation with logo, links, and optional CTA button",
-    hint: "Add your site title and configure navigation links",
+    kind: "navbar",       icon: Menu,             name: "Navigation Bar",
+    description: "Top nav with logo, links, and optional CTA",
   },
   {
-    kind: "hero",
-    icon: Sparkles,
-    name: "Hero Section",
-    description: "Bold headline, subtitle, and primary call-to-action",
-    hint: "Write a compelling headline and upload a background image",
+    kind: "hero",         icon: Sparkles,         name: "Hero Section",
+    description: "Headline, subtitle, and primary call-to-action",
   },
   {
-    kind: "blog-feed",
-    icon: Newspaper,
-    name: "Blog Feed",
-    description: "Automatically displays blog posts in a grid layout",
-    hint: "Write blog posts in the Content tab to populate this section",
+    kind: "blog-feed",    icon: Newspaper,        name: "Blog Feed",
+    description: "Blog posts displayed in a grid layout",
   },
   {
-    kind: "podcast-feed",
-    icon: Mic2,
-    name: "Podcast Feed",
-    description: "Showcases podcast episodes with cover art and descriptions",
-    hint: "Add podcast episodes in the Content tab",
+    kind: "podcast-feed", icon: Mic2,             name: "Podcast Feed",
+    description: "Podcast episodes with cover art and descriptions",
   },
   {
-    kind: "awards",
-    icon: Trophy,
-    name: "Awards",
-    description: "Displays a list of awards, certifications, or recognitions",
-    hint: "Add your awards in the Content tab",
+    kind: "awards",       icon: Trophy,           name: "Awards",
+    description: "Awards, certifications, or recognitions",
   },
   {
-    kind: "contact",
-    icon: Mail,
-    name: "Contact Section",
-    description:
-      "Contact information with email, phone, address, and optional form",
-    hint: "Add your contact details and set up email forwarding",
+    kind: "contact",      icon: Mail,             name: "Contact Section",
+    description: "Email, phone, address, and optional contact form",
   },
   {
-    kind: "cta-banner",
-    icon: ArrowRightCircle,
-    name: "CTA Banner",
-    description: "Call-to-action section with heading, supporting text, and a button",
-    hint: "Prompt visitors to take action with a clear button and message",
+    kind: "cta-banner",   icon: ArrowRightCircle, name: "CTA Banner",
+    description: "Call-to-action with heading, text, and button",
   },
   {
-    kind: "text-content",
-    icon: FileText,
-    name: "Text Content",
-    description: "Freeform prose section — about us, policies, or any text-only content",
-    hint: "Write your content with optional heading and body text",
+    kind: "text-content", icon: FileText,         name: "Text Content",
+    description: "Freeform prose — about us, policies, or text-only",
   },
   {
-    kind: "image-gallery",
-    icon: Images,
-    name: "Image Gallery",
+    kind: "image-gallery",icon: Images,           name: "Image Gallery",
     description: "Visual image gallery with lightbox viewing",
-    hint: "Upload images and add captions in the Gallery tab",
   },
 ];
 
-const ALL_BLOCK_KINDS: BlockKind[] = BLOCK_PICKER_ITEMS.map(
-  (item) => item.kind,
-);
+const CATEGORY_MAP: Record<string, string> = {
+  navbar: "structure",
+  hero: "structure",
+  "blog-feed": "content",
+  "podcast-feed": "content",
+  awards: "content",
+  "text-content": "content",
+  "image-gallery": "media",
+  contact: "interactive",
+  "cta-banner": "interactive",
+};
+
+const CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "structure", label: "Structure" },
+  { id: "content", label: "Content" },
+  { id: "media", label: "Media" },
+  { id: "interactive", label: "Interactive" },
+] as const;
+
+// ── Selectable picker card ─────────────────────────────────────────────────
+
+function PickerCard({
+  item,
+  isSelected,
+  onToggle,
+}: {
+  item: (typeof BLOCK_PICKER_ITEMS)[number];
+  isSelected: boolean;
+  onToggle: () => void;
+}) {
+  const Icon = item.icon;
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={cn(
+        "flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-all cursor-pointer",
+        "hover:border-primary/50 hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0",
+        isSelected
+          ? "ring-2 ring-primary border-primary bg-primary/5"
+          : "border-border/60 bg-card",
+      )}
+    >
+      <div className="flex items-center gap-3 w-full">
+        <span className="rounded-lg bg-primary/10 p-2.5 shrink-0">
+          <Icon className="h-5 w-5 text-primary" />
+        </span>
+        <span className="font-semibold text-sm text-foreground flex-1">
+          {item.name}
+        </span>
+        {isSelected && (
+          <span className="text-primary shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+              <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+            </svg>
+          </span>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground leading-relaxed pl-1">
+        {item.description}
+      </p>
+    </button>
+  );
+}
+
+// ── Main BlockList ─────────────────────────────────────────────────────────
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 
@@ -150,19 +188,21 @@ export function BlockList({
   translations,
   onLocaleChange,
 }: BlockListProps) {
-  const [newKind, setNewKind] = useState<BlockKind>(ALL_BLOCK_KINDS[0]);
+  const [selectedKinds, setSelectedKinds] = useState<Set<BlockKind>>(new Set());
+  const [category, setCategory] = useState<string>("all");
   const [orderedBlocks, setOrderedBlocks] = useState<Block[]>(blocks);
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  // Sync local order when blocks prop changes (e.g. after add/delete)
   useEffect(() => {
     setOrderedBlocks(blocks);
   }, [blocks]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor),
   );
+
+  // ── Sortable drag handlers ─────────────────────────────────────────────
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
@@ -172,7 +212,6 @@ export function BlockList({
     async (event: DragEndEvent) => {
       const { active, over } = event;
       setActiveId(null);
-
       if (!over || active.id === over.id) return;
 
       const oldIndex = orderedBlocks.findIndex((b) => b.id === active.id);
@@ -193,28 +232,53 @@ export function BlockList({
     setActiveId(null);
   }, []);
 
-  const selectedItem = BLOCK_PICKER_ITEMS.find((item) => item.kind === newKind);
+  // ── Multi-select ─────────────────────────────────────────────────────
+
+  const toggleKind = useCallback((kind: BlockKind) => {
+    setSelectedKinds((prev) => {
+      const next = new Set(prev);
+      if (next.has(kind)) next.delete(kind);
+      else next.add(kind);
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => setSelectedKinds(new Set()), []);
+
+  const handleBatchAdd = useCallback(async () => {
+    if (selectedKinds.size === 0) return;
+    for (const kind of selectedKinds) {
+      await addBlock(tenantId, kind);
+    }
+    clearSelection();
+  }, [selectedKinds, tenantId, clearSelection]);
+
+  // ── Filtering ────────────────────────────────────────────────────────
+
+  const filteredItems = useMemo(
+    () =>
+      category === "all"
+        ? BLOCK_PICKER_ITEMS
+        : BLOCK_PICKER_ITEMS.filter((i) => CATEGORY_MAP[i.kind] === category),
+    [category],
+  );
+
+  // ── Active sortable item preview ──────────────────────────────────────
+
   const activeBlock = activeId
-    ? (orderedBlocks.find((b) => b.id === activeId) ?? null)
+    ? orderedBlocks.find((b) => b.id === activeId) ?? null
     : null;
 
-  const emptyState = resolveTranslation(
-    translations,
-    "empty",
-    "No blocks yet. Add your first block below.",
-  );
+  // ── Translations ─────────────────────────────────────────────────────
+
+  const emptyState = resolveTranslation(translations, "empty", "No blocks yet. Add your first block below.");
   const addBlockLabel = resolveTranslation(translations, "add", "+ Add Block");
-  const addDialogTitle = resolveTranslation(
-    translations,
-    "add-dialog.title",
-    "Add a New Block",
-  );
-  const addDialogConfirm = resolveTranslation(
-    translations,
-    "add-dialog.confirm",
-    'Add "{name}"',
-    { name: selectedItem?.name ?? newKind },
-  );
+  const addDialogTitle = resolveTranslation(translations, "add-dialog.title", "Add Blocks");
+  const batchAddLabel = resolveTranslation(translations, "add-dialog.add-n", "Add {count} Block(s)", { count: selectedKinds.size });
+  const selectHint = resolveTranslation(translations, "add-dialog.hint-selected", "{count} selected — add below", { count: selectedKinds.size });
+  const mobileHint = selectedKinds.size > 0
+    ? resolveTranslation(translations, "add-dialog.hint-mobile-selected", "{count} selected", { count: selectedKinds.size })
+    : resolveTranslation(translations, "add-dialog.hint-mobile-empty", "Tap to select blocks");
 
   return (
     <div className="flex flex-col gap-3 w-full">
@@ -229,112 +293,149 @@ export function BlockList({
           strategy={verticalListSortingStrategy}
         >
           {orderedBlocks.map((block) => (
-            <BlockCard
-              key={block.id}
-              block={block}
-              tenantId={tenantId}
-              tenant={tenant}
-              activeLocale={activeLocale}
-              initialEntities={initialEntities}
-              userRole={userRole}
-              translations={translations}
-              onLocaleChange={onLocaleChange}
-            />
+            <div key={block.id}>
+              <BlockCard
+                block={block}
+                tenantId={tenantId}
+                tenant={tenant}
+                activeLocale={activeLocale}
+                initialEntities={initialEntities}
+                userRole={userRole}
+                translations={translations}
+                onLocaleChange={onLocaleChange}
+              />
+            </div>
           ))}
         </SortableContext>
 
+        {/* ── Drag overlay ──────────────────────────────────────────────── */}
         <DragOverlay>
-          {activeBlock && (
+          {activeBlock ? (
             <div className="flex items-center gap-2 p-3 sm:p-4 bg-card rounded-xl border-2 border-primary shadow-lg opacity-90">
               <GripVertical className="h-4 w-4 text-muted-foreground shrink-0" />
               <Badge variant="secondary" className="font-mono text-xs shrink-0">
                 {activeBlock.type}
               </Badge>
             </div>
-          )}
+          ) : null}
         </DragOverlay>
+
+        {/* ── Add Block Sheet ─────────────────────────────────────────── */}
+        {userRole === "owner" && (
+          <Sheet onOpenChange={(open) => { if (!open) clearSelection(); }}>
+            <SheetTrigger asChild>
+              <Button tenantVariant="outline" className="mt-2">
+                {addBlockLabel}
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="bottom"
+              className="min-h-[100dvh] max-h-[100dvh] overflow-hidden p-0 flex flex-col"
+              showCloseButton={false}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
+                <SheetTitle className="text-xl font-bold text-foreground">
+                  {addDialogTitle}
+                </SheetTitle>
+                <SheetClose asChild>
+                  <button
+                    type="button"
+                    className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <XIcon className="h-5 w-5" />
+                  </button>
+                </SheetClose>
+              </div>
+
+              {/* Category pills */}
+              <div className="flex gap-2 px-6 pb-4 shrink-0 overflow-x-auto">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setCategory(cat.id)}
+                    className={cn(
+                      "px-3.5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer",
+                      category === cat.id
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+                    )}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Block grid */}
+              <div className="flex-1 overflow-y-auto px-6 pb-4">
+                {category === "all" ? (
+                  CATEGORIES.filter((c) => c.id !== "all").map((cat) => {
+                    const catItems = BLOCK_PICKER_ITEMS.filter(
+                      (i) => CATEGORY_MAP[i.kind] === cat.id,
+                    );
+                    if (catItems.length === 0) return null;
+                    return (
+                      <div key={cat.id} className="mb-6">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                          {cat.label}
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {catItems.map((item) => (
+                            <PickerCard
+                              key={item.kind}
+                              item={item}
+                              isSelected={selectedKinds.has(item.kind)}
+                              onToggle={() => toggleKind(item.kind)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {filteredItems.map((item) => (
+                      <PickerCard
+                        key={item.kind}
+                        item={item}
+                        isSelected={selectedKinds.has(item.kind)}
+                        onToggle={() => toggleKind(item.kind)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom bar */}
+              <div className="shrink-0 border-t border-border bg-popover px-6 py-4">
+                <div className="flex items-center justify-between gap-4">
+                  <p className="text-sm text-muted-foreground hidden sm:block">
+                    {selectHint}
+                  </p>
+                  <p className="text-sm text-muted-foreground sm:hidden">
+                    {mobileHint}
+                  </p>
+                  <SheetClose asChild>
+                    <Button
+                      tenantVariant="default"
+                      disabled={selectedKinds.size === 0}
+                      onClick={handleBatchAdd}
+                    >
+                      {batchAddLabel}
+                    </Button>
+                  </SheetClose>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        )}
       </DndContext>
 
       {orderedBlocks.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-8">
           {emptyState}
         </p>
-      )}
-
-      {userRole === "owner" && (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button tenantVariant="outline" className="mt-2">
-              {addBlockLabel}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{addDialogTitle}</DialogTitle>
-            </DialogHeader>
-            <div className="flex flex-col gap-4 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[340px] overflow-y-auto pr-1">
-                {BLOCK_PICKER_ITEMS.map((item) => {
-                  const Icon = item.icon;
-                  const isSelected = newKind === item.kind;
-                  return (
-                    <button
-                      key={item.kind}
-                      type="button"
-                      onClick={() => setNewKind(item.kind)}
-                      className={cn(
-                        "flex flex-col items-start gap-2 rounded-xl border p-3.5 text-left transition-all cursor-pointer",
-                        isSelected
-                          ? "ring-2 ring-primary border-primary bg-muted/20"
-                          : "border-border/60 bg-card hover:border-primary/40 hover:bg-muted/30",
-                      )}
-                    >
-                      <div className="flex items-center gap-3 w-full">
-                        <span className="rounded-lg bg-primary/10 p-2.5 shrink-0">
-                          <Icon className="h-5 w-5 text-primary" />
-                        </span>
-                        <span className="font-medium text-sm text-foreground">
-                          {item.name}
-                        </span>
-                        {isSelected && (
-                          <span className="ml-auto text-primary shrink-0">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="currentColor"
-                              className="h-5 w-5"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
-                        {item.description}
-                      </p>
-                      <p className="text-xs text-muted-foreground/60 mt-0.5 italic">
-                        {item.hint}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
-              <DialogClose asChild>
-                <Button
-                  onClick={() => addBlock(tenantId, newKind)}
-                  className="w-full"
-                  disabled={!selectedItem}
-                >
-                  {addDialogConfirm}
-                </Button>
-              </DialogClose>
-            </div>
-          </DialogContent>
-        </Dialog>
       )}
     </div>
   );

@@ -34,7 +34,7 @@ export async function BlogFeedBlock({ block, config, locale }: BlockProps) {
           return (
             <article
               key={entity.id}
-              className="rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow"
+              className="rounded-xs border border-border overflow-hidden hover:shadow-md transition-shadow"
             >
               {entity.coverImageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -46,8 +46,14 @@ export async function BlogFeedBlock({ block, config, locale }: BlockProps) {
                 />
               )}
               <div className="p-4">
-                <h2 className="font-semibold text-card-foreground line-clamp-2">{title}</h2>
-                {excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{excerpt}</p>}
+                <h2 className="font-semibold text-card-foreground line-clamp-2">
+                  {title}
+                </h2>
+                {excerpt && (
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+                    {excerpt}
+                  </p>
+                )}
                 {slug && (
                   <a
                     href={`/blog/${slug}`}
