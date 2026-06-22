@@ -5,7 +5,8 @@ export type BlockKind =
   | "podcast-feed"
   | "awards"
   | "contact"
-  | "image-gallery";
+  | "image-gallery"
+  | "text-content";
 
 // Shared type for image-gallery blocks
 export interface GalleryImage {

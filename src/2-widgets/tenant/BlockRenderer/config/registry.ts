@@ -6,6 +6,7 @@ import { HeroBlock } from "../blocks/HeroBlock/ui/HeroBlock";
 import { ImageGalleryBlock } from "../blocks/ImageGallery";
 import { NavbarBlock } from "../blocks/NavbarBlock/ui/NavbarBlock";
 import { PodcastFeedBlock } from "../blocks/PodcastFeedBlock/ui/PodcastFeedBlock";
+import { TextContentBlock } from "../blocks/TextContentBlock/ui/TextContentBlock";
 import type { BlockComponent, BlockProps, BlockRegistry } from "./types";
 
 const adaptImageGalleryBlock: BlockComponent = function AdaptImageGalleryBlock(props: BlockProps) {
@@ -53,6 +54,14 @@ export const blockRegistry: BlockRegistry = {
     fields: [
       { key: "title", label: "Title", inputType: "input" },
       { key: "description", label: "Description", inputType: "textarea" },
+    ],
+  },
+  "text-content": {
+    component: TextContentBlock,
+    defaultConfig: {},
+    fields: [
+      { key: "heading", label: "Heading", inputType: "input" },
+      { key: "body", label: "Body", inputType: "textarea" },
     ],
   },
   "image-gallery": {

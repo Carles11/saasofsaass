@@ -35,6 +35,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
+  FileText,
   GripVertical,
   Images,
   Mail,
@@ -97,6 +98,13 @@ const BLOCK_PICKER_ITEMS: {
     description:
       "Contact information with email, phone, address, and optional form",
     hint: "Add your contact details and set up email forwarding",
+  },
+  {
+    kind: "text-content",
+    icon: FileText,
+    name: "Text Content",
+    description: "Freeform prose section — about us, policies, or any text-only content",
+    hint: "Write your content with optional heading and body text",
   },
   {
     kind: "image-gallery",

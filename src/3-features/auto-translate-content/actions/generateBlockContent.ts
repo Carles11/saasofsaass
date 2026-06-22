@@ -11,6 +11,7 @@ const BLOCK_TYPES_WITH_TRANSLATIONS: Set<BlockKind> = new Set([
   "navbar",
   "hero",
   "contact",
+  "text-content",
 ]);
 
 function titleize(slug: string): string {

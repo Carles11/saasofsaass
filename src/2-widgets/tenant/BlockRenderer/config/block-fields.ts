@@ -24,6 +24,10 @@ export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
     { key: "description", label: "Description", inputType: "textarea" },
   ],
   "blog-feed": [],
+  "text-content": [
+    { key: "heading", label: "Heading", inputType: "input" },
+    { key: "body", label: "Body", inputType: "textarea" },
+  ],
   "image-gallery": [
     { key: "images", label: "Images", inputType: "input" }, // Placeholder for gallery manager
     { key: "lang", label: "Language", inputType: "input" },
