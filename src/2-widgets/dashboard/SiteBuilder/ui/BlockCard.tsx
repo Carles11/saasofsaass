@@ -3,6 +3,7 @@
 import {
   deleteBlock,
   toggleBlockVisibility,
+  updateBlockConfig,
 } from "@/3-features/manage-site-blocks";
 import type {
   Block,
@@ -25,6 +26,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { blockIncludeInNav } from "@/2-widgets/tenant/BlockRenderer/config/block-fields";
 import { useSortable } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -125,6 +127,19 @@ export function BlockCard({
     "Confirm Delete",
   );
   const cancelLabel = resolveTranslation(translations, "cancel", "Cancel");
+
+  const isHero = block.type === "hero";
+  const blockConfig = (block.config ?? {}) as Record<string, unknown>;
+  const includeInNavDefault = blockIncludeInNav[block.type] ?? false;
+  const includeInNavValue = isHero ? true : (blockConfig.includeInNav as boolean | undefined) ?? includeInNavDefault;
+
+  const includeInNavLabel = resolveTranslation(translations, "include-in-nav", "Show in navigation");
+  const includeInNavDisabledNote = resolveTranslation(translations, "include-in-nav-disabled-note", "(always shown)");
+
+  async function handleIncludeInNavChange(checked: boolean) {
+    const newConfig = { ...blockConfig, includeInNav: checked };
+    await updateBlockConfig(block.id, tenantId, newConfig);
+  }
 
   return (
     <div
@@ -249,6 +264,35 @@ export function BlockCard({
             defaultLocale={tenant.defaultLocale}
             onTranslate={setIsTranslating}
           />
+
+          {/* ── includeInNav toggle ─────────────────────────────────── */}
+          <label className="flex items-center gap-3 cursor-pointer px-4 py-3 border-t border-border">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={includeInNavValue}
+              disabled={isHero}
+              onClick={() => !isHero && handleIncludeInNavChange(!includeInNavValue)}
+              className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                includeInNavValue ? "bg-primary" : "bg-input"
+              }`}
+            >
+              <span
+                className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-sm ring-0 transition-transform ${
+                  includeInNavValue ? "translate-x-[18px]" : "translate-x-[2px]"
+                }`}
+              />
+            </button>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">{includeInNavLabel}</span>
+              {isHero && (
+                <span className="text-xs text-muted-foreground">
+                  {includeInNavDisabledNote}
+                </span>
+              )}
+            </div>
+          </label>
+
           <div className={
             "border-t border-border" +
             (isTranslating ? " pointer-events-none" : "")

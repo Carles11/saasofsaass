@@ -11,6 +11,17 @@ export type FieldDef = {
   inputType: "input" | "textarea" | "image";
 };
 
+export const blockIncludeInNav: Record<string, boolean> = {
+  hero: false,
+  "blog-feed": true,
+  "podcast-feed": true,
+  awards: true,
+  contact: true,
+  "cta-banner": false,
+  "text-content": true,
+  "image-gallery": false,
+};
+
 export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
   hero: [
     { key: "title", label: "Title", inputType: "input" },

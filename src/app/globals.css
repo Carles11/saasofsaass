@@ -323,6 +323,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-wrap: break-word;
   }
   html {
     @apply font-sans;

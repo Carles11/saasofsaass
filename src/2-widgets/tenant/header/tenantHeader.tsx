@@ -167,7 +167,7 @@ export default function UnifiedHeader({
           <PoweredBadge isSubdomain={isSubdomain} />
         </div>
 
-        <div className="flex md:hidden items-center gap-2 isolate">
+        <div className="flex md:hidden items-center gap-2">
           {hasLocales && <LanguageSelector locales={tenant.locales} currentLocale={locale} />}
           <MobileMenu links={navLinks} isSubdomain={isSubdomain} />
         </div>
@@ -190,7 +190,7 @@ export default function UnifiedHeader({
         <PoweredBadge isSubdomain={isSubdomain} />
       </div>
 
-      <div className="flex md:hidden items-center gap-2 isolate">
+      <div className="flex md:hidden items-center gap-2">
         {hasLocales && <LanguageSelector locales={tenant.locales} currentLocale={locale} />}
         <MobileMenu links={navLinks} isSubdomain={isSubdomain} />
       </div>
