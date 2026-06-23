@@ -5,6 +5,7 @@ import {
   getEntityTranslations,
   publishEntity,
   updateEntityTranslation,
+  updateEntityMetadata,
 } from "@/3-features/manage-entities";
 import type {
   Tenant,
@@ -68,6 +69,7 @@ export function CollectionManager({
     if (blockType === "blog-feed") return ["blog_post"];
     if (blockType === "podcast-feed") return ["podcast_episode"];
     if (blockType === "awards") return ["award_item"];
+    if (blockType === "testimonials") return ["testimonial"];
     return ["blog_post", "podcast_episode", "award_item"];
   }, [blockType]);
 
@@ -77,6 +79,7 @@ export function CollectionManager({
     ? newKind
     : entityKinds[0];
   const [newSlug, setNewSlug] = useState("");
+  const [newRating, setNewRating] = useState<number>(0);
   const dir = isRtl(activeLocale) ? "rtl" : "ltr";
 
   // ── Locale-reactive entity rows ──────────────────────────────────────
@@ -183,13 +186,19 @@ export function CollectionManager({
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!newSlug.trim()) return;
+    const metadata =
+      effectiveKind === "testimonial" && newRating > 0
+        ? { rating: newRating }
+        : undefined;
     await createEntity({
       tenantId: tenant.id,
       kind: newKind,
       slug: newSlug.trim(),
       blockId,
+      metadata,
     });
     setNewSlug("");
+    setNewRating(0);
   }
 
   return (
@@ -235,6 +244,22 @@ export function CollectionManager({
               title="lowercase letters, numbers and hyphens only"
             />
           </div>
+
+          {effectiveKind === "testimonial" && (
+            <div className="flex flex-col gap-1 min-w-24">
+              <Label>
+                {resolveTranslation(translations, "label.rating", "Rating (1-5)")}
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                max={5}
+                value={newRating || ""}
+                onChange={(e) => setNewRating(Number(e.target.value))}
+              />
+            </div>
+          )}
+
           <Button
             type="submit"
             tenantVariant="default"
@@ -313,6 +338,12 @@ function EntityRow({
     { locale: activeLocale.toUpperCase() },
   );
   const publishLabel = resolveTranslation(translations, "publish", "Publish");
+  const metadataLabel = resolveTranslation(translations, "label.edit-metadata", "Edit Metadata");
+  const ratingLabel = resolveTranslation(translations, "label.rating", "Rating (1—5)");
+
+  const testimonialMeta = entity.metadata as { authorRole?: string; rating?: number } | null;
+
+  const [metadataOpen, setMetadataOpen] = useState(false);
 
   return (
     <div className="flex items-center justify-between p-4 bg-card rounded-xl border border-border">
@@ -341,6 +372,13 @@ function EntityRow({
             <span className="text-xs text-amber-500">{noTranslationLabel}</span>
           )}
         </div>
+
+        {entity.kind === "testimonial" && testimonialMeta?.rating != null && (
+          <span className="text-xs text-muted-foreground">
+            Rating: {"★".repeat(Math.min(Math.max(testimonialMeta.rating, 0), 5))}
+            {"☆".repeat(Math.max(5 - Math.min(Math.max(testimonialMeta.rating, 0), 5), 0))} ({testimonialMeta.rating}/5)
+          </span>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -369,6 +407,58 @@ function EntityRow({
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Edit metadata (testimonials — rating) */}
+        {entity.kind === "testimonial" && (
+          <Dialog open={metadataOpen} onOpenChange={setMetadataOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" disabled={isPending}>
+                {metadataLabel}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <div dir={dir}>
+                <DialogHeader>
+                  <DialogTitle>
+                    Edit Metadata &mdash; {activeLocale.toUpperCase()}
+                  </DialogTitle>
+                </DialogHeader>
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const fd = new FormData(e.currentTarget);
+                    const rating = Number(fd.get("rating"));
+                    const meta: Record<string, unknown> = {
+                      ...testimonialMeta,
+                      rating: rating > 0 ? rating : undefined,
+                    };
+                    await updateEntityMetadata(entity.id, tenantId, meta);
+                    setMetadataOpen(false);
+                  }}
+                  className="flex flex-col gap-4 mt-4"
+                  dir={dir}
+                >
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="md-rating">{ratingLabel}</Label>
+                    <Input
+                      id="md-rating"
+                      name="rating"
+                      type="number"
+                      min={1}
+                      max={5}
+                      defaultValue={testimonialMeta?.rating ?? ""}
+                    />
+                  </div>
+                  <DialogClose asChild>
+                    <Button type="submit" className="mt-2">
+                      Save
+                    </Button>
+                  </DialogClose>
+                </form>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
         {/* Publish */}
         {entity.status !== "published" && (
@@ -408,6 +498,7 @@ function TranslationForm({
 }: TranslationFormProps) {
   const isBlog = entity.kind === "blog_post";
   const isPodcast = entity.kind === "podcast_episode";
+  const isTestimonial = entity.kind === "testimonial";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -464,7 +555,22 @@ function TranslationForm({
         </div>
       )}
 
-      {!isBlog && !isPodcast && (
+      {isTestimonial && (
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="et-quote">
+            {resolveTranslation(translations, "label.quote", "Quote")}
+          </Label>
+          <Textarea
+            id="et-quote"
+            name="quote"
+            defaultValue={currentPayload.quote ?? ""}
+            rows={4}
+            dir={dir}
+          />
+        </div>
+      )}
+
+      {!isBlog && !isPodcast && !isTestimonial && (
         <div className="flex flex-col gap-1">
           <Label htmlFor="et-desc">
             {resolveTranslation(

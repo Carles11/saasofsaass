@@ -43,6 +43,7 @@ import {
   Mic2,
   Newspaper,
   Sparkles,
+  Star,
   Trophy,
   XIcon,
   type LucideIcon,
@@ -76,6 +77,10 @@ const BLOCK_PICKER_ITEMS: {
     description: "Awards, certifications, or recognitions",
   },
   {
+    kind: "testimonials", icon: Star,             name: "Testimonials",
+    description: "Customer/client testimonials with quotes, ratings, and author info",
+  },
+  {
     kind: "contact",      icon: Mail,             name: "Contact Section",
     description: "Email, phone, address, and optional contact form",
   },
@@ -106,6 +111,7 @@ const CATEGORY_MAP: Record<string, string> = {
   "blog-feed": "content",
   "podcast-feed": "content",
   awards: "content",
+  testimonials: "content",
   "text-content": "content",
   "image-gallery": "media",
   contact: "interactive",

@@ -23,6 +23,7 @@ export const blockIncludeInNav: Record<string, boolean> = {
   "image-gallery": false,
   map: true,
   footer: false,
+  testimonials: true,
 };
 
 export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
@@ -56,5 +57,9 @@ export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
   ],
   footer: [
     { key: "description", label: "Slogan", inputType: "textarea", placeholder: "A short tagline describing what your site is about" },
+  ],
+  testimonials: [
+    { key: "heading", label: "Section Heading", inputType: "input" },
+    { key: "emptyState", label: "Empty State Text", inputType: "input" },
   ],
 };

@@ -8,7 +8,8 @@ export type BlockKind =
   | "text-content"
   | "cta-banner"
   | "map"
-  | "footer";
+  | "footer"
+  | "testimonials";
 
 // Shared type for image-gallery blocks
 export interface GalleryImage {

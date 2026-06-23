@@ -18,9 +18,10 @@ interface CreateEntityParams {
   blockId?: string
   kind: EntityKind
   slug: string
+  metadata?: Record<string, unknown>
 }
 
-export async function createEntity({ tenantId, blockId, kind, slug }: CreateEntityParams) {
+export async function createEntity({ tenantId, blockId, kind, slug, metadata }: CreateEntityParams) {
   await assertCanEditContent(tenantId)
 
   const [tenant] = await db
@@ -40,7 +41,7 @@ export async function createEntity({ tenantId, blockId, kind, slug }: CreateEnti
       slug,
       status: 'draft',
       order: 0,
-      metadata: {},
+      metadata: metadata ?? {},
     })
     .returning({ id: tenantEntities.id })
 
@@ -98,6 +99,21 @@ export async function updateEntityTranslation(
         updatedAt: new Date(),
       },
     })
+
+  revalidateSiteBuilder(tenantId)
+}
+
+export async function updateEntityMetadata(
+  entityId: string,
+  tenantId: string,
+  metadata: Record<string, unknown>,
+) {
+  await assertCanEditContent(tenantId)
+
+  await db
+    .update(tenantEntities)
+    .set({ metadata, updatedAt: new Date() })
+    .where(eq(tenantEntities.id, entityId))
 
   revalidateSiteBuilder(tenantId)
 }

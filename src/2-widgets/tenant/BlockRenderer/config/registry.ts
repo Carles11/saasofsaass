@@ -9,6 +9,7 @@ import { CtaBannerBlock } from "../blocks/CtaBannerBlock/ui/CtaBannerBlock";
 import { TextContentBlock } from "../blocks/TextContentBlock/ui/TextContentBlock";
 import { MapBlock } from "../blocks/MapBlock/ui/MapBlock";
 import { FooterBlock } from "../blocks/FooterBlock/ui/FooterBlock";
+import { TestimonialsBlock } from "../blocks/TestimonialsBlock/ui/TestimonialsBlock";
 import type { BlockComponent, BlockProps, BlockRegistry } from "./types";
 
 const adaptImageGalleryBlock: BlockComponent = function AdaptImageGalleryBlock(props: BlockProps) {
@@ -106,5 +107,15 @@ export const blockRegistry: BlockRegistry = {
     includeInNav: false,
     defaultConfig: { showPoweredBy: true, socialLinks: [], email: "", phone: "" },
     fields: [],
+  },
+  testimonials: {
+    component: TestimonialsBlock,
+    includeInNav: true,
+    navLabel: "Testimonials",
+    defaultConfig: { maxItems: 12 },
+    fields: [
+      { key: "heading", label: "Section Heading", inputType: "input" },
+      { key: "emptyState", label: "Empty State Text", inputType: "input" },
+    ],
   },
 };

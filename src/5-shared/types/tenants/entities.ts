@@ -2,7 +2,7 @@ import { SupportedLocaleType } from '@/5-shared/types'
 import { TenantEntity, TenantTranslation } from '@/5-shared/lib/db/schema'
 
 // ── Kind & status enums ────────────────────────────────────────────────────────
-export type EntityKind = 'blog_post' | 'podcast_episode' | 'award_item'
+export type EntityKind = 'blog_post' | 'podcast_episode' | 'award_item' | 'testimonial'
 export type EntityStatus = 'draft' | 'published' | 'archived'
 export type TranslationStatus = 'pending' | 'translated' | 'failed' | 'locked'
 
@@ -24,7 +24,12 @@ export interface AwardItemMeta {
   awardUrl?: string
 }
 
-export type EntityMeta = BlogPostMeta | PodcastEpisodeMeta | AwardItemMeta
+export interface TestimonialMeta {
+  authorRole?: string
+  rating?: number
+}
+
+export type EntityMeta = BlogPostMeta | PodcastEpisodeMeta | AwardItemMeta | TestimonialMeta
 
 // ── Translation payload shapes (stored in translation.payload) ─────────────────
 export interface BlogPostPayload {
@@ -45,7 +50,12 @@ export interface AwardItemPayload {
   description?: string
 }
 
-export type TranslationPayload = BlogPostPayload | PodcastEpisodePayload | AwardItemPayload
+export interface TestimonialPayload {
+  title: string
+  quote?: string
+}
+
+export type TranslationPayload = BlogPostPayload | PodcastEpisodePayload | AwardItemPayload | TestimonialPayload
 
 // ── Typed entity helpers ───────────────────────────────────────────────────────
 
@@ -59,6 +69,7 @@ export type TypedTenantEntity<TKind extends EntityKind, TMeta extends EntityMeta
 export type BlogPostEntity   = TypedTenantEntity<'blog_post', BlogPostMeta>
 export type PodcastEntity    = TypedTenantEntity<'podcast_episode', PodcastEpisodeMeta>
 export type AwardItemEntity  = TypedTenantEntity<'award_item', AwardItemMeta>
+export type TestimonialEntity  = TypedTenantEntity<'testimonial', TestimonialMeta>
 
 /** TenantTranslation with its payload cast to the correct shape */
 export type TypedTranslation<TPayload extends TranslationPayload> =
@@ -81,3 +92,4 @@ export interface EntityWithTranslation<TEntity extends TenantEntity, TPayload ex
 export type BlogPostWithTranslation   = EntityWithTranslation<BlogPostEntity, BlogPostPayload>
 export type PodcastWithTranslation    = EntityWithTranslation<PodcastEntity, PodcastEpisodePayload>
 export type AwardItemWithTranslation  = EntityWithTranslation<AwardItemEntity, AwardItemPayload>
+export type TestimonialWithTranslation  = EntityWithTranslation<TestimonialEntity, TestimonialPayload>

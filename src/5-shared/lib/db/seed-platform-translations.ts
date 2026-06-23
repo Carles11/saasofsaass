@@ -2324,6 +2324,21 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
   },
   {
     namespace: "dashboard.collection",
+    key: "label.quote",
+    translations: t({ en: "Quote" }),
+  },
+  {
+    namespace: "dashboard.collection",
+    key: "label.rating",
+    translations: t({ en: "Rating (1—5)" }),
+  },
+  {
+    namespace: "dashboard.collection",
+    key: "label.edit-metadata",
+    translations: t({ en: "Edit Metadata" }),
+  },
+  {
+    namespace: "dashboard.collection",
     key: "status.pending",
     translations: t({ en: "pending" }),
   },
