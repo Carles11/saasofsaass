@@ -44,7 +44,7 @@ export async function MarketingPage() {
         <FaqSection translations={translations["marketing.faq"]} />
         <CtaSection translations={translations["marketing.cta"]} />
       </main>
-      <FooterSection translations={translations["marketing.footer"]} />
+      <FooterSection translations={translations["marketing.footer"]} locale={locale} />
     </div>
   );
 }

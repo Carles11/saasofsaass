@@ -376,7 +376,7 @@ export async function StructuredVsAIPage() {
         </section>
       </main>
 
-      <FooterSection translations={translations["marketing.footer"]} />
+      <FooterSection translations={translations["marketing.footer"]} locale={locale} />
     </div>
   );
 }

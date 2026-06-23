@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import {
+  resolveTranslation,
+  type TranslationDict,
+} from "@/5-shared/lib/translations/resolve";
 import { ChevronDown } from "lucide-react";
-import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { useState } from "react";
 
 interface FaqSectionProps {
   translations?: TranslationDict;
@@ -31,7 +34,9 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
           open ? "max-h-64 pb-5" : "max-h-0"
         }`}
       >
-        <p className="text-sm text-muted-foreground leading-relaxed">{answer}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {answer}
+        </p>
       </div>
     </div>
   );
@@ -39,19 +44,31 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
 
 export function FaqSection({ translations }: FaqSectionProps) {
   const badge = resolveTranslation(translations, "badge", "FAQ");
-  const title = resolveTranslation(translations, "title", "Questions professionals ask");
+  const title = resolveTranslation(
+    translations,
+    "title",
+    "Questions professionals ask",
+  );
 
   const faqs = [
     {
-      q: resolveTranslation(translations, "q1.question", "Do I need to be a developer to use this?"),
+      q: resolveTranslation(
+        translations,
+        "q1.question",
+        "Do I need to be a developer to use this?",
+      ),
       a: resolveTranslation(
         translations,
         "q1.answer",
-        "Not at all. If you can use a word processor, you can use SoSS. You set up the site structure once using our visual builder, and your client handles everything after that.",
+        "Not at all. If you can use a word processor, you can use SofS. You set up the site structure once using our visual builder, and your client handles everything after that.",
       ),
     },
     {
-      q: resolveTranslation(translations, "q2.question", "How does my client edit their site?"),
+      q: resolveTranslation(
+        translations,
+        "q2.question",
+        "How does my client edit their site?",
+      ),
       a: resolveTranslation(
         translations,
         "q2.answer",
@@ -59,15 +76,23 @@ export function FaqSection({ translations }: FaqSectionProps) {
       ),
     },
     {
-      q: resolveTranslation(translations, "q3.question", "Can I offer this as part of my services?"),
+      q: resolveTranslation(
+        translations,
+        "q3.question",
+        "Can I offer this as part of my services?",
+      ),
       a: resolveTranslation(
         translations,
         "q3.answer",
-        "Absolutely. Many of our users charge their clients a monthly fee for website management. SoSS works behind the scenes — your client just sees a site that looks like yours.",
+        "Absolutely. Many of our users charge their clients a monthly fee for website management. SofS works behind the scenes — your client just sees a site that looks like yours.",
       ),
     },
     {
-      q: resolveTranslation(translations, "q4.question", "What languages can a site be in?"),
+      q: resolveTranslation(
+        translations,
+        "q4.question",
+        "What languages can a site be in?",
+      ),
       a: resolveTranslation(
         translations,
         "q4.answer",
@@ -75,7 +100,11 @@ export function FaqSection({ translations }: FaqSectionProps) {
       ),
     },
     {
-      q: resolveTranslation(translations, "q5.question", "Can each client have their own domain?"),
+      q: resolveTranslation(
+        translations,
+        "q5.question",
+        "Can each client have their own domain?",
+      ),
       a: resolveTranslation(
         translations,
         "q5.answer",
@@ -89,7 +118,9 @@ export function FaqSection({ translations }: FaqSectionProps) {
       <div className="mx-auto max-w-3xl">
         {/* Header */}
         <div className="text-center mb-14">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">{badge}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">
+            {badge}
+          </p>
           <h2 className="text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
             {title}
           </h2>

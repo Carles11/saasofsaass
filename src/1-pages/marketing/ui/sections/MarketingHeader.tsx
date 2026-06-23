@@ -1,7 +1,7 @@
 "use client";
 
-import { LanguageSwitcher } from "@/5-shared/i18n/LanguageSwitcher";
 import { useSession } from "@/5-shared/hooks/use-session";
+import { LanguageSwitcher } from "@/5-shared/i18n/LanguageSwitcher";
 import {
   resolveTranslation,
   type TranslationDict,
@@ -31,9 +31,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
 
   const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.localhost";
   const isDev = process.env.NODE_ENV === "development";
-  const dashboardHref = `${
-    isDev ? "http:" : "https:"
-  }//${appDomain}${
+  const dashboardHref = `${isDev ? "http:" : "https:"}//${appDomain}${
     isDev ? `:${process.env.NEXT_PUBLIC_DEV_PORT || "3000"}` : ""
   }/${locale}/dashboard`;
 
@@ -88,7 +86,10 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
           href={`/${locale}`}
           className="text-lg font-bold tracking-tight text-foreground"
         >
-          SoSS<span className="text-primary">.</span>
+          <h3 className="font-serif text-2xl font-normal leading-none tracking-wide">
+            S<em className="italic text-primary">of</em>S
+            <em className="italic text-primary">.</em>
+          </h3>
         </Link>
 
         {/* Desktop nav */}
@@ -156,10 +157,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
           <div className="flex gap-2 pt-2 border-t border-border/60">
             {isLoggedIn ? (
               <Button size="sm" asChild className="flex-1">
-                <Link
-                  href={dashboardHref}
-                  onClick={() => setMobileOpen(false)}
-                >
+                <Link href={dashboardHref} onClick={() => setMobileOpen(false)}>
                   Dashboard
                 </Link>
               </Button>

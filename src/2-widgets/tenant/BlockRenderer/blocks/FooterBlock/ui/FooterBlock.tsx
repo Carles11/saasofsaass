@@ -121,13 +121,13 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
             </h4>
             <div className="flex flex-col gap-1.5">
               <Link
-                href="/legal/terms-of-service"
+                href="/terms-of-service"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Terms of Service
               </Link>
               <Link
-                href="/legal/privacy-policy"
+                href="/privacy-policy"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Privacy Policy

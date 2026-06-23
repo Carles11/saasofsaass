@@ -13,7 +13,7 @@ Specifically check:
    go through `resolveTranslation`. Flag any string literal in JSX that isn't
    wrapped this way, including ones that look like reasonable defaults — a
    hardcoded fallback inside `resolveTranslation`'s third argument is fine, a
-   hardcoded string used directly in JSX is not.
+   hardcoded string used directly in JSX is not. english version must remain as fallback.
 2. **Seed completeness** — confirm every translation key referenced in the
    code actually has a corresponding entry in the seed file
    (`seed-platform-translations.ts`), and that the entry covers all locales
