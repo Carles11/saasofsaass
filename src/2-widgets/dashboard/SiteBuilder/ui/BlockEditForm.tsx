@@ -163,7 +163,7 @@ export function BlockEditForm({
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               {sectionTranslations}
             </p>
-            {fields.map((field) => (
+              {fields.map((field) => (
               <div key={field.key} className="flex flex-col gap-1">
                 <Label htmlFor={field.key}>{getFieldLabel(field)}</Label>
                 {field.inputType === "textarea" ? (
@@ -171,6 +171,7 @@ export function BlockEditForm({
                     id={field.key}
                     name={field.key}
                     defaultValue={current[field.key] ?? ""}
+                    placeholder={field.placeholder ?? ""}
                     rows={4}
                     dir={dir}
                   />

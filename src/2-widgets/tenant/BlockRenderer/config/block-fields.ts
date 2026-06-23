@@ -9,6 +9,7 @@ export type FieldDef = {
   key: string;
   label: string;
   inputType: "input" | "textarea" | "image";
+  placeholder?: string;
 };
 
 export const blockIncludeInNav: Record<string, boolean> = {
@@ -54,7 +55,6 @@ export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
     { key: "address", label: "Address / Location", inputType: "textarea" },
   ],
   footer: [
-    { key: "copyright", label: "Copyright text", inputType: "textarea" },
-    { key: "description", label: "Tagline / Site description", inputType: "textarea" },
+    { key: "description", label: "Slogan", inputType: "textarea", placeholder: "A short tagline describing what your site is about" },
   ],
 };

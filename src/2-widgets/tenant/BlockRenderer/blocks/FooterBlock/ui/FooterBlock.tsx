@@ -1,45 +1,7 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Briefcase,
-  Camera,
-  Code2,
-  Globe,
-  ImageIcon,
-  MessageCircle,
-  Music,
-  Video,
-} from "lucide-react";
+import { SocialMediaRow } from "@/5-shared/ui/SocialMediaRow";
 import Image from "next/image";
 import Link from "next/link";
 import type { BlockProps } from "../../../config/types";
-
-const SOCIAL_ICON_MAP: Record<string, LucideIcon> = {
-  facebook: MessageCircle,
-  fb: MessageCircle,
-  twitter: MessageCircle,
-  x: MessageCircle,
-  instagram: Camera,
-  linkedin: Briefcase,
-  youtube: Video,
-  tiktok: Music,
-  github: Code2,
-  gitlab: Code2,
-  pinterest: ImageIcon,
-  snapchat: Camera,
-  threads: MessageCircle,
-};
-
-function detectSocialIcon(url: string): LucideIcon {
-  try {
-    const host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
-    for (const [key, icon] of Object.entries(SOCIAL_ICON_MAP)) {
-      if (host.includes(key) || host.startsWith(key)) return icon;
-    }
-  } catch {
-    // fall through
-  }
-  return Globe;
-}
 
 function normalizeUrl(url: string): string {
   const trimmed = url.trim();
@@ -58,8 +20,7 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
   }));
   const showPoweredBy = (config.showPoweredBy as boolean) ?? true;
   const description = t.description;
-  const copyright =
-    t.copyright || `${tenant.name} © ${new Date().getFullYear()}`;
+  const copyright = `${tenant.name} © ${new Date().getFullYear()}`;
   const email = (config.email as string) ?? "";
   const phone = (config.phone as string) ?? "";
 
@@ -88,27 +49,24 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
             className="inline-flex items-center gap-2"
           >
             {tenantLogoUrl ? (
-              <Image
-                src={tenantLogoUrl}
-                alt={`${tenant.name} logo`}
-                width={160}
-                height={60}
-                className="max-h-12 w-auto"
-                unoptimized
-              />
+              <>
+                <Image
+                  src={tenantLogoUrl}
+                  alt={`${tenant.name} logo`}
+                  width={160}
+                  height={60}
+                  className="max-h-12 w-auto"
+                  unoptimized
+                />
+                <span className="text-sm font-semibold text-foreground">
+                  {tenant.name}
+                </span>
+              </>
             ) : (
-              <Image
-                src="/logos/saasofsaass-official-logo.webp"
-                alt="SoSS"
-                width={32}
-                height={32}
-                className="h-8 w-auto"
-                unoptimized
-              />
+              <span className="text-sm font-semibold text-foreground">
+                {tenant.name}
+              </span>
             )}
-            <span className="text-sm font-semibold text-foreground">
-              {tenant.name}
-            </span>
           </a>
           {description && (
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -121,17 +79,15 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
               href={homeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors mt-2"
+              className="mt-2 font-serif text-base font-normal leading-none tracking-widest text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Image
-                src="/logos/saasofsaass-short-logo.webp"
-                alt="SoSS"
-                width={250}
-                height={250}
-                className="h-11 w-auto"
-                unoptimized
-              />
-              Powered by SofS
+              <>
+                Powered by{" "}
+                <h3 className="font-serif text-2xl font-normal leading-none tracking-wide">
+                  SaaS<em className="italic text-primary">of</em>SaaSs
+                  <em className="italic text-primary">.com</em>
+                </h3>
+              </>
             </a>
           )}
         </div>
@@ -183,28 +139,11 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
         {/* ── Right column: Social links ──────────────────────────────── */}
         <div className="flex flex-col items-start gap-4">
           <h3 className="text-sm font-semibold text-foreground">Social</h3>
-          {socialLinks.length === 0 && (
+          {socialLinks.length === 0 ? (
             <p className="text-sm text-muted-foreground italic">No links yet</p>
+          ) : (
+            <SocialMediaRow links={socialLinks} />
           )}
-          <div className="flex flex-col gap-3">
-            {socialLinks.map((link, i) => {
-              const Icon = detectSocialIcon(link.url);
-              return (
-                <a
-                  key={i}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-                >
-                  <span className="p-2 rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  {link.label || link.url}
-                </a>
-              );
-            })}
-          </div>
         </div>
       </div>
     </footer>
