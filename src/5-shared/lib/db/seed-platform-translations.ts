@@ -2449,6 +2449,62 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       ga: "Imaxe de Heroe",
     }),
   },
+  {
+    namespace: "dashboard.block-edit",
+    key: "block-fields.map.heading",
+    translations: t({
+      en: "Heading",
+      es: "Título",
+      ca: "Títol",
+      fr: "Titre",
+      de: "Überschrift",
+      it: "Intestazione",
+      eu: "Izenburua",
+      ga: "Título",
+    }),
+  },
+  {
+    namespace: "dashboard.block-edit",
+    key: "block-fields.map.address",
+    translations: t({
+      en: "Address / Location",
+      es: "Dirección / Ubicación",
+      ca: "Adreça / Ubicació",
+      fr: "Adresse / Lieu",
+      de: "Adresse / Standort",
+      it: "Indirizzo / Luogo",
+      eu: "Helbidea / Kokalekua",
+      ga: "Dirección / Localización",
+    }),
+  },
+  {
+    namespace: "dashboard.block-edit",
+    key: "block-fields.footer.copyright",
+    translations: t({
+      en: "Copyright text",
+      es: "Texto de derechos de autor",
+      ca: "Text de drets d'autor",
+      fr: "Texte des droits d'auteur",
+      de: "Urheberrechtstext",
+      it: "Testo del diritto d'autore",
+      eu: "Egile-eskubideen testua",
+      ga: "Texto de dereitos de autor",
+    }),
+  },
+  {
+    namespace: "dashboard.block-edit",
+    key: "block-fields.footer.description",
+    translations: t({
+      en: "Tagline / Site description",
+      es: "Eslogan / Descripción del sitio",
+      ca: "Eslògan / Descripció del lloc",
+      fr: "Slogan / Description du site",
+      de: "Slogan / Seitenbeschreibung",
+      it: "Slogan / Descrizione del sito",
+      eu: "Eslogana / Gunearen deskribapena",
+      ga: "Eslogan / Descrición do sitio",
+    }),
+  },
 
   // ── Dashboard: Team Manager ─────────────────────────────────────────────
   {

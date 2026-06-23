@@ -7,6 +7,8 @@ import { ImageGalleryBlock } from "../blocks/ImageGallery";
 import { PodcastFeedBlock } from "../blocks/PodcastFeedBlock/ui/PodcastFeedBlock";
 import { CtaBannerBlock } from "../blocks/CtaBannerBlock/ui/CtaBannerBlock";
 import { TextContentBlock } from "../blocks/TextContentBlock/ui/TextContentBlock";
+import { MapBlock } from "../blocks/MapBlock/ui/MapBlock";
+import { FooterBlock } from "../blocks/FooterBlock/ui/FooterBlock";
 import type { BlockComponent, BlockProps, BlockRegistry } from "./types";
 
 const adaptImageGalleryBlock: BlockComponent = function AdaptImageGalleryBlock(props: BlockProps) {
@@ -91,5 +93,18 @@ export const blockRegistry: BlockRegistry = {
       { key: "images", label: "Images", inputType: "input" }, // Placeholder, real editing via gallery UI
       { key: "lang", label: "Language", inputType: "input" },
     ],
+  },
+  map: {
+    component: MapBlock,
+    includeInNav: true,
+    navLabel: "Location",
+    defaultConfig: {},
+    fields: [],
+  },
+  footer: {
+    component: FooterBlock,
+    includeInNav: false,
+    defaultConfig: { showPoweredBy: true, socialLinks: [], email: "", phone: "" },
+    fields: [],
   },
 };

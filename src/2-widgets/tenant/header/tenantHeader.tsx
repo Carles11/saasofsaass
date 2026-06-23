@@ -1,6 +1,8 @@
 import { LOCALE_LABELS } from "@/5-shared/config/languages/supportedLanguages";
-import type { Tenant } from "@/5-shared/lib/db/schema";
 import { LanguageSwitcher } from "@/5-shared/i18n/LanguageSwitcher";
+import type { Tenant } from "@/5-shared/lib/db/schema";
+import Image from "next/image";
+import Link from "next/link";
 
 interface NavLink {
   label: string;
@@ -27,12 +29,19 @@ function PoweredBadge({ isSubdomain }: { isSubdomain: boolean }) {
       rel="noopener noreferrer"
       className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors no-underline"
     >
-      Powered by SoSS<span className="text-primary">.</span>
+      Powered by SofS
+      <span className="text-primary">.</span>
     </a>
   );
 }
 
-function LanguageSelector({ locales, currentLocale }: { locales: string[]; currentLocale: string }) {
+function LanguageSelector({
+  locales,
+  currentLocale,
+}: {
+  locales: string[];
+  currentLocale: string;
+}) {
   if (locales.length < 2) return null;
 
   if (locales.length > 2) {
@@ -59,11 +68,20 @@ function LanguageSelector({ locales, currentLocale }: { locales: string[]; curre
   );
 }
 
-function NavLinks({ links, className = "" }: { links: NavLink[]; className?: string }) {
+function NavLinks({
+  links,
+  className = "",
+}: {
+  links: NavLink[];
+  className?: string;
+}) {
   if (links.length === 0) return null;
 
   return (
-    <nav aria-label="Section navigation" className={`flex gap-4 sm:gap-6 ${className}`}>
+    <nav
+      aria-label="Section navigation"
+      className={`flex gap-4 sm:gap-6 ${className}`}
+    >
       {links.map((link) => (
         <a
           key={link.href}
@@ -77,7 +95,13 @@ function NavLinks({ links, className = "" }: { links: NavLink[]; className?: str
   );
 }
 
-function MobileMenu({ links, isSubdomain }: { links: NavLink[]; isSubdomain: boolean }) {
+function MobileMenu({
+  links,
+  isSubdomain,
+}: {
+  links: NavLink[];
+  isSubdomain: boolean;
+}) {
   if (links.length === 0 && !isSubdomain) return null;
 
   return (
@@ -113,18 +137,34 @@ export default function UnifiedHeader({
   isSubdomain,
   templateId,
 }: UnifiedHeaderProps) {
-  const branding = (tenant.branding as { logoUrl?: string }) ?? {};
+  const branding = (tenant.branding ?? {}) as Record<string, unknown>;
+  const logoData = branding.logo as
+    | { url?: string; s3Key?: string; linkUrl?: string }
+    | undefined;
+  const tenantLogoUrl = logoData?.url ?? null;
+  const tenantLogoLinkUrl = logoData?.linkUrl ?? null;
   const hasLocales = (tenant.locales?.length ?? 0) >= 2;
 
-  const brandMark = branding.logoUrl ? (
-    <img
-      src={branding.logoUrl}
-      alt={tenant.name}
-      className="h-8 w-auto object-contain"
-      onError={(e) => {
-        (e.target as HTMLImageElement).style.display = "none";
-      }}
-    />
+  const logoHref = tenantLogoLinkUrl || "/";
+  const isExternal =
+    tenantLogoLinkUrl &&
+    (tenantLogoLinkUrl.startsWith("http://") ||
+      tenantLogoLinkUrl.startsWith("https://"));
+
+  const brandMark = tenantLogoUrl ? (
+    <>
+      <Image
+        src={tenantLogoUrl}
+        alt={`${tenant.name} logo`}
+        className="h-16 w-auto max-h-16 object-contain"
+        width={150}
+        height={150}
+        unoptimized
+      />
+      <span className="font-black text-xl tracking-tighter uppercase text-foreground">
+        {tenant.name}
+      </span>
+    </>
   ) : (
     <span className="font-black text-xl tracking-tighter uppercase text-foreground">
       {tenant.name}
@@ -137,13 +177,22 @@ export default function UnifiedHeader({
         className="w-full bg-background border-b border-border py-6 px-4 flex flex-col items-center gap-4"
         style={{ fontFamily: "var(--font-heading)" }}
       >
-        <a href="/" aria-label="Home" className="no-underline">
-          {branding.logoUrl ? <div className="flex justify-center">{brandMark}</div> : brandMark}
-        </a>
+        <Link href={logoHref} aria-label="Home" className="no-underline">
+          {tenantLogoUrl ? (
+            <div className="flex justify-center">{brandMark}</div>
+          ) : (
+            brandMark
+          )}
+        </Link>
         <NavLinks links={navLinks} className="flex-wrap justify-center" />
         {(hasLocales || isSubdomain) && (
           <div className="flex items-center gap-3 mt-1">
-            {hasLocales && <LanguageSelector locales={tenant.locales} currentLocale={locale} />}
+            {hasLocales && (
+              <LanguageSelector
+                locales={tenant.locales}
+                currentLocale={locale}
+              />
+            )}
             <PoweredBadge isSubdomain={isSubdomain} />
           </div>
         )}
@@ -157,18 +206,26 @@ export default function UnifiedHeader({
         className="h-16 flex items-center justify-between px-4 sm:px-8 bg-background/70 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm"
         style={{ fontFamily: "var(--font-heading)" }}
       >
-        <a href="/" aria-label="Home" className="flex items-center gap-4 no-underline">
+        <Link
+          href={logoHref}
+          aria-label="Home"
+          className="flex items-center gap-4 no-underline"
+        >
           {brandMark}
-        </a>
+        </Link>
 
         <div className="hidden md:flex items-center gap-6">
           <NavLinks links={navLinks} />
-          {hasLocales && <LanguageSelector locales={tenant.locales} currentLocale={locale} />}
+          {hasLocales && (
+            <LanguageSelector locales={tenant.locales} currentLocale={locale} />
+          )}
           <PoweredBadge isSubdomain={isSubdomain} />
         </div>
 
         <div className="flex md:hidden items-center gap-2">
-          {hasLocales && <LanguageSelector locales={tenant.locales} currentLocale={locale} />}
+          {hasLocales && (
+            <LanguageSelector locales={tenant.locales} currentLocale={locale} />
+          )}
           <MobileMenu links={navLinks} isSubdomain={isSubdomain} />
         </div>
       </header>
@@ -180,18 +237,26 @@ export default function UnifiedHeader({
       className="h-16 flex items-center justify-between px-4 sm:px-8 bg-background border-b border-border sticky top-0 z-50"
       style={{ fontFamily: "var(--font-heading)" }}
     >
-      <a href="/" aria-label="Home" className="flex items-center gap-4 no-underline">
+      <Link
+        href={logoHref}
+        aria-label="Home"
+        className="flex items-center gap-4 no-underline"
+      >
         {brandMark}
-      </a>
+      </Link>
 
       <div className="hidden md:flex items-center gap-6">
         <NavLinks links={navLinks} />
-        {hasLocales && <LanguageSelector locales={tenant.locales} currentLocale={locale} />}
+        {hasLocales && (
+          <LanguageSelector locales={tenant.locales} currentLocale={locale} />
+        )}
         <PoweredBadge isSubdomain={isSubdomain} />
       </div>
 
       <div className="flex md:hidden items-center gap-2">
-        {hasLocales && <LanguageSelector locales={tenant.locales} currentLocale={locale} />}
+        {hasLocales && (
+          <LanguageSelector locales={tenant.locales} currentLocale={locale} />
+        )}
         <MobileMenu links={navLinks} isSubdomain={isSubdomain} />
       </div>
     </header>

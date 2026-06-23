@@ -452,10 +452,10 @@ New tenant-facing blocks, grouped by storage pattern and build order (see 🧱 B
 
 **Tier 1 — config-blob blocks (no new tables, `blocks.config` JSONB only)**
 
-- [ ] Text/rich-content
-- [ ] CTA banner
-- [ ] Footer (confirm whether currently hardcoded per template before treating as net-new)
-- [ ] Map/location
+- [x] Text/rich-content
+- [x] CTA banner
+- [x] Footer (confirm whether currently hardcoded per template before treating as net-new)
+- [x] Map/location
 
 **Tier 2 — collection blocks (reuse `tenant_entities` + `CollectionManager`)**
 

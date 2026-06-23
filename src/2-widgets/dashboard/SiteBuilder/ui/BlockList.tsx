@@ -39,12 +39,14 @@ import {
   GripVertical,
   Images,
   Mail,
+  MapPin,
   Mic2,
   Newspaper,
   Sparkles,
   Trophy,
   XIcon,
   type LucideIcon,
+  Copyright,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BlockCard } from "./BlockCard";
@@ -89,6 +91,14 @@ const BLOCK_PICKER_ITEMS: {
     kind: "image-gallery",icon: Images,           name: "Image Gallery",
     description: "Visual image gallery with lightbox viewing",
   },
+  {
+    kind: "map",           icon: MapPin,           name: "Location",
+    description: "Map with address and embedded Google Maps view",
+  },
+  {
+    kind: "footer",        icon: Copyright,        name: "Footer",
+    description: "Copyright, social links, and powered-by branding",
+  },
 ];
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -100,6 +110,8 @@ const CATEGORY_MAP: Record<string, string> = {
   "image-gallery": "media",
   contact: "interactive",
   "cta-banner": "interactive",
+  map: "interactive",
+  footer: "structure",
 };
 
 const CATEGORIES = [
@@ -170,6 +182,7 @@ interface BlockListProps {
   userRole?: "owner" | "editor" | null;
   translations?: TranslationDict;
   onLocaleChange?: (locale: SupportedLocaleType) => void;
+  plan?: string;
 }
 
 export function BlockList({
@@ -181,6 +194,7 @@ export function BlockList({
   userRole,
   translations,
   onLocaleChange,
+  plan,
 }: BlockListProps) {
   const [selectedKinds, setSelectedKinds] = useState<Set<BlockKind>>(new Set());
   const [category, setCategory] = useState<string>("all");
@@ -297,6 +311,7 @@ export function BlockList({
                 userRole={userRole}
                 translations={translations}
                 onLocaleChange={onLocaleChange}
+                plan={plan}
               />
             </div>
           ))}

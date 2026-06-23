@@ -1,5 +1,6 @@
 "use client";
 
+import { blockIncludeInNav } from "@/2-widgets/tenant/BlockRenderer/config/block-fields";
 import {
   deleteBlock,
   toggleBlockVisibility,
@@ -26,11 +27,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { blockIncludeInNav } from "@/2-widgets/tenant/BlockRenderer/config/block-fields";
+import { Spinner } from "@/components/ui/spinner";
 import { useSortable } from "@dnd-kit/sortable";
 import { GripVertical } from "lucide-react";
 import { useState, useTransition } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import { BlockEditForm } from "./BlockEditForm";
 import { BlockEditorHeader } from "./BlockEditorHeader";
 import { BlockExpandedArea } from "./BlockExpandedArea";
@@ -51,6 +51,7 @@ interface BlockCardProps {
   userRole?: "owner" | "editor" | null;
   translations?: TranslationDict;
   onLocaleChange?: (locale: SupportedLocaleType) => void;
+  plan?: string;
 }
 
 export function BlockCard({
@@ -62,6 +63,7 @@ export function BlockCard({
   userRole,
   translations,
   onLocaleChange,
+  plan,
 }: BlockCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -129,15 +131,37 @@ export function BlockCard({
   const cancelLabel = resolveTranslation(translations, "cancel", "Cancel");
 
   const isHero = block.type === "hero";
+  const isFooter = block.type === "footer";
   const blockConfig = (block.config ?? {}) as Record<string, unknown>;
   const includeInNavDefault = blockIncludeInNav[block.type] ?? false;
-  const includeInNavValue = isHero ? true : (blockConfig.includeInNav as boolean | undefined) ?? includeInNavDefault;
+  const includeInNavValue = isHero
+    ? true
+    : ((blockConfig.includeInNav as boolean | undefined) ??
+      includeInNavDefault);
 
-  const includeInNavLabel = resolveTranslation(translations, "include-in-nav", "Show in navigation");
-  const includeInNavDisabledNote = resolveTranslation(translations, "include-in-nav-disabled-note", "(always shown)");
+  const isPaidPlan = plan === "pro";
+  const showPoweredByValue = isPaidPlan
+    ? ((blockConfig.showPoweredBy as boolean | undefined) ?? true)
+    : true;
+
+  const includeInNavLabel = resolveTranslation(
+    translations,
+    "include-in-nav",
+    "Show in navigation",
+  );
+  const includeInNavDisabledNote = resolveTranslation(
+    translations,
+    "include-in-nav-disabled-note",
+    "(always shown)",
+  );
 
   async function handleIncludeInNavChange(checked: boolean) {
     const newConfig = { ...blockConfig, includeInNav: checked };
+    await updateBlockConfig(block.id, tenantId, newConfig);
+  }
+
+  async function handleShowPoweredByChange(checked: boolean) {
+    const newConfig = { ...blockConfig, showPoweredBy: checked };
     await updateBlockConfig(block.id, tenantId, newConfig);
   }
 
@@ -258,45 +282,87 @@ export function BlockCard({
             blockId={block.id}
             locales={tenant.locales}
             activeLocale={activeLocale}
-            onLocaleChange={
-              onLocaleChange ?? (() => {})
-            }
+            onLocaleChange={onLocaleChange ?? (() => {})}
             defaultLocale={tenant.defaultLocale}
             onTranslate={setIsTranslating}
           />
 
-          {/* ── includeInNav toggle ─────────────────────────────────── */}
-          <label className="flex items-center gap-3 cursor-pointer px-4 py-3 border-t border-border">
-            <button
-              type="button"
-              role="switch"
-              aria-checked={includeInNavValue}
-              disabled={isHero}
-              onClick={() => !isHero && handleIncludeInNavChange(!includeInNavValue)}
-              className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                includeInNavValue ? "bg-primary" : "bg-input"
-              }`}
-            >
-              <span
-                className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-sm ring-0 transition-transform ${
-                  includeInNavValue ? "translate-x-[18px]" : "translate-x-[2px]"
+          {/* ── includeInNav toggle — not shown for footer ──────────── */}
+          {!isFooter && (
+            <label className="flex items-center gap-3 cursor-pointer px-4 py-3 border-t border-border">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={includeInNavValue}
+                disabled={isHero}
+                onClick={() =>
+                  !isHero && handleIncludeInNavChange(!includeInNavValue)
+                }
+                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                  includeInNavValue ? "bg-primary" : "bg-input"
                 }`}
-              />
-            </button>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{includeInNavLabel}</span>
-              {isHero && (
-                <span className="text-xs text-muted-foreground">
-                  {includeInNavDisabledNote}
-                </span>
-              )}
-            </div>
-          </label>
+              >
+                <span
+                  className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-sm ring-0 transition-transform ${
+                    includeInNavValue
+                      ? "translate-x-[18px]"
+                      : "translate-x-[2px]"
+                  }`}
+                />
+              </button>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{includeInNavLabel}</span>
+                {isHero && (
+                  <span className="text-xs text-muted-foreground">
+                    {includeInNavDisabledNote}
+                  </span>
+                )}
+              </div>
+            </label>
+          )}
 
-          <div className={
-            "border-t border-border" +
-            (isTranslating ? " pointer-events-none" : "")
-          }>
+          {/* ── showPoweredBy toggle — footer only ──────────────────── */}
+          {isFooter && (
+            <label className="flex items-center gap-3 cursor-pointer px-4 py-3 border-t border-border">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={showPoweredByValue}
+                disabled={!isPaidPlan}
+                onClick={() =>
+                  isPaidPlan && handleShowPoweredByChange(!showPoweredByValue)
+                }
+                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                  showPoweredByValue ? "bg-primary" : "bg-input"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-sm ring-0 transition-transform ${
+                    showPoweredByValue
+                      ? "translate-x-[18px]"
+                      : "translate-x-[2px]"
+                  }`}
+                />
+              </button>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">
+                  Show Powered by SofS
+                </span>
+                {!isPaidPlan && (
+                  <span className="text-xs text-muted-foreground">
+                    (free plan — always shown)
+                  </span>
+                )}
+              </div>
+            </label>
+          )}
+
+          <div
+            className={
+              "border-t border-border" +
+              (isTranslating ? " pointer-events-none" : "")
+            }
+          >
             {block.type === "image-gallery" ? (
               <div className="p-3 sm:p-4">
                 <GalleryManager

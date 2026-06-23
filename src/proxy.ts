@@ -58,7 +58,7 @@ async function isTenantActive(
 
 // ── Middleware config ──────────────────────────────────────────────────────────
 export const config = {
-  matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+).*)"],
+  matcher: ["/((?!api/|_next/|_static/|_vercel|[\\w-]+\\.\\w+|.*\\.[a-z0-9]{2,5}$).*)"],
 };
 
 export default async function proxy(req: NextRequest) {

@@ -50,15 +50,19 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
 
   const plan = workspace?.plan ?? "free";
 
-  const branding = (tenant.branding ?? {}) as Record<string, string>;
-  const initialTitleFont = branding.fontHeading
-    ? getFontIdByVariableRef(branding.fontHeading)
+  const branding = (tenant.branding ?? {}) as Record<string, unknown>;
+  const initialTitleFont = (branding.fontHeading as string)
+    ? getFontIdByVariableRef(branding.fontHeading as string)
     : undefined;
-  const initialBodyFont = branding.fontBody
-    ? getFontIdByVariableRef(branding.fontBody)
+  const initialBodyFont = (branding.fontBody as string)
+    ? getFontIdByVariableRef(branding.fontBody as string)
     : undefined;
-  const initialPalette = branding.palette ?? undefined;
+  const initialPalette = (branding.palette as string) ?? undefined;
   const initialSeoEnabled = tenant.seoEnabled ?? true;
+  const logoData = branding.logo as { url?: string; s3Key?: string; linkUrl?: string } | undefined;
+  const initialLogoUrl = logoData?.url ?? null;
+  const initialLogoS3Key = logoData?.s3Key ?? null;
+  const initialLogoLinkUrl = logoData?.linkUrl ?? null;
 
   const translations = {
     ...(namespacedTranslations.common ?? {}),
@@ -84,6 +88,9 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
             initialBodyFont={initialBodyFont}
             initialPalette={initialPalette}
             initialSeoEnabled={initialSeoEnabled}
+            initialLogoUrl={initialLogoUrl}
+            initialLogoS3Key={initialLogoS3Key}
+            initialLogoLinkUrl={initialLogoLinkUrl}
           />
         </StoreHydrator>
       </div>

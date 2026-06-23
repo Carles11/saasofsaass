@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
 
 const CONFIG_FIELDS: Partial<
   Record<BlockKind, Array<{ key: string; label: string; inputType?: string }>>
@@ -28,6 +30,10 @@ const CONFIG_FIELDS: Partial<
     { key: "email", label: "Email" },
     { key: "phone", label: "Phone" },
     { key: "address", label: "Address" },
+  ],
+  footer: [
+    { key: "email", label: "Email" },
+    { key: "phone", label: "Phone" },
   ],
 };
 
@@ -58,6 +64,7 @@ export function BlockEditForm({
 
   const isHero = block.type === "hero";
   const isCtaBanner = block.type === "cta-banner";
+  const isFooter = block.type === "footer";
 
   const sectionTranslations = resolveTranslation(
     translations,
@@ -69,6 +76,16 @@ export function BlockEditForm({
   const saveLabel = resolveTranslation(translations, "save", "Save");
   const removeImage = resolveTranslation(translations, "remove-image", "Remove image");
   const noFieldsLabel = resolveTranslation(translations, "no-fields", "This block has no editable fields.");
+
+  const [socialLinks, setSocialLinks] = useState<Array<{ label: string; url: string }>>(
+    (config.socialLinks as Array<{ label: string; url: string }>) ?? [],
+  );
+
+  async function handleSocialLinksSave() {
+    const newConfig = { ...config, socialLinks };
+    await updateBlockConfig(block.id, tenant.id, newConfig);
+    toast({ title: "Social links saved", status: "success" });
+  }
 
   const hasTranslations = fields.length > 0;
   const hasConfig = cfFields.length > 0;
@@ -267,8 +284,69 @@ export function BlockEditForm({
         </>
       )}
 
+      {/* ── Social links — footer only ──────────────────────────────── */}
+      {isFooter && (
+        <>
+          <Separator />
+          <div className="flex flex-col gap-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Social Links
+            </p>
+            {socialLinks.map((link, i) => (
+              <div key={i} className="flex items-end gap-2">
+                <div className="flex flex-col gap-1 flex-1">
+                  <Label htmlFor={`sl-label-${i}`}>Label</Label>
+                  <Input
+                    id={`sl-label-${i}`}
+                    value={link.label}
+                    onChange={(e) => {
+                      const next = [...socialLinks];
+                      next[i] = { ...next[i], label: e.target.value };
+                      setSocialLinks(next);
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col gap-1 flex-[2]">
+                  <Label htmlFor={`sl-url-${i}`}>URL</Label>
+                  <Input
+                    id={`sl-url-${i}`}
+                    value={link.url}
+                    onChange={(e) => {
+                      const next = [...socialLinks];
+                      next[i] = { ...next[i], url: e.target.value };
+                      setSocialLinks(next);
+                    }}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSocialLinks(socialLinks.filter((_, j) => j !== i))}
+                  className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                tenantVariant="outline"
+                size="sm"
+                onClick={() => setSocialLinks([...socialLinks, { label: "", url: "" }])}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Link
+              </Button>
+              <Button type="button" size="sm" onClick={handleSocialLinksSave}>
+                {saveLabel}
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
       {/* ── Empty state ─────────────────────────────────────────────── */}
-      {!hasTranslations && !hasConfig && (
+      {!hasTranslations && !hasConfig && !isFooter && (
         <div className="py-8 text-center">
           <p className="text-sm text-muted-foreground">{noFieldsLabel}</p>
         </div>

@@ -31,9 +31,15 @@ export function BlockRenderer({ blocks, locale, tenant }: BlockRendererProps) {
     );
   }
 
+  // 3. Sort footer blocks to the end
+  const sortedBlocks = [
+    ...visibleBlocks.filter((b) => b.type !== "footer"),
+    ...visibleBlocks.filter((b) => b.type === "footer"),
+  ];
+
   return (
     <div className="flex flex-col w-full">
-      {visibleBlocks.map((block) => (
+      {sortedBlocks.map((block) => (
         <RegistryBlock
           key={block.id}
           block={block}

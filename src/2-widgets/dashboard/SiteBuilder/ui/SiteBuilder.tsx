@@ -15,6 +15,7 @@ import { CustomDomainSection } from "./CustomDomainSection";
 import { SubdomainSection } from "./SubdomainSection";
 import { TypographySection } from "./TypographySection";
 import { PaletteSection } from "./PaletteSection";
+import { LogoSection } from "./LogoSection";
 import { SeoSection } from "./SeoSection";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
@@ -32,6 +33,9 @@ interface SiteBuilderProps {
   initialBodyFont?: string;
   initialPalette?: string;
   initialSeoEnabled?: boolean;
+  initialLogoUrl?: string | null;
+  initialLogoS3Key?: string | null;
+  initialLogoLinkUrl?: string | null;
 }
 
 export function SiteBuilder({
@@ -46,6 +50,9 @@ export function SiteBuilder({
   initialBodyFont,
   initialPalette,
   initialSeoEnabled,
+  initialLogoUrl,
+  initialLogoS3Key,
+  initialLogoLinkUrl,
 }: SiteBuilderProps) {
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType
@@ -139,6 +146,7 @@ const previewUrl = isDev
                 userRole={userRole}
                 translations={translations}
                 onLocaleChange={handleLocaleChange}
+                plan={plan}
               />
             </TenantLayoutResolver>
           </div>
@@ -224,6 +232,13 @@ const previewUrl = isDev
                   {isSaving && <span className="ml-2 text-blue-500">{savingLabel}</span>}
                 </p>
               </div>
+              <LogoSection
+                tenantId={tenant.id}
+                slug={currentSlug}
+                initialLogoUrl={initialLogoUrl}
+                initialLogoS3Key={initialLogoS3Key}
+                initialLogoLinkUrl={initialLogoLinkUrl}
+              />
               <SeoSection
                 tenantId={tenant.id}
                 initialSeoEnabled={initialSeoEnabled ?? true}

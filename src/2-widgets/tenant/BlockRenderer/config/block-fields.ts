@@ -20,6 +20,8 @@ export const blockIncludeInNav: Record<string, boolean> = {
   "cta-banner": false,
   "text-content": true,
   "image-gallery": false,
+  map: true,
+  footer: false,
 };
 
 export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
@@ -46,5 +48,13 @@ export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
   "image-gallery": [
     { key: "images", label: "Images", inputType: "input" }, // Placeholder for gallery manager
     { key: "lang", label: "Language", inputType: "input" },
+  ],
+  map: [
+    { key: "heading", label: "Heading", inputType: "input" },
+    { key: "address", label: "Address / Location", inputType: "textarea" },
+  ],
+  footer: [
+    { key: "copyright", label: "Copyright text", inputType: "textarea" },
+    { key: "description", label: "Tagline / Site description", inputType: "textarea" },
   ],
 };

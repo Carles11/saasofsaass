@@ -6,7 +6,9 @@ export type BlockKind =
   | "contact"
   | "image-gallery"
   | "text-content"
-  | "cta-banner";
+  | "cta-banner"
+  | "map"
+  | "footer";
 
 // Shared type for image-gallery blocks
 export interface GalleryImage {
