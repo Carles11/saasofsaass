@@ -261,14 +261,29 @@ export function BlockList({
     clearSelection();
   }, [selectedKinds, tenantId, clearSelection]);
 
+  // ── Existing block kinds (for picker filtering) ─────────────────────
+
+  const existingKinds = useMemo(
+    () => new Set(orderedBlocks.map((b) => b.type)),
+    [orderedBlocks],
+  );
+
   // ── Filtering ────────────────────────────────────────────────────────
+
+  const pickerItems = useMemo(
+    () =>
+      BLOCK_PICKER_ITEMS.filter(
+        (i) => !(existingKinds.has(i.kind) && (i.kind === "hero" || i.kind === "footer")),
+      ),
+    [existingKinds],
+  );
 
   const filteredItems = useMemo(
     () =>
       category === "all"
-        ? BLOCK_PICKER_ITEMS
-        : BLOCK_PICKER_ITEMS.filter((i) => CATEGORY_MAP[i.kind] === category),
-    [category],
+        ? pickerItems
+        : pickerItems.filter((i) => CATEGORY_MAP[i.kind] === category),
+    [category, pickerItems],
   );
 
   // ── Active sortable item preview ──────────────────────────────────────
@@ -380,7 +395,7 @@ export function BlockList({
               <div className="flex-1 overflow-y-auto px-6 pb-4">
                 {category === "all" ? (
                   CATEGORIES.filter((c) => c.id !== "all").map((cat) => {
-                    const catItems = BLOCK_PICKER_ITEMS.filter(
+                    const catItems = pickerItems.filter(
                       (i) => CATEGORY_MAP[i.kind] === cat.id,
                     );
                     if (catItems.length === 0) return null;

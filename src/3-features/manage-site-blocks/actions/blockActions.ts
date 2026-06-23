@@ -101,11 +101,29 @@ export async function reorderBlock(
 export async function reorderBlocks(tenantId: string, orderedBlockIds: string[]) {
   await assertCanManageStructure(tenantId)
 
-  for (let i = 0; i < orderedBlockIds.length; i++) {
+  // Fetch all blocks to find hero and footer
+  const allBlocks = await db
+    .select({ id: blocks.id, type: blocks.type })
+    .from(blocks)
+    .where(eq(blocks.tenantId, tenantId))
+
+  const hero = allBlocks.find(b => b.type === "hero")
+  const footer = allBlocks.find(b => b.type === "footer")
+
+  // Enforce hero first, footer last
+  const reordered = orderedBlockIds.filter(id => {
+    const block = allBlocks.find(b => b.id === id)
+    return block && block.type !== "hero" && block.type !== "footer"
+  })
+
+  if (hero) reordered.unshift(hero.id)
+  if (footer) reordered.push(footer.id)
+
+  for (let i = 0; i < reordered.length; i++) {
     await db
       .update(blocks)
       .set({ order: i, updatedAt: new Date() })
-      .where(eq(blocks.id, orderedBlockIds[i]))
+      .where(eq(blocks.id, reordered[i]))
   }
 
   revalidateSiteBuilder(tenantId)
@@ -114,15 +132,39 @@ export async function reorderBlocks(tenantId: string, orderedBlockIds: string[])
 export async function addBlock(tenantId: string, type: BlockKind) {
   await assertCanManageStructure(tenantId)
 
-  const [{ maxOrder }] = await db
-    .select({ maxOrder: sql<number>`coalesce(max(${blocks.order}), -1)` })
+  // Prevent duplicate hero or footer blocks
+  if (type === "hero" || type === "footer") {
+    const [existing] = await db
+      .select({ id: blocks.id })
+      .from(blocks)
+      .where(and(eq(blocks.tenantId, tenantId), eq(blocks.type, type)))
+      .limit(1)
+
+    if (existing) {
+      throw new Error(`A ${type} section already exists and cannot be duplicated.`)
+    }
+  }
+
+  // Insert new block right before footer, shifting footer down
+  const [footerBlock] = await db
+    .select({ order: blocks.order })
     .from(blocks)
-    .where(eq(blocks.tenantId, tenantId))
+    .where(and(eq(blocks.tenantId, tenantId), eq(blocks.type, "footer")))
+    .limit(1)
+
+  const insertOrder = footerBlock ? footerBlock.order : 0
+
+  if (footerBlock) {
+    await db
+      .update(blocks)
+      .set({ order: footerBlock.order + 1, updatedAt: new Date() })
+      .where(and(eq(blocks.tenantId, tenantId), eq(blocks.type, "footer")))
+  }
 
   await db.insert(blocks).values({
     tenantId,
     type,
-    order: maxOrder + 1,
+    order: insertOrder,
     isVisible: true,
     config: {},
     translations: {},
@@ -133,6 +175,16 @@ export async function addBlock(tenantId: string, type: BlockKind) {
 
 export async function deleteBlock(blockId: string, tenantId: string) {
   await assertCanManageStructure(tenantId)
+
+  const [block] = await db
+    .select({ type: blocks.type })
+    .from(blocks)
+    .where(eq(blocks.id, blockId))
+    .limit(1)
+
+  if (block && (block.type === "hero" || block.type === "footer")) {
+    throw new Error("Hero and Footer sections cannot be removed.")
+  }
 
   await db.delete(blocks).where(eq(blocks.id, blockId))
 

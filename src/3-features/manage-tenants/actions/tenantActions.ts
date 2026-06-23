@@ -2,7 +2,7 @@
 
 import { requireProfile } from "@/5-shared/lib/auth/authorization";
 import { db } from "@/5-shared/lib/db";
-import { tenants, workspaces } from "@/5-shared/lib/db/schema";
+import { tenants, workspaces, blocks } from "@/5-shared/lib/db/schema";
 import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -142,6 +142,12 @@ export async function createTenant(raw: FormData | CreateTenantInput) {
     profileId: profile.id,
     role: "owner",
   });
+
+  // Auto-create hero and footer blocks (always present, cannot be removed)
+  await db.insert(blocks).values([
+    { tenantId: tenant.id, type: "hero", order: 0, isVisible: true, config: {}, translations: {} },
+    { tenantId: tenant.id, type: "footer", order: 1, isVisible: true, config: {}, translations: {} },
+  ]);
 
   revalidatePath("/", "layout");
 

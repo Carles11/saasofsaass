@@ -12,6 +12,7 @@ import type {
   TenantEntity,
   TenantTranslation,
 } from "@/5-shared/lib/db/schema";
+import { toast } from "@/5-shared/lib/ui/toast";
 import {
   resolveTranslation,
   type TranslationDict,
@@ -129,6 +130,11 @@ export function BlockCard({
     "Confirm Delete",
   );
   const cancelLabel = resolveTranslation(translations, "cancel", "Cancel");
+  const protectedBlockMessage = resolveTranslation(
+    translations,
+    "protected-block",
+    "This section cannot be removed.",
+  );
 
   const isHero = block.type === "hero";
   const isFooter = block.type === "footer";
@@ -235,7 +241,16 @@ export function BlockCard({
           </Button>
 
           {/* Delete — owner only */}
-          {userRole === "owner" && (
+          {isHero || isFooter ? (
+            <Button
+              tenantVariant="destructive"
+              size="sm"
+              disabled
+              title={protectedBlockMessage}
+            >
+              {deleteLabel}
+            </Button>
+          ) : userRole === "owner" ? (
             <Dialog>
               <DialogTrigger asChild>
                 <Button
@@ -270,7 +285,7 @@ export function BlockCard({
                 </div>
               </DialogContent>
             </Dialog>
-          )}
+          ) : null}
         </div>
       </div>
 

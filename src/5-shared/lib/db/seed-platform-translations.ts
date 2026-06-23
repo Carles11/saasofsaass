@@ -103,6 +103,20 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       ga: "Máis información",
     }),
   },
+  {
+    namespace: "common",
+    key: "protected-block",
+    translations: t({
+      en: "Hero and Footer sections are required and cannot be removed.",
+      es: "Las secciones de Héroe y Pie de página son obligatorias y no se pueden eliminar.",
+      ca: "Les seccions d'Heroi i Peu de pàgina són obligatòries i no es poden eliminar.",
+      fr: "Les sections Héros et Pied de page sont obligatoires et ne peuvent pas être supprimées.",
+      de: "Hero- und Footer-Abschnitte sind erforderlich und können nicht entfernt werden.",
+      it: "Le sezioni Hero e Footer sono obbligatorie e non possono essere rimosse.",
+      eu: "Hero eta Footer atalak beharrezkoak dira eta ezin dira kendu.",
+      ga: "As seccións de Hero e Pé de páxina son obrigatorias e non se poden eliminar.",
+    }),
+  },
 
   // ── Marketing: Header ───────────────────────────────────────────────────
   {
