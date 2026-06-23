@@ -5,21 +5,21 @@ interface BlogFeedConfig {
   maxItems?: number;
 }
 
-export async function BlogFeedBlock({ block, config, locale }: BlockProps) {
+export async function BlogFeedBlock({ block, config, locale, blockId }: BlockProps) {
   const { maxItems = 9 } = config as BlogFeedConfig;
   const rows = await getEntitiesByBlock(block.id, locale);
   const items = rows.slice(0, maxItems);
 
   if (items.length === 0) {
     return (
-      <section className="py-16 px-6 text-center">
+      <section id={blockId} className="py-16 px-6 text-center">
         <p className="text-muted-foreground text-sm">No posts published yet.</p>
       </section>
     );
   }
 
   return (
-    <section className="py-16 px-6">
+    <section id={blockId} className="py-16 px-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {items.map(({ entity, translation }) => {
           const payload = translation?.payload as {

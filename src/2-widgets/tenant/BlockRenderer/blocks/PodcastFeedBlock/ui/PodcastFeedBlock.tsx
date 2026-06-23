@@ -2,7 +2,7 @@ import { getEntitiesByBlock } from "@/4-entities/tenant-content";
 import type { PodcastWithTranslation } from "@/5-shared/types/tenants/entities";
 import type { BlockProps } from "../../../config/types";
 
-export async function PodcastFeedBlock({ block, locale }: BlockProps) {
+export async function PodcastFeedBlock({ block, locale, blockId }: BlockProps) {
   const rows = (await getEntitiesByBlock(
     block.id,
     locale,
@@ -10,7 +10,7 @@ export async function PodcastFeedBlock({ block, locale }: BlockProps) {
 
   if (!rows.length) {
     return (
-      <section className="py-16 px-6 text-center">
+      <section id={blockId} className="py-16 px-6 text-center">
         <h2 className="text-xl font-bold mb-2">Podcast Feed</h2>
         <p className="text-muted-foreground text-sm">
           No podcast episodes published yet.
@@ -20,7 +20,7 @@ export async function PodcastFeedBlock({ block, locale }: BlockProps) {
   }
 
   return (
-    <section className="py-16 px-6">
+    <section id={blockId} className="py-16 px-6">
       <h2 className="text-xl font-bold mb-6 text-center">Podcast Feed</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {rows.map(({ entity, translation }) => {

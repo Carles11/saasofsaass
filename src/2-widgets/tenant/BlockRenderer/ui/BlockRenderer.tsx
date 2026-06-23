@@ -63,17 +63,8 @@ function RegistryBlock({
 }) {
   const entry = blockRegistry[block.type as BlockKind];
 
-  // 1. Handle missing implementation in registry
-  if (!entry) {
-    return (
-      <section className="py-12 px-6 text-center border-b border-border bg-muted/30">
-        <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-          Engine Warning: Block <span className="text-foreground font-bold">{block.type}</span> is not
-          registered.
-        </p>
-      </section>
-    );
-  }
+  // 1. Handle missing implementation in registry — silently skip
+  if (!entry) return null;
 
   // 2. Merge default config with tenant-specific overrides
   const config = {
@@ -94,6 +85,7 @@ function RegistryBlock({
     <>
       <Component
         block={block}
+        blockId={block.id}
         config={config}
         t={t}
         locale={locale}

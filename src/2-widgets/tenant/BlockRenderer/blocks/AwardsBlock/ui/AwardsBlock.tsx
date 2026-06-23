@@ -2,12 +2,12 @@ import { getEntitiesByBlock } from "@/4-entities/tenant-content";
 import type { AwardItemWithTranslation } from "@/5-shared/types/tenants/entities";
 import type { BlockProps } from "../../../config/types";
 
-export async function AwardsBlock({ block, locale }: BlockProps) {
+export async function AwardsBlock({ block, locale, blockId }: BlockProps) {
   const rows = (await getEntitiesByBlock(block.id, locale)) as AwardItemWithTranslation[];
 
   if (!rows.length) {
     return (
-      <section className="py-16 px-6 text-center">
+      <section id={blockId} className="py-16 px-6 text-center">
         <h2 className="text-xl font-bold mb-2">Awards</h2>
         <p className="text-muted-foreground text-sm">No awards to display yet.</p>
       </section>
@@ -15,7 +15,7 @@ export async function AwardsBlock({ block, locale }: BlockProps) {
   }
 
   return (
-    <section className="py-16 px-6">
+    <section id={blockId} className="py-16 px-6">
       <h2 className="text-xl font-bold mb-6 text-center">Awards</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {rows.map(({ entity, translation }) => {

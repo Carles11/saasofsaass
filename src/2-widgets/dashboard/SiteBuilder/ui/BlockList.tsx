@@ -39,7 +39,6 @@ import {
   GripVertical,
   Images,
   Mail,
-  Menu,
   Mic2,
   Newspaper,
   Sparkles,
@@ -58,10 +57,6 @@ const BLOCK_PICKER_ITEMS: {
   name: string;
   description: string;
 }[] = [
-  {
-    kind: "navbar",       icon: Menu,             name: "Navigation Bar",
-    description: "Top nav with logo, links, and optional CTA",
-  },
   {
     kind: "hero",         icon: Sparkles,         name: "Hero Section",
     description: "Headline, subtitle, and primary call-to-action",
@@ -97,7 +92,6 @@ const BLOCK_PICKER_ITEMS: {
 ];
 
 const CATEGORY_MAP: Record<string, string> = {
-  navbar: "structure",
   hero: "structure",
   "blog-feed": "content",
   "podcast-feed": "content",

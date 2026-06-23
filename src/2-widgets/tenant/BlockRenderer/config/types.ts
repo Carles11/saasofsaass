@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 // level. Each block narrows them internally via its own typed interface.
 export interface BlockProps {
   block: Block;
+  blockId: string;
   config: {
     images?: GalleryImage[];
     lang?: string;
@@ -27,6 +28,14 @@ export type BlockComponent =
 export interface BlockRegistryEntry {
   component: BlockComponent;
   defaultConfig: Record<string, unknown>;
+  /** Whether this block kind should generate an auto-nav link in the unified header.
+   * When true, a link is generated if the block instance has a non-empty heading
+   * translation. Set false for blocks that aren't navigable destinations
+   * (e.g. hero, cta-banner). */
+  includeInNav: boolean;
+  /** Generic nav label for auto-generated header links (e.g. "Blog", "Contact").
+   * When absent, falls back to the block's translated heading/title (for text-content). */
+  navLabel?: string;
   /** Translatable fields rendered by the FocusedLanguageEditor in the dashboard.
    * Collection blocks (e.g. blog-feed) leave this empty — their content
    * lives in tenant_entities and is managed via CollectionManager. */

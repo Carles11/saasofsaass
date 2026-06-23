@@ -15,11 +15,12 @@ interface ImageGalleryProps {
   images: GalleryImage[];
   lang: string;
   galleryName?: string;
+  blockId?: string;
 }
 
 type GalleryMode = "slider" | "grid";
 
-export function ImageGallery({ images, lang, galleryName }: ImageGalleryProps) {
+export function ImageGallery({ images, lang, galleryName, blockId }: ImageGalleryProps) {
   const [mode, setMode] = useState<GalleryMode>("slider");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -43,7 +44,7 @@ export function ImageGallery({ images, lang, galleryName }: ImageGalleryProps) {
   if (!images.length) return null;
 
   return (
-    <section className="py-16 px-6">
+    <section id={blockId} className="py-16 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           {galleryName && (

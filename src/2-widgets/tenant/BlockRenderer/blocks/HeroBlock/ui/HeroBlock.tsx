@@ -8,7 +8,7 @@ interface HeroConfig {
   heroImage?: { url: string; alt?: string } | null;
 }
 export function HeroBlock(props: BlockProps) {
-  const { config, t, templateId } = props;
+  const { config, t, templateId, blockId } = props;
   const { ctaUrl, layout = "centered", heroImage } = config as HeroConfig;
   const safeCtaUrl = sanitizeCtaUrl(ctaUrl);
   const isCenter = layout === "centered";
@@ -21,6 +21,7 @@ export function HeroBlock(props: BlockProps) {
     // Modern: split layout, image right, mono font
     return (
       <section
+        id={blockId}
         className={`flex flex-col md:flex-row items-center justify-between gap-8 px-6 py-24`}
         style={{ minHeight: "85vh" }}
       >
@@ -80,6 +81,7 @@ export function HeroBlock(props: BlockProps) {
     // Classic: overlay on image, serif font
     return (
       <section
+        id={blockId}
         className={`relative flex items-center justify-center min-h-80 px-6 py-24 bg-linear-to-b from-muted to-muted/50`}
         style={{ minHeight: "85vh" }}
       >
@@ -133,6 +135,7 @@ export function HeroBlock(props: BlockProps) {
   // Default: centered, simple, bg image if present
   return (
     <section
+      id={blockId}
       className={`relative flex flex-col ${gapClass} px-6 py-24 items-center text-center`}
       style={{
         fontFamily: "var(--font-heading)",

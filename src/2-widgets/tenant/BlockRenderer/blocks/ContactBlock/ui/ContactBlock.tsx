@@ -6,12 +6,12 @@ interface ContactConfig {
   address?: string;
 }
 
-export function ContactBlock({ config, t }: BlockProps) {
+export function ContactBlock({ config, t, blockId }: BlockProps) {
   const { email, phone, address } = config as ContactConfig;
   const hasDetails = email || phone || address;
 
   return (
-    <section className="py-16 px-6">
+    <section id={blockId} className="py-16 px-6">
       <div className="max-w-4xl mx-auto">
         {t.title && (
           <h2 className="text-3xl font-bold text-center mb-4">{t.title}</h2>

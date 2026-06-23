@@ -11,10 +11,16 @@ import { Globe } from "lucide-react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  locales?: string[];
+}
+
+export function LanguageSwitcher({ locales: allowedLocales }: LanguageSwitcherProps) {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+
+  const availableLocales = allowedLocales ?? SUPPORTED_LOCALES;
 
   function handleLocaleChange(newLocale: string) {
     const segments = pathname.split("/");
@@ -28,7 +34,7 @@ export function LanguageSwitcher() {
         <Globe className="size-4" />
       </SelectTrigger>
       <SelectContent position="popper" className="w-max">
-        {SUPPORTED_LOCALES.map((l) => (
+        {availableLocales.map((l) => (
           <SelectItem key={l} value={l} className="text-xs w-full">
             {LOCALE_LABELS[l] ?? l.toUpperCase()}
           </SelectItem>

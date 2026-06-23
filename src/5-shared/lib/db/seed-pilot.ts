@@ -127,32 +127,13 @@ async function main() {
     console.log(`  ✓ ${existingBlocks.length} block(s) already exist — skipping block inserts.`)
   } else {
 
-  // Navbar
-  const [navbarBlock] = await db
-    .insert(blocks)
-    .values({
-      tenantId,
-      type:      'navbar',
-      order:     0,
-      isVisible: true,
-      config:    {},
-      translations: {
-        en: { siteTitle: 'Àgora' },
-        es: { siteTitle: 'Àgora' },
-        ca: { siteTitle: 'Àgora' },
-      },
-    })
-    .returning({ id: blocks.id })
-
-  console.log(`  ✓ Navbar block inserted (id: ${navbarBlock.id})`)
-
   // Hero — en fully seeded; es/ca left for Gemini worker
   const [heroBlock] = await db
     .insert(blocks)
     .values({
       tenantId,
       type:      'hero',
-      order:     1,
+      order:     0,
       isVisible: true,
       config:    { layout: 'centered' },
       translations: {
@@ -173,7 +154,7 @@ async function main() {
     .values({
       tenantId,
       type:      'contact',
-      order:     3,
+      order:     2,
       isVisible: true,
       config:    {
         email:   'info@agora-association.org',

@@ -9,7 +9,7 @@ interface CtaBannerConfig {
   ctaUrl?: string;
 }
 
-export async function CtaBannerBlock({ config, t, locale }: BlockProps) {
+export async function CtaBannerBlock({ config, t, locale, blockId }: BlockProps) {
   const { ctaUrl } = config as CtaBannerConfig;
   const safeCtaUrl = sanitizeCtaUrl(ctaUrl);
   const heading = t.heading;
@@ -19,7 +19,7 @@ export async function CtaBannerBlock({ config, t, locale }: BlockProps) {
   const ctaLabel = t.ctaLabel || resolveTranslation(platformT, "learnMore", "Learn more");
 
   return (
-    <section className="py-16 px-6">
+    <section id={blockId} className="py-16 px-6">
       <div className="max-w-4xl mx-auto text-center">
         {heading && (
           <h2 className="text-3xl font-bold mb-4">{heading}</h2>

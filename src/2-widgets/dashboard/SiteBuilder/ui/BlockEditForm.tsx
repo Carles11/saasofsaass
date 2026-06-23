@@ -82,6 +82,7 @@ export function BlockEditForm({
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const newConfig: Record<string, unknown> = { ...(block.config as Record<string, unknown>) };
+    newConfig.includeInNav = fd.get("includeInNav") === "on";
     for (const f of cfFields) {
       if (f.key === "heroImage") {
         const file = fd.get("heroImage");
@@ -217,109 +218,107 @@ export function BlockEditForm({
       )}
 
       {/* ── Config fields (non-translatable) ──────────────────────── */}
-      {cfFields.length > 0 && (
-        <>
-          <Separator className="my-2" />
-          <form onSubmit={handleConfigSubmit} className="flex flex-col gap-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              {sectionSettings}
-            </p>
-            {cfFields.map((f) => (
-              <div key={f.key} className="flex flex-col gap-1">
-                <Label htmlFor={`cfg-${f.key}`}>{f.label}</Label>
-                {f.inputType === "image" ? (
-                  <>
-                    {typeof config.heroImage === "object" &&
-                      config.heroImage &&
-                      "url" in config.heroImage && (
-                        <div className="mb-2">
-                          <img
-                            src={(config.heroImage as any).url}
-                            alt={(config.heroImage as any).alt || "Hero image"}
-                            className="max-h-32 rounded"
-                          />
-                          <button
-                            type="button"
-                            className="text-xs text-red-500 underline mt-1 cursor-pointer"
-                            onClick={async () => {
-                              let s3Key = (config.heroImage as any)?.s3Key;
-                              if (!s3Key && (config.heroImage as any)?.url) {
-                                const url: string = (config.heroImage as any).url;
-                                try {
-                                  const match = url.match(/cloudfront\.net\/(.+)$/);
-                                  if (match && match[1]) {
-                                    s3Key = match[1];
-                                  }
-                                } catch (e) {
-                                  console.error("[HeroImage] Failed to extract s3Key", url, e);
-                                }
-                              }
-                              if (!s3Key) {
-                                toast({ title: "No hero image key found.", status: "error" });
-                                return;
-                              }
-                              try {
-                                const res = await fetch(
-                                  `/api/hero/delete?s3Key=${encodeURIComponent(s3Key)}`,
-                                  { method: "DELETE" },
-                                );
-                                if (!res.ok) {
-                                  let errMsg = "Failed to delete hero image";
-                                  try {
-                                    const err = await res.json();
-                                    errMsg = err.error || errMsg;
-                                  } catch (e) {
-                                    console.error("[HeroImage] Error parsing delete error", e);
-                                  }
-                                  toast({ title: errMsg, status: "error" });
-                                  return;
-                                }
-                                await updateBlockConfig(block.id, tenant.id, {
-                                  ...config,
-                                  heroImage: null,
-                                });
-                                toast({ title: "Hero image removed.", status: "success" });
-                              } catch (e) {
-                                toast({
-                                  title: "Failed to delete hero image (network error)",
-                                  status: "error",
-                                });
-                              }
-                            }}
-                          >
-                            {removeImage}
-                          </button>
-                        </div>
-                      )}
-                    <Input id={`cfg-${f.key}`} name={f.key} type="file" accept="image/*" />
-                  </>
-                ) : (
-                  <Input
-                    id={`cfg-${f.key}`}
-                    name={f.key}
-                    defaultValue={
-                      typeof config[f.key] === "string" ? (config[f.key] as string) : ""
-                    }
-                  />
-                )}
-              </div>
-            ))}
-            <Button type="submit" className="self-start">
-              {saveSettings}
-            </Button>
-          </form>
-        </>
-      )}
-
-      {fields.length === 0 && cfFields.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          {resolveTranslation(
-            translations,
-            "no-fields",
-            "This block has no editable fields. Manage its content in the Content tab.",
-          )}
+      <Separator className="my-2" />
+      <form onSubmit={handleConfigSubmit} className="flex flex-col gap-4">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          {sectionSettings}
         </p>
-      )}
+
+        {/* includeInNav toggle — shown for every block */}
+        <label className="flex items-center gap-2 text-sm cursor-pointer">
+          <input
+            type="checkbox"
+            name="includeInNav"
+            defaultChecked={(config.includeInNav as boolean | undefined) ?? false}
+            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+          />
+          {resolveTranslation(translations, "include-in-nav", "Show in navigation")}
+        </label>
+
+        {cfFields.map((f) => (
+          <div key={f.key} className="flex flex-col gap-1">
+            <Label htmlFor={`cfg-${f.key}`}>{f.label}</Label>
+            {f.inputType === "image" ? (
+              <>
+                {typeof config.heroImage === "object" &&
+                  config.heroImage &&
+                  "url" in config.heroImage && (
+                    <div className="mb-2">
+                      <img
+                        src={(config.heroImage as any).url}
+                        alt={(config.heroImage as any).alt || "Hero image"}
+                        className="max-h-32 rounded"
+                      />
+                      <button
+                        type="button"
+                        className="text-xs text-red-500 underline mt-1 cursor-pointer"
+                        onClick={async () => {
+                          let s3Key = (config.heroImage as any)?.s3Key;
+                          if (!s3Key && (config.heroImage as any)?.url) {
+                            const url: string = (config.heroImage as any).url;
+                            try {
+                              const match = url.match(/cloudfront\.net\/(.+)$/);
+                              if (match && match[1]) {
+                                s3Key = match[1];
+                              }
+                            } catch (e) {
+                              console.error("[HeroImage] Failed to extract s3Key", url, e);
+                            }
+                          }
+                          if (!s3Key) {
+                            toast({ title: "No hero image key found.", status: "error" });
+                            return;
+                          }
+                          try {
+                            const res = await fetch(
+                              `/api/hero/delete?s3Key=${encodeURIComponent(s3Key)}`,
+                              { method: "DELETE" },
+                            );
+                            if (!res.ok) {
+                              let errMsg = "Failed to delete hero image";
+                              try {
+                                const err = await res.json();
+                                errMsg = err.error || errMsg;
+                              } catch (e) {
+                                console.error("[HeroImage] Error parsing delete error", e);
+                              }
+                              toast({ title: errMsg, status: "error" });
+                              return;
+                            }
+                            await updateBlockConfig(block.id, tenant.id, {
+                              ...config,
+                              heroImage: null,
+                            });
+                            toast({ title: "Hero image removed.", status: "success" });
+                          } catch (e) {
+                            toast({
+                              title: "Failed to delete hero image (network error)",
+                              status: "error",
+                            });
+                          }
+                        }}
+                      >
+                        {removeImage}
+                      </button>
+                    </div>
+                  )}
+                <Input id={`cfg-${f.key}`} name={f.key} type="file" accept="image/*" />
+              </>
+            ) : (
+              <Input
+                id={`cfg-${f.key}`}
+                name={f.key}
+                defaultValue={
+                  typeof config[f.key] === "string" ? (config[f.key] as string) : ""
+                }
+              />
+            )}
+          </div>
+        ))}
+        <Button type="submit" className="self-start">
+          {saveSettings}
+        </Button>
+      </form>
     </div>
   );
 }

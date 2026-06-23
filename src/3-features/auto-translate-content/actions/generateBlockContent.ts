@@ -8,7 +8,6 @@ import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 
 // Block types that have translatable text fields (non-image fields)
 const BLOCK_TYPES_WITH_TRANSLATIONS: Set<BlockKind> = new Set([
-  "navbar",
   "hero",
   "contact",
   "text-content",
@@ -30,8 +29,6 @@ function generateBlockPlaceholder(blockType: BlockKind): Record<string, string> 
         subtitle: "Your tagline goes here",
         ctaLabel: "Get Started",
       };
-    case "navbar":
-      return { siteTitle: "My Site" };
     case "contact":
       return {
         title: "Contact Us",

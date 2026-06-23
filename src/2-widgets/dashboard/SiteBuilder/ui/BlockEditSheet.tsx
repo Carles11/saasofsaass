@@ -25,11 +25,6 @@ export function BlockEditSheet({
 }: BlockEditSheetProps) {
   if (!block) return null;
 
-  // Hide sidebar for collection/content blocks
-  if (["blog-feed", "podcast-feed", "awards", "image-gallery"].includes(block.type)) {
-    return null;
-  }
-
   const editTitle = resolveTranslation(
     translations,
     "title",

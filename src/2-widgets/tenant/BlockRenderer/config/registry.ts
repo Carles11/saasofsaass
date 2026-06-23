@@ -4,7 +4,6 @@ import { BlogFeedBlock } from "../blocks/BlogFeedBlock/ui/BlogFeedBlock";
 import { ContactBlock } from "../blocks/ContactBlock/ui/ContactBlock";
 import { HeroBlock } from "../blocks/HeroBlock/ui/HeroBlock";
 import { ImageGalleryBlock } from "../blocks/ImageGallery";
-import { NavbarBlock } from "../blocks/NavbarBlock/ui/NavbarBlock";
 import { PodcastFeedBlock } from "../blocks/PodcastFeedBlock/ui/PodcastFeedBlock";
 import { CtaBannerBlock } from "../blocks/CtaBannerBlock/ui/CtaBannerBlock";
 import { TextContentBlock } from "../blocks/TextContentBlock/ui/TextContentBlock";
@@ -15,17 +14,14 @@ const adaptImageGalleryBlock: BlockComponent = function AdaptImageGalleryBlock(p
     images: (props.config.images ?? []) as import("@/5-shared/types/tenants/blocks").GalleryImage[],
     lang: (props.config.lang as string) ?? props.locale,
     galleryName: props.config.galleryName as string | undefined,
+    blockId: props.block.id,
   });
 };
 
 export const blockRegistry: BlockRegistry = {
-  navbar: {
-    component: NavbarBlock,
-    defaultConfig: { links: [] },
-    fields: [{ key: "siteTitle", label: "Site Title", inputType: "input" }],
-  },
   hero: {
     component: HeroBlock,
+    includeInNav: false,
     defaultConfig: { layout: "centered", ctaUrl: "/", heroImage: null },
     fields: [
       { key: "title", label: "Title", inputType: "input" },
@@ -36,21 +32,29 @@ export const blockRegistry: BlockRegistry = {
   },
   "blog-feed": {
     component: BlogFeedBlock,
+    includeInNav: true,
+    navLabel: "Blog",
     defaultConfig: { maxItems: 9 },
     fields: [], // collection blocks — managed via CollectionManager tab
   },
   "podcast-feed": {
     component: PodcastFeedBlock,
+    includeInNav: true,
+    navLabel: "Podcast",
     defaultConfig: { maxItems: 9 },
     fields: [], // collection blocks — managed via CollectionManager tab
   },
   awards: {
     component: AwardsBlock,
+    includeInNav: true,
+    navLabel: "Awards",
     defaultConfig: {},
     fields: [],
   },
   contact: {
     component: ContactBlock,
+    includeInNav: true,
+    navLabel: "Contact",
     defaultConfig: { email: "", phone: "", address: "" },
     fields: [
       { key: "title", label: "Title", inputType: "input" },
@@ -59,6 +63,7 @@ export const blockRegistry: BlockRegistry = {
   },
   "cta-banner": {
     component: CtaBannerBlock,
+    includeInNav: false,
     defaultConfig: { ctaUrl: "/" },
     fields: [
       { key: "heading", label: "Heading", inputType: "input" },
@@ -68,6 +73,7 @@ export const blockRegistry: BlockRegistry = {
   },
   "text-content": {
     component: TextContentBlock,
+    includeInNav: true,
     defaultConfig: {},
     fields: [
       { key: "heading", label: "Heading", inputType: "input" },
@@ -76,6 +82,7 @@ export const blockRegistry: BlockRegistry = {
   },
   "image-gallery": {
     component: adaptImageGalleryBlock,
+    includeInNav: false,
     defaultConfig: {
       images: [], // Will be managed via a gallery manager/editor
       lang: "en",

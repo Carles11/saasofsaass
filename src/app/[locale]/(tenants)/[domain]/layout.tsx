@@ -1,6 +1,11 @@
+import { getBlocksByTenantId } from "@/4-entities/block";
 import { getTenantByDomain } from "@/4-entities/tenant";
 import { StoreHydrator } from "@/5-shared/store/StoreHydrator";
-import { TenantHeader } from "@/2-widgets/tenant/header/tenantHeader";
+import UnifiedHeader from "@/2-widgets/tenant/header/tenantHeader";
+import { blockRegistry } from "@/2-widgets/tenant/BlockRenderer/config/registry";
+import { resolveBlockT } from "@/2-widgets/tenant/BlockRenderer/config/utils/block";
+import type { SupportedLocaleType } from "@/5-shared/types/languages/supportedLocales";
+import { getLocale } from "next-intl/server";
 
 export default async function TenantLayout({
   params,
@@ -30,9 +35,47 @@ export default async function TenantLayout({
       ? ((tenant.branding as Record<string, string>).palette ?? "ocean")
       : "ocean";
 
+  let locale: SupportedLocaleType = "en";
+  try {
+    locale = (await getLocale()) as SupportedLocaleType;
+  } catch {}
+
+  const defaultLocale = (tenant?.defaultLocale ?? "en") as SupportedLocaleType;
+
+  let tenantBlocks: Awaited<ReturnType<typeof getBlocksByTenantId>> = [];
+  if (tenant) {
+    tenantBlocks = await getBlocksByTenantId(tenant.id);
+  }
+
+  const navLinks = tenantBlocks
+    .filter((b) => b.isVisible)
+    .filter((b) => {
+      const entry = blockRegistry[b.type as keyof typeof blockRegistry];
+      const config = (b.config ?? {}) as Record<string, unknown>;
+      const includeInNav = (config.includeInNav as boolean | undefined) ?? entry?.includeInNav;
+      if (!includeInNav) return false;
+      if (entry?.navLabel) return true;
+      const t = resolveBlockT(b.translations, locale, defaultLocale);
+      return !!(t.title || t.heading);
+    })
+    .map((b) => {
+      const entry = blockRegistry[b.type as keyof typeof blockRegistry];
+      const t = resolveBlockT(b.translations, locale, defaultLocale);
+      const label = entry?.navLabel ?? t.title ?? t.heading ?? "";
+      return { label, href: `#${b.id}` };
+    });
+
   return (
     <StoreHydrator tenant={tenant ?? null}>
-      {tenant && <TenantHeader />}
+      {tenant && (
+        <UnifiedHeader
+          tenant={tenant}
+          navLinks={navLinks}
+          locale={locale}
+          isSubdomain={isSubdomain}
+          templateId={tenant.templateId ?? "default"}
+        />
+      )}
       <div className={`min-h-screen selection:bg-foreground selection:text-background theme-${palette}`}>
         {children}
       </div>

@@ -12,7 +12,6 @@ export type FieldDef = {
 };
 
 export const blockFields: Partial<Record<BlockKind, FieldDef[]>> = {
-  navbar: [{ key: "siteTitle", label: "Site Title", inputType: "input" }],
   hero: [
     { key: "title", label: "Title", inputType: "input" },
     { key: "subtitle", label: "Subtitle", inputType: "textarea" },

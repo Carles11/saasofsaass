@@ -1,13 +1,13 @@
 import type { BlockProps } from "../../../config/types";
 
-export function TextContentBlock({ t }: BlockProps) {
+export function TextContentBlock({ t, blockId }: BlockProps) {
   const heading = t.heading;
   const body = t.body;
 
   if (!heading && !body) return null;
 
   return (
-    <section className="py-16 px-6">
+    <section id={blockId} className="py-16 px-6">
       <div className="max-w-4xl mx-auto">
         {heading && (
           <h2 className="text-3xl font-bold mb-6">{heading}</h2>
