@@ -231,6 +231,20 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       ga: "Comeza gratis",
     }),
   },
+  {
+    namespace: "marketing.header",
+    key: "sign-out",
+    translations: t({
+      en: "Sign Out",
+      es: "Cerrar sesión",
+      ca: "Tancar sessió",
+      fr: "Se déconnecter",
+      de: "Abmelden",
+      it: "Esci",
+      eu: "Saioa itxi",
+      ga: "Pechar sesión",
+    }),
+  },
 
   // ── Marketing: Hero ─────────────────────────────────────────────────────
   {

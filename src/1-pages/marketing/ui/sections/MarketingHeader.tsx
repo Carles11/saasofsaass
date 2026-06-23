@@ -9,6 +9,7 @@ import {
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
 import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { LogOutButton } from "@/components/ui/log-out-button";
 import { Menu, X } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
@@ -72,6 +73,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
     },
   ];
   const signInLabel = resolveTranslation(translations, "sign-in", "Sign In");
+  const signOutLabel = resolveTranslation(translations, "sign-out", "Sign Out");
   const getStartedLabel = resolveTranslation(
     translations,
     "get-started",
@@ -114,9 +116,12 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
 
           <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border/60">
             {isLoggedIn ? (
-              <Button size="sm" asChild className="text-sm px-4">
-                <Link href={dashboardHref}>Dashboard</Link>
-              </Button>
+              <>
+                <Button size="sm" asChild className="text-sm px-4">
+                  <Link href={dashboardHref}>Dashboard</Link>
+                </Button>
+                <LogOutButton label={signOutLabel} />
+              </>
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild className="text-sm">
@@ -156,11 +161,18 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
           ))}
           <div className="flex gap-2 pt-2 border-t border-border/60">
             {isLoggedIn ? (
-              <Button size="sm" asChild className="flex-1">
-                <Link href={dashboardHref} onClick={() => setMobileOpen(false)}>
-                  Dashboard
-                </Link>
-              </Button>
+              <>
+                <Button size="sm" asChild className="flex-1">
+                  <Link href={dashboardHref} onClick={() => setMobileOpen(false)}>
+                    Dashboard
+                  </Link>
+                </Button>
+                <LogOutButton
+                  label={signOutLabel}
+                  variant="outline"
+                  className="flex-1"
+                />
+              </>
             ) : (
               <>
                 <Button variant="outline" size="sm" asChild className="flex-1">

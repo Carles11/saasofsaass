@@ -44,12 +44,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page() {
   const locale = await getLocale();
   const all = await getPlatformTranslationsByNamespaces(
-    ["marketing.legal.privacy", "marketing.footer"],
+    ["marketing.header", "marketing.legal.privacy", "marketing.footer"],
     locale,
   );
   return (
     <PrivacyPolicyPage
       translations={all["marketing.legal.privacy"]}
+      headerTranslations={all["marketing.header"]}
       footerTranslations={all["marketing.footer"]}
       lang={locale}
     />

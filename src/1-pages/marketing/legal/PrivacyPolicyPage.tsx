@@ -1,5 +1,6 @@
 import { PRIVACY_POLICY_VERSION } from "@/5-shared/config/legal/versions";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { MarketingHeader } from "../ui/sections/MarketingHeader";
 import { FooterSection } from "../ui/sections/FooterSection";
 import {
   PrivacyCollectSection,
@@ -15,13 +16,15 @@ import {
 
 type Props = {
   translations: TranslationDict;
+  headerTranslations?: TranslationDict;
   footerTranslations?: TranslationDict;
   lang: string;
 };
 
-export default function PrivacyPolicyPage({ translations, footerTranslations, lang }: Props) {
+export default function PrivacyPolicyPage({ translations, headerTranslations, footerTranslations, lang }: Props) {
   return (
     <div className="min-h-screen bg-background">
+      <MarketingHeader translations={headerTranslations} />
       <header className="py-12 px-4 text-center border-b border-border">
         <div className="inline-block px-3 py-1 mb-4 text-[10px] font-bold tracking-[0.2em] uppercase rounded-full bg-primary/10 text-primary border border-primary/20">
           {resolveTranslation(translations, "badge", "Privacy First")}

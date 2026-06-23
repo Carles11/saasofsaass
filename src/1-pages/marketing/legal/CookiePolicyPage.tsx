@@ -1,5 +1,6 @@
 import { COOKIE_CONSENT_VERSION } from "@/5-shared/config/legal/versions";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { MarketingHeader } from "../ui/sections/MarketingHeader";
 import { FooterSection } from "../ui/sections/FooterSection";
 import {
   CookieContactSection,
@@ -13,13 +14,15 @@ import {
 
 type Props = {
   translations: TranslationDict;
+  headerTranslations?: TranslationDict;
   footerTranslations?: TranslationDict;
   lang: string;
 };
 
-export default function CookiePolicyPage({ translations, footerTranslations, lang }: Props) {
+export default function CookiePolicyPage({ translations, headerTranslations, footerTranslations, lang }: Props) {
   return (
     <div className="min-h-screen bg-background">
+      <MarketingHeader translations={headerTranslations} />
       <header className="py-12 px-4 text-center border-b border-border">
         <div className="inline-block mb-4 text-primary">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

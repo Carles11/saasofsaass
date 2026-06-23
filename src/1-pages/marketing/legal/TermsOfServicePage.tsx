@@ -1,5 +1,6 @@
 import { TERMS_VERSION } from "@/5-shared/config/legal/versions";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { MarketingHeader } from "../ui/sections/MarketingHeader";
 import { FooterSection } from "../ui/sections/FooterSection";
 import {
   TermsUseSection,
@@ -16,13 +17,15 @@ import {
 
 type Props = {
   translations: TranslationDict;
+  headerTranslations?: TranslationDict;
   footerTranslations?: TranslationDict;
   lang: string;
 };
 
-export default function TermsOfServicePage({ translations, footerTranslations, lang }: Props) {
+export default function TermsOfServicePage({ translations, headerTranslations, footerTranslations, lang }: Props) {
   return (
     <div className="min-h-screen bg-background">
+      <MarketingHeader translations={headerTranslations} />
       <header className="py-12 px-4 text-center border-b border-border">
         <h1 className="text-4xl md:text-6xl font-display font-extrabold tracking-tight text-foreground mb-6">
           {resolveTranslation(translations, "title", "Terms of Service")}
