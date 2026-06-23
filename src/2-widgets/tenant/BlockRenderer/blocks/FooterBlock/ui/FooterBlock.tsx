@@ -1,6 +1,5 @@
 import { SocialMediaRow } from "@/5-shared/ui/SocialMediaRow";
 import Image from "next/image";
-import Link from "next/link";
 import type { BlockProps } from "../../../config/types";
 
 function normalizeUrl(url: string): string {
@@ -11,7 +10,7 @@ function normalizeUrl(url: string): string {
   return `https://${trimmed}`;
 }
 
-export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
+export function FooterBlock({ t, config, blockId, tenant, locale }: BlockProps) {
   const rawSocialLinks =
     (config.socialLinks as Array<{ label: string; url: string }>) ?? [];
   const socialLinks = rawSocialLinks.map((l) => ({
@@ -120,18 +119,30 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
               Legal
             </h4>
             <div className="flex flex-col gap-1.5">
-              <Link
-                href="/terms-of-service"
+              <a
+                href={`${homeUrl}/${locale}/terms-of-service`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Terms of Service
-              </Link>
-              <Link
-                href="/privacy-policy"
+              </a>
+              <a
+                href={`${homeUrl}/${locale}/privacy-policy`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Privacy Policy
-              </Link>
+              </a>
+              <a
+                href={`${homeUrl}/${locale}/cookie-policy`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Cookie Policy
+              </a>
             </div>
           </div>
         </div>
