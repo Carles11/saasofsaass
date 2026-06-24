@@ -36,6 +36,9 @@ export interface BlockRegistryEntry {
   /** Generic nav label for auto-generated header links (e.g. "Blog", "Contact").
    * When absent, falls back to the block's translated heading/title (for text-content). */
   navLabel?: string;
+  /** When set, the nav link for this block type points to this path
+   * (e.g. "/blog" for blog-feed) instead of an #anchor on the homepage. */
+  archivePath?: string;
   /** Translatable fields rendered by the FocusedLanguageEditor in the dashboard.
    * Collection blocks (e.g. blog-feed) leave this empty — their content
    * lives in tenant_entities and is managed via CollectionManager. */

@@ -1,12 +1,15 @@
 import { getEntitiesByBlock } from "@/4-entities/tenant-content";
+import { BlogCard } from "@/5-shared/ui/BlogCard";
 import type { BlockProps } from "../../../config/types";
+import type { BlogPostEntity, BlogPostPayload } from "@/5-shared/types/tenants/entities";
 
 interface BlogFeedConfig {
   maxItems?: number;
+  archivePath?: string;
 }
 
 export async function BlogFeedBlock({ block, config, locale, blockId }: BlockProps) {
-  const { maxItems = 9 } = config as BlogFeedConfig;
+  const { maxItems = 9, archivePath = "/blog" } = config as BlogFeedConfig;
   const rows = await getEntitiesByBlock(block.id, locale);
   const items = rows.slice(0, maxItems);
 
@@ -22,52 +25,37 @@ export async function BlogFeedBlock({ block, config, locale, blockId }: BlockPro
     <section id={blockId} className="py-16 px-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {items.map(({ entity, translation }) => {
-          const payload = translation?.payload as {
-            title?: string;
-            excerpt?: string;
-            localizedSlug?: string;
-          } | null;
+          const payload = translation?.payload as BlogPostPayload | null;
           const title = payload?.title ?? entity.slug ?? entity.id;
-          const excerpt = payload?.excerpt;
           const slug = payload?.localizedSlug ?? entity.slug;
+          const meta = entity.metadata as BlogPostEntity['metadata'] | null;
 
           return (
-            <article
+            <BlogCard
               key={entity.id}
-              className="rounded-xs border border-border overflow-hidden hover:shadow-md transition-shadow"
-            >
-              {entity.coverImageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={entity.coverImageUrl}
-                  alt={title}
-                  loading="lazy"
-                  className="w-full h-48 object-cover"
-                />
-              )}
-              <div className="p-4">
-                <h2 className="font-semibold text-card-foreground line-clamp-2">
-                  {title}
-                </h2>
-                {excerpt && (
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-                    {excerpt}
-                  </p>
-                )}
-                {slug && (
-                  <a
-                    href={`/blog/${slug}`}
-                    className="mt-3 inline-block text-sm font-medium hover:underline"
-                    style={{ color: "hsl(var(--primary))" }}
-                  >
-                    Read more →
-                  </a>
-                )}
-              </div>
-            </article>
+              title={title}
+              slug={slug ?? ""}
+              href={`/blog/${slug}`}
+              excerpt={payload?.excerpt}
+              coverImageUrl={entity.coverImageUrl}
+              author={meta?.author}
+              publishedAt={entity.publishedAt}
+              locale={locale}
+            />
           );
         })}
       </div>
+      {rows.length > maxItems && (
+        <div className="mt-8 text-center">
+          <a
+            href={archivePath}
+            className="inline-block text-sm font-medium hover:underline px-4 py-2 rounded-xs transition-colors"
+            style={{ color: "hsl(var(--primary))" }}
+          >
+            View all posts &rarr;
+          </a>
+        </div>
+      )}
     </section>
   );
 }

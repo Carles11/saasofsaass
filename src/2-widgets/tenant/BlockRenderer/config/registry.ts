@@ -37,14 +37,16 @@ export const blockRegistry: BlockRegistry = {
     component: BlogFeedBlock,
     includeInNav: true,
     navLabel: "Blog",
-    defaultConfig: { maxItems: 9 },
+    archivePath: "/blog",
+    defaultConfig: { maxItems: 9, archivePath: "/blog" },
     fields: [], // collection blocks — managed via CollectionManager tab
   },
   "podcast-feed": {
     component: PodcastFeedBlock,
     includeInNav: true,
     navLabel: "Podcast",
-    defaultConfig: { maxItems: 9 },
+    archivePath: "/podcast",
+    defaultConfig: { maxItems: 9, archivePath: "/podcast" },
     fields: [], // collection blocks — managed via CollectionManager tab
   },
   awards: {

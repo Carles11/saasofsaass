@@ -62,7 +62,8 @@ export default async function TenantLayout({
       const entry = blockRegistry[b.type as keyof typeof blockRegistry];
       const t = resolveBlockT(b.translations, locale, defaultLocale);
       const label = entry?.navLabel ?? t.title ?? t.heading ?? "";
-      return { label, href: `#${b.id}` };
+      const href = entry?.archivePath ?? `#${b.id}`;
+      return { label, href };
     });
 
   return (

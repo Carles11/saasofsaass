@@ -75,6 +75,7 @@ export function BlockCard({
     "podcast-feed",
     "awards",
     "image-gallery",
+    "testimonials",
   ].includes(block.type);
 
   const {
