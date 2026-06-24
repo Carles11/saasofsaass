@@ -29,7 +29,7 @@ export function LanguageSwitcher({ locales: allowedLocales }: LanguageSwitcherPr
   }
 
   return (
-    <Select defaultValue={locale} onValueChange={handleLocaleChange}>
+    <Select key={locale} value={locale} onValueChange={handleLocaleChange}>
       <SelectTrigger className="h-8 w-fit gap-1 border-border/60 bg-transparent pe-1 cursor-pointer">
         <Globe className="size-4" />
       </SelectTrigger>

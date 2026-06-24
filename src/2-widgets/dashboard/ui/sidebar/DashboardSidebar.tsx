@@ -8,6 +8,7 @@ import type { AuthSession } from "@/5-shared/lib/auth/server";
 import { SIDEBAR_TABS } from "@/5-shared/config/sidebar-tabs";
 import { can } from "@/5-shared/config/permissions";
 import type { ResolvedRoles } from "@/5-shared/config/permissions";
+import { LogOutButton } from "@/components/ui/log-out-button";
 
 interface DashboardSidebarProps {
   session: AuthSession;
@@ -69,15 +70,18 @@ export const DashboardSidebar = ({
         </button>
       </div>
 
-      {isOpen && user && (
+      {user && (
         <div className="flex items-center gap-3 px-2 mb-6">
-          <div className="h-9 w-9 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+          <div className="h-9 w-9 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0 shrink-0">
             {initials}
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium truncate">{user.name || user.email}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
-          </div>
+          {isOpen && (
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium truncate">{user.name || user.email}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+              <LogOutButton size="xs" className="mt-1 h-6 px-2 text-[10px]" label="Sign out" />
+            </div>
+          )}
         </div>
       )}
 

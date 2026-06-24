@@ -1,14 +1,17 @@
 "use server";
 
 import { db } from "@/5-shared/lib/db";
+import { tenants } from "@/5-shared/lib/db/schema";
 import { profiles, tenantMemberships } from "@/5-shared/lib/db/schema/auth";
 import { eq, and, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireProfile, assertTenantRole } from "@/5-shared/lib/auth/authorization";
+import { sendInviteEmail } from "@/5-shared/lib/email/resend";
 
 /** Invite a new member to a tenant (owner only). */
-export async function inviteMember(tenantId: string, email: string, role: "owner" | "editor") {
-  await assertTenantRole(tenantId, "owner");
+export async function inviteMember(tenantId: string, email: string, role: "owner" | "editor", locale = "en") {
+  const inviter = await requireProfile();
+  await assertTenantRole(tenantId, "owner", inviter.id);
 
   // Find or create profile by email
   let [profile] = await db
@@ -37,13 +40,26 @@ export async function inviteMember(tenantId: string, email: string, role: "owner
     .limit(1);
 
   if (existing) {
-    // Update role
     await db
       .update(tenantMemberships)
       .set({ role })
       .where(eq(tenantMemberships.id, existing.id));
   } else {
     await db.insert(tenantMemberships).values({ tenantId, profileId: profile.id, role });
+  }
+
+  // Send invite email — non-blocking, failure does not roll back the membership
+  try {
+    const [tenant] = await db.select({ name: tenants.name }).from(tenants).where(eq(tenants.id, tenantId)).limit(1);
+    await sendInviteEmail({
+      to: email,
+      tenantName: tenant?.name ?? "your site",
+      inviterName: inviter.name || inviter.email,
+      role,
+      locale,
+    });
+  } catch (err) {
+    console.error("Failed to send invite email:", err);
   }
 
   revalidatePath("/[locale]/dashboard/team", "page");
@@ -85,6 +101,37 @@ export async function removeMember(tenantId: string, membershipId: string) {
         eq(tenantMemberships.tenantId, tenantId),
       ),
     );
+
+  revalidatePath("/[locale]/dashboard/team", "page");
+}
+
+/** Change an existing member's role (owner only). Cannot demote the last owner. */
+export async function changeMemberRole(tenantId: string, membershipId: string, newRole: "owner" | "editor") {
+  await assertTenantRole(tenantId, "owner");
+
+  const [target] = await db
+    .select({ role: tenantMemberships.role })
+    .from(tenantMemberships)
+    .where(eq(tenantMemberships.id, membershipId))
+    .limit(1);
+
+  if (!target) throw new Error("Membership not found");
+
+  if (target.role === "owner" && newRole !== "owner") {
+    const [ownerCount] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(tenantMemberships)
+      .where(and(eq(tenantMemberships.tenantId, tenantId), eq(tenantMemberships.role, "owner")));
+
+    if (Number(ownerCount?.count ?? 0) <= 1) {
+      throw new Error("Cannot demote the last owner. Assign another owner first.");
+    }
+  }
+
+  await db
+    .update(tenantMemberships)
+    .set({ role: newRole })
+    .where(and(eq(tenantMemberships.id, membershipId), eq(tenantMemberships.tenantId, tenantId)));
 
   revalidatePath("/[locale]/dashboard/team", "page");
 }

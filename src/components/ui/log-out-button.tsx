@@ -3,7 +3,7 @@
 import { authClient } from "@/5-shared/lib/auth/client";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface LogOutButtonProps {
@@ -20,12 +20,17 @@ export function LogOutButton({
   className,
 }: LogOutButtonProps) {
   const router = useRouter();
+  const params = useParams();
+  const locale = (params?.locale as string) ?? "en";
   const [loading, setLoading] = useState(false);
 
   async function handleSignOut() {
     setLoading(true);
     await authClient.signOut();
-    router.refresh();
+    const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost";
+    const isDev = process.env.NODE_ENV === "development";
+    const base = isDev ? `http://${rootDomain}:3000` : `https://${rootDomain}`;
+    window.location.href = `${base}/${locale}`;
   }
 
   return (

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { appAuthUrl } from "@/5-shared/lib/auth/auth-urls";
 import { ArrowRight } from "lucide-react";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 
@@ -55,7 +56,7 @@ export function HeroSection({ translations, locale }: HeroSectionProps) {
         {/* CTAs */}
         <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Button size="lg" asChild className="px-8 h-12 text-base">
-            <Link href={`/${locale}/auth/sign-up`}>
+            <Link href={appAuthUrl("sign-up", locale ?? "en")}>
               {startBuilding}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>

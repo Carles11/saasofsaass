@@ -103,6 +103,7 @@ export async function TeamPage({ locale }: TeamPageProps) {
             key={tenant.id}
             tenant={tenant}
             initialMembers={members}
+            currentProfileId={profile.id}
             translations={translations["dashboard.team-manager"]}
           />
         ))}

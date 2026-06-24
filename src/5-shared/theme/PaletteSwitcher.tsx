@@ -19,14 +19,10 @@ function applyPalette(p: Palette) {
 
 export function PaletteSwitcher() {
   const [palette, setPalette] = useState<Palette>("ocean");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const p = getInitialPalette();
-    applyPalette(p);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setPalette(p);
-    setMounted(true);
+    // Sync React state with what the blocking script already applied
+    setPalette(getInitialPalette());
   }, []);
 
   function toggle() {
@@ -34,8 +30,6 @@ export function PaletteSwitcher() {
     setPalette(next);
     applyPalette(next);
   }
-
-  if (!mounted) return <div className="h-9 w-9" />;
 
   return (
     <button

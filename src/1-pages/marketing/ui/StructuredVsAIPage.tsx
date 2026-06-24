@@ -6,6 +6,7 @@ import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { appAuthUrl } from "@/5-shared/lib/auth/auth-urls";
 import { ArrowRight, Check, FileStack, Search, Sparkles, GitBranch, Languages, LayoutTemplate, Brain, Globe } from "lucide-react";
 
 export async function StructuredVsAIPage() {
@@ -85,7 +86,7 @@ export async function StructuredVsAIPage() {
 
             <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
               <Button size="lg" asChild className="px-8 h-12 text-base">
-                <Link href={`/${locale}/auth/sign-up`}>
+                <Link href={appAuthUrl("sign-up", locale)}>
                   {resolveTranslation(t, "hero.cta.primary", "Build Your Website")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -165,7 +166,7 @@ export async function StructuredVsAIPage() {
                   )}
                 </p>
                 <Button variant="outline" size="sm" asChild className="border-border/60">
-                  <Link href={`/${locale}/auth/sign-up`}>
+                  <Link href={appAuthUrl("sign-up", locale)}>
                     {resolveTranslation(t, "hidden.cta", "Start with a proven structure")}
                     <ArrowRight className="ml-2 h-3 w-3" />
                   </Link>
@@ -360,7 +361,7 @@ export async function StructuredVsAIPage() {
               </p>
               <div className="relative mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                 <Button size="lg" asChild className="px-8 h-12 text-base">
-                  <Link href={`/${locale}/auth/sign-up`}>
+                  <Link href={appAuthUrl("sign-up", locale)}>
                     {resolveTranslation(t, "cta.primary", "Start Building Free")}
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

@@ -91,23 +91,28 @@ export default async function proxy(req: NextRequest) {
   // ── Step 5: Neon Auth Network Interception (App Subdomain Only) ───────────
   // Protects everything running underneath app.saasofsaass.com (DASHBOARD)
   if (parsed.type === "DASHBOARD") {
-    const runAuthMiddleware = neonAuthMiddleware({
-      loginUrl: `/${locale}/auth/login`, // Dynamic localized path based on resolved step 3
-    });
-    const authResponse = await runAuthMiddleware(req);
+    // Auth pages are publicly accessible — skip the middleware so /auth/sign-in,
+    // /auth/sign-up etc. don't get redirected to loginUrl before they can render.
+    const isAuthPath = strippedPath === "/auth" || strippedPath.startsWith("/auth/");
 
-    if (
-      authResponse &&
-      (authResponse.status === 307 || authResponse.status === 308)
-    ) {
-      return authResponse;
-    }
-
-    if (authResponse) {
-      // Explicitly type value and key as strings to satisfy strict compiler rules
-      authResponse.headers.forEach((value: string, key: string) => {
-        headers.set(key, value);
+    if (!isAuthPath) {
+      const runAuthMiddleware = neonAuthMiddleware({
+        loginUrl: `/${locale}/auth/sign-in`,
       });
+      const authResponse = await runAuthMiddleware(req);
+
+      if (
+        authResponse &&
+        (authResponse.status === 307 || authResponse.status === 308)
+      ) {
+        return authResponse;
+      }
+
+      if (authResponse) {
+        authResponse.headers.forEach((value: string, key: string) => {
+          headers.set(key, value);
+        });
+      }
     }
   }
 

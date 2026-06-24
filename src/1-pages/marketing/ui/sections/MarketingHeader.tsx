@@ -13,6 +13,7 @@ import { LogOutButton } from "@/components/ui/log-out-button";
 import { Menu, X } from "lucide-react";
 import { useLocale } from "next-intl";
 import Link from "next/link";
+import { appAuthUrl, appDashboardUrl } from "@/5-shared/lib/auth/auth-urls";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -30,11 +31,9 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
   const { data: session, isPending } = useSession();
   const isLoggedIn = !isPending && !!session;
 
-  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.localhost";
-  const isDev = process.env.NODE_ENV === "development";
-  const dashboardHref = `${isDev ? "http:" : "https:"}//${appDomain}${
-    isDev ? `:${process.env.NEXT_PUBLIC_DEV_PORT || "3000"}` : ""
-  }/${locale}/dashboard`;
+  const dashboardHref = appDashboardUrl(locale);
+  const signInHref = appAuthUrl("sign-in", locale);
+  const signUpHref = appAuthUrl("sign-up", locale);
 
   function navHref(homeAnchor: string, localAnchor?: string): string {
     if (isHome) return `#${homeAnchor}`;
@@ -125,10 +124,10 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
             ) : (
               <>
                 <Button variant="ghost" size="sm" asChild className="text-sm">
-                  <Link href={`/${locale}/auth/sign-in`}>{signInLabel}</Link>
+                  <Link href={signInHref}>{signInLabel}</Link>
                 </Button>
                 <Button size="sm" asChild className="text-sm px-4">
-                  <Link href={`/${locale}/auth/sign-up`}>
+                  <Link href={signUpHref}>
                     {getStartedLabel}
                   </Link>
                 </Button>
@@ -176,10 +175,10 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
             ) : (
               <>
                 <Button variant="outline" size="sm" asChild className="flex-1">
-                  <Link href={`/${locale}/auth/sign-in`}>{signInLabel}</Link>
+                  <Link href={signInHref}>{signInLabel}</Link>
                 </Button>
                 <Button size="sm" asChild className="flex-1">
-                  <Link href={`/${locale}/auth/sign-up`}>
+                  <Link href={signUpHref}>
                     {getStartedLabel}
                   </Link>
                 </Button>

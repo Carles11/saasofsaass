@@ -27,11 +27,11 @@ export default async function DashboardLayout({
     session = sessionResult.data;
   } catch (error) {
     console.error("Auth session fallback in layout:", error);
-    redirect(`/${locale}/auth/login`);
+    redirect(`/${locale}/auth/sign-in`);
   }
 
   if (!session?.user) {
-    redirect(`/${locale}/auth/login`);
+    redirect(`/${locale}/auth/sign-in`);
   }
 
   await syncProfile(session);
@@ -39,7 +39,7 @@ export default async function DashboardLayout({
   const resolvedRoles = await resolveRoles(session);
 
   if (!resolvedRoles) {
-    redirect(`/${locale}/auth/login`);
+    redirect(`/${locale}/auth/sign-in`);
   }
 
   return (
