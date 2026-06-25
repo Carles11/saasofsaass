@@ -1,19 +1,28 @@
 import "dotenv/config";
+import { translatePayload } from "../src/3-features/auto-translate-content/api/translateWithGemini";
 import { db } from "../src/5-shared/lib/db";
 import { platformTranslations } from "../src/5-shared/lib/db/schema";
-import { translatePayload } from "../src/3-features/auto-translate-content/api/translateWithGemini";
 
 const TARGET_LOCALES = ["es", "ca", "eu", "ga", "fr", "it", "de"] as const;
 
 const PLACEHOLDER_RULE =
   "Keep any placeholder tokens wrapped in curly braces (e.g. {charge}, {plan}) EXACTLY as they appear — do not translate or remove them.";
 
-async function upsert(namespace: string, key: string, locale: string, value: string) {
+async function upsert(
+  namespace: string,
+  key: string,
+  locale: string,
+  value: string,
+) {
   await db
     .insert(platformTranslations)
     .values({ namespace, key, locale, value })
     .onConflictDoUpdate({
-      target: [platformTranslations.namespace, platformTranslations.key, platformTranslations.locale],
+      target: [
+        platformTranslations.namespace,
+        platformTranslations.key,
+        platformTranslations.locale,
+      ],
       set: { value, updatedAt: new Date() },
     });
 }
@@ -21,7 +30,6 @@ async function upsert(namespace: string, key: string, locale: string, value: str
 async function main() {
   // 1. Seed the new nav key in marketing.header.
   const navEn = "Why SoS";
-  console.log("\n=== marketing.header: nav.why-sos ===");
   await upsert("marketing.header", "nav.why-sos", "en", navEn);
   for (const locale of TARGET_LOCALES) {
     try {
@@ -32,7 +40,6 @@ async function main() {
         context: `Navigation link label for a website builder platform. Keep it very short (2-3 words). ${PLACEHOLDER_RULE}`,
       });
       await upsert("marketing.header", "nav.why-sos", locale, translated.value);
-      console.log(`  ✓ ${locale}`);
     } catch (err) {
       console.error(`  ✗ ${locale}:`, err instanceof Error ? err.message : err);
     }
@@ -62,12 +69,9 @@ async function main() {
     },
   };
 
-  console.log(`\n=== ${SOURCE.namespace} (${Object.keys(SOURCE.en).length} keys) ===`);
-
   for (const [key, value] of Object.entries(SOURCE.en)) {
     await upsert(SOURCE.namespace, key, "en", value);
   }
-  console.log("  ✓ en saved");
 
   for (const locale of TARGET_LOCALES) {
     try {
@@ -80,13 +84,13 @@ async function main() {
       for (const [key, value] of Object.entries(translated)) {
         await upsert(SOURCE.namespace, key, locale, value);
       }
-      console.log(`  ✓ ${locale}: ${Object.keys(translated).length} entries saved`);
     } catch (err) {
-      console.error(`  ✗ ${locale}: failed —`, err instanceof Error ? err.message : err);
+      console.error(
+        `  ✗ ${locale}: failed —`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
-
-  console.log("\nDone.");
 }
 
 main().catch(console.error);
