@@ -523,3 +523,68 @@ npm run db:studio    # Open Drizzle Studio
 | `app.localhost:3000`   | Dashboard                       |
 | `agora.localhost:3000` | Àgora tenant (or any subdomain) |
 | `*.localhost:3000`     | Any tenant                      |
+
+---
+
+## 🤝 Working Protocol & AI Agent Routing
+
+This section is the **shared contract for every AI tool** working in this repo
+(Claude Code and OpenCode both read this file). The tool-specific wrappers in
+`.claude/` and `.opencode/` are thin and defer to the rules here.
+
+### Standing working rules (apply to every change)
+
+- **Stage and pause.** Work in the staged order proposed. After each stage, show
+  the result and wait for explicit approval before starting the next — do not
+  chain straight through.
+- **Plan before non-trivial code.** For a new block, feature, or schema change,
+  produce a plan (storage pattern, FSD placement, reuse check, schema diff,
+  translation keys, plan gating) and get approval before writing.
+- **Schema changes are gated.** Run `npm run db:generate` and show the exact
+  generated SQL before `npm run db:push`. Never push automatically.
+- **Green gate = done.** A stage is only "ready" when `npx tsc --noEmit` and
+  `npm run lint` report **zero errors**. TypeScript is the strict correctness
+  gate; React-Compiler lint advisories (`purity`, `immutability`,
+  `set-state-in-effect`) are warnings, not blockers.
+- **No hardcoded user-facing strings.** Every visible string (headings,
+  empty-states, buttons, errors, placeholders) goes through `resolveTranslation`
+  with an English fallback, and its key is seeded for all locales — see the
+  `/audit-translations` command.
+- **Reuse-first & FSD.** Downward imports only
+  (`app → 1-pages → 2-widgets → 3-features → 4-entities → 5-shared`); no
+  cross-slice imports on the same layer. If about to duplicate something that
+  exists, stop and point it out.
+- **Surface contradictions.** If reality differs from the plan (missing file,
+  different data shape, existing validation), stop and report rather than
+  silently adapting.
+
+### Model routing (token economy)
+
+Use the cheapest model that fits the task. Subagents declare their model in
+their own definition; the main/orchestrating session's model is the operator's
+choice per session.
+
+| Work | Model tier |
+| --- | --- |
+| Locate code, "where is X", read-only mapping | **haiku** (`explorer`) |
+| Docs, README, AGENTS edits, comments, commit bodies | **haiku** (`docs-writer`) |
+| Implement a block / feature, refactor, tests | **sonnet** (`block-builder`) |
+| Architecture, multi-system design, hard debugging | **opus** (main session) |
+
+### Shared commands (mirrored in `.claude/commands/` and `.opencode/commands/`)
+
+| Command | Purpose |
+| --- | --- |
+| `/plan-block` | Plan a new tenant block (plan-only, stops for approval) |
+| `/approve-stage` | Approve current stage + restate standing rules |
+| `/audit-translations` | Audit a block/feature for hardcoded strings & seed gaps |
+| `/verify-gate` | Run tsc + lint; report green/red |
+| `/safe-db-push` | `db:generate` → show SQL → confirm → `db:push` |
+
+### Subagents (mirrored in `.claude/agents/` and `.opencode/agent/`)
+
+| Agent | Model | Scope |
+| --- | --- | --- |
+| `explorer` | haiku | read-only code search & feature mapping |
+| `block-builder` | sonnet | implement a tenant block per §🧱 |
+| `docs-writer` | haiku | documentation & comments only |
