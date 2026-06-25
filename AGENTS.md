@@ -319,7 +319,7 @@ Before writing new UI, check for and reuse:
 - `resolveTranslation` for every user-facing string — **never hardcode English copy directly in a block component**, including empty-states and section headings (the existing `AwardsBlock`'s hardcoded `"Awards"` heading and `"No awards to display yet."` empty-state are a known gap, not a pattern to copy — route both through `resolveTranslation` for new blocks)
 - Existing shadcn/ui primitives (`@/components/ui/*`) before reaching for a new dependency
 - The existing image pipeline (S3 + CloudFront) for any block needing images — check how `HeroBlock`/`ImageGallery` already handle upload and `next/image` usage before reinventing it
-- Semantic shadcn CSS vars (`bg-background`, `text-card-foreground`, `border-border`, etc.) — never hardcode hex colors in a new block, and respect whichever tenant palette (`ocean` / `sunset` / `forest`) and template (`bentley-default` / `bentley-modern` / `bentley-classic`) is active, the same way `TenantLayoutResolver` already applies font/palette overrides
+- Semantic shadcn CSS vars (`bg-background`, `text-card-foreground`, `border-border`, etc.) — never hardcode hex colors in a new block, and respect whichever tenant palette (`ocean` / `sunset` / `forest`) and template (`default` / `modern` / `classic` — see `config/templates.ts` and ADR 0001) is active, the same way `TenantLayoutResolver` already applies font/palette overrides
 
 ### 4. Responsive design baseline
 
