@@ -1,7 +1,6 @@
 ---
 description: Read-only codebase search and feature mapping. Locate files, find where a symbol/feature lives, map how a slice works before changing it.
 mode: subagent
-model: anthropic/claude-haiku-4-5-20251001
 tools:
   read: true
   grep: true

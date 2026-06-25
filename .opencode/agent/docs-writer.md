@@ -1,7 +1,6 @@
 ---
 description: Documentation only — README, AGENTS.md, code comments, changelog/commit bodies. Use for writing tasks that don't change runtime behavior.
 mode: subagent
-model: anthropic/claude-haiku-4-5-20251001
 tools:
   read: true
   grep: true

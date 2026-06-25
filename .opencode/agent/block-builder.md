@@ -1,7 +1,6 @@
 ---
 description: Implement a new tenant-facing block per AGENTS.md "Block Development Standards". Use after a block plan is approved.
 mode: subagent
-model: anthropic/claude-sonnet-4-6
 tools:
   read: true
   grep: true

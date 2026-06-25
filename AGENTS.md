@@ -571,6 +571,11 @@ choice per session.
 | Implement a block / feature, refactor, tests | **sonnet** (`block-builder`) |
 | Architecture, multi-system design, hard debugging | **opus** (main session) |
 
+Claude Code subagents pin these tiers via their `model:` frontmatter. OpenCode
+subagents intentionally omit `model:` and inherit the session's model/provider
+(so they work with whatever provider is authenticated) — set the session model
+in OpenCode to control cost there.
+
 ### Shared commands (mirrored in `.claude/commands/` and `.opencode/commands/`)
 
 | Command | Purpose |
