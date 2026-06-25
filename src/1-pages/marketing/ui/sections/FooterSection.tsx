@@ -1,6 +1,12 @@
+import {
+  LOCALE_LABELS,
+  SUPPORTED_LOCALES,
+} from "@/5-shared/config/languages/supportedLanguages";
+import {
+  resolveTranslation,
+  type TranslationDict,
+} from "@/5-shared/lib/translations/resolve";
 import Link from "next/link";
-import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
-import { SUPPORTED_LOCALES, LOCALE_LABELS } from "@/5-shared/config/languages/supportedLanguages";
 
 interface FooterSectionProps {
   translations?: TranslationDict;
@@ -12,7 +18,11 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
   const l = locale ?? "en";
   const langPrefix = `/${l}`;
   const env = process.env.NODE_ENV?.toUpperCase() || "PRODUCTION";
-  const tagline = resolveTranslation(translations, "tagline", "Websites for your clients. Managed by you.");
+  const tagline = resolveTranslation(
+    translations,
+    "tagline",
+    "Websites for your clients. Managed by you.",
+  );
 
   const resourceLinks = [
     {
@@ -39,15 +49,27 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
 
   const legalLinks = [
     {
-      label: resolveTranslation(translations, "link.terms-of-service", "Terms of Service"),
+      label: resolveTranslation(
+        translations,
+        "link.terms-of-service",
+        "Terms of Service",
+      ),
       href: `${langPrefix}/terms-of-service`,
     },
     {
-      label: resolveTranslation(translations, "link.privacy-policy", "Privacy Policy"),
+      label: resolveTranslation(
+        translations,
+        "link.privacy-policy",
+        "Privacy Policy",
+      ),
       href: `${langPrefix}/privacy-policy`,
     },
     {
-      label: resolveTranslation(translations, "link.cookie-policy", "Cookie Policy"),
+      label: resolveTranslation(
+        translations,
+        "link.cookie-policy",
+        "Cookie Policy",
+      ),
       href: `${langPrefix}/cookie-policy`,
     },
   ];
@@ -59,14 +81,16 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
         aria-hidden="true"
         className="pointer-events-none absolute -right-16 -top-20 h-80 w-80 rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)",
         }}
       />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -bottom-10 -left-10 h-52 w-52 rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(244,162,97,0.05) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(244,162,97,0.05) 0%, transparent 70%)",
         }}
       />
 
@@ -76,7 +100,7 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
           <div className="flex flex-col gap-5 md:col-span-5">
             <Link href={langPrefix} className="inline-flex items-center gap-2">
               <h3 className="font-serif text-2xl font-normal leading-none tracking-wide">
-                SaaS<em className="italic text-primary">of</em>SaaSs
+                Saas<em className="italic text-primary">of</em>saaSs
                 <em className="italic text-primary">.com</em>
               </h3>
             </Link>
@@ -93,7 +117,10 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
                 color: "hsl(var(--primary))",
               }}
             >
-              <span className="relative flex h-1.5 w-1.5 shrink-0" aria-hidden="true">
+              <span
+                className="relative flex h-1.5 w-1.5 shrink-0"
+                aria-hidden="true"
+              >
                 <span
                   className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
                   style={{ background: "hsl(var(--primary))" }}
@@ -103,7 +130,11 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
                   style={{ background: "hsl(var(--primary))" }}
                 />
               </span>
-              {resolveTranslation(translations, "production", "Live Production")}
+              {resolveTranslation(
+                translations,
+                "production",
+                "Live Production",
+              )}
             </span>
           </div>
 
@@ -185,7 +216,11 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
 
           <div>
             <p className="mb-1.5 font-serif text-[10px] italic tracking-wide text-primary/70">
-              {resolveTranslation(translations, "at_a_glance.title", "Platform Entity Data")}
+              {resolveTranslation(
+                translations,
+                "at_a_glance.title",
+                "Platform Entity Data",
+              )}
             </p>
             <p className="text-[11.5px] font-light leading-[1.8] text-muted-foreground">
               {resolveTranslation(

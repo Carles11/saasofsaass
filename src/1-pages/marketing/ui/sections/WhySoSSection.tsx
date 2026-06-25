@@ -26,7 +26,7 @@ const CARDS = [
 ] as const;
 
 export function WhySoSSection({ translations, locale }: WhySoSSectionProps) {
-  const badge = resolveTranslation(translations, "badge", "Why SoS?");
+  const badge = resolveTranslation(translations, "badge", "Why SofS?");
   const title = resolveTranslation(translations, "title", "Built for agencies who build for clients");
   const subtitle = resolveTranslation(
     translations,

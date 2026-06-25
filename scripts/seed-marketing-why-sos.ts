@@ -29,7 +29,7 @@ async function upsert(
 
 async function main() {
   // 1. Seed the new nav key in marketing.header.
-  const navEn = "Why SoS";
+  const navEn = "Why SofS";
   await upsert("marketing.header", "nav.why-sos", "en", navEn);
   for (const locale of TARGET_LOCALES) {
     try {
@@ -48,9 +48,9 @@ async function main() {
   // 2. Seed the new marketing.why-sos namespace.
   const SOURCE = {
     namespace: "marketing.why-sos",
-    context: `Marketing homepage section titled "Why SoS?" — three feature cards that link to dedicated feature pages. The platform is a multi-site website builder for freelancers and agencies. ${PLACEHOLDER_RULE}`,
+    context: `Marketing homepage section titled "Why SofS?" — three feature cards that link to dedicated feature pages. The platform is a multi-site website builder for freelancers and agencies. ${PLACEHOLDER_RULE}`,
     en: {
-      badge: "Why SoS?",
+      badge: "Why SofS?",
       title: "Built for agencies who build for clients",
       subtitle:
         "Three reasons freelancers and agencies choose SaaS of SaaS over every other website builder.",

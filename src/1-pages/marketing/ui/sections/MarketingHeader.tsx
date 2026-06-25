@@ -55,7 +55,7 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
       href: navHref("features"),
     },
     {
-      label: resolveTranslation(translations, "nav.why-sos", "Why SoS"),
+      label: resolveTranslation(translations, "nav.why-sos", "Why SofS"),
       href: navHref("why-sos"),
     },
     {
