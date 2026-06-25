@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { updateTenantSeo } from "@/3-features/manage-tenants/actions/updateTenantSeo";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { hasFeature } from "@/5-shared/lib/billing/plans";
+import Link from "next/link";
 import { Search } from "lucide-react";
 
 interface SeoSectionProps {
@@ -73,12 +74,12 @@ export function SeoSection({
             {!canToggle && (
               <p className="text-xs text-muted-foreground mt-1">
                 {proRequired}{" "}
-                <a
+                <Link
                   href="/dashboard/billing"
                   className="text-primary hover:underline font-medium"
                 >
                   Upgrade
-                </a>
+                </Link>
               </p>
             )}
             {isPro && !seoEnabled && (

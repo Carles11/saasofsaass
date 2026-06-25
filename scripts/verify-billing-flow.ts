@@ -31,8 +31,8 @@ const db = drizzle(sqlClient, {
 });
 
 let passed = 0;
-let failed: string[] = [];
-let warnings: string[] = [];
+const failed: string[] = [];
+const warnings: string[] = [];
 
 function assert(condition: boolean, message: string) {
   if (condition) {

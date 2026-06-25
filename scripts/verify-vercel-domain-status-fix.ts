@@ -44,7 +44,7 @@ function simulateStatus(
 // ── Test runner ────────────────────────────────────────────────────────────
 
 let passed = 0;
-let failed: string[] = [];
+const failed: string[] = [];
 let total = 0;
 
 function test(description: string, fn: () => void) {

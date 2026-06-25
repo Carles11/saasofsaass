@@ -1,34 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 type Palette = "ocean" | "sunset";
 
 const STORAGE_KEY = "soos-palette";
 
-function getInitialPalette(): Palette {
-  if (typeof window === "undefined") return "ocean";
-  return (localStorage.getItem(STORAGE_KEY) as Palette) ?? "ocean";
+// Palette lives on <html> (applied pre-paint by the blocking script in the root
+// layout). We read it as external state via useSyncExternalStore — no effect,
+// no hydration flash, and it re-renders on toggle via the notify below.
+const listeners = new Set<() => void>();
+
+function subscribe(cb: () => void) {
+  listeners.add(cb);
+  return () => listeners.delete(cb);
+}
+
+function getSnapshot(): Palette {
+  if (typeof document === "undefined") return "ocean";
+  return document.documentElement.classList.contains("theme-sunset") ? "sunset" : "ocean";
 }
 
 function applyPalette(p: Palette) {
   document.documentElement.classList.remove("theme-ocean", "theme-sunset");
   document.documentElement.classList.add(`theme-${p}`);
   localStorage.setItem(STORAGE_KEY, p);
+  listeners.forEach((l) => l());
 }
 
 export function PaletteSwitcher() {
-  const [palette, setPalette] = useState<Palette>("ocean");
-
-  useEffect(() => {
-    // Sync React state with what the blocking script already applied
-    setPalette(getInitialPalette());
-  }, []);
+  const palette = useSyncExternalStore(subscribe, getSnapshot, () => "ocean" as Palette);
 
   function toggle() {
-    const next: Palette = palette === "ocean" ? "sunset" : "ocean";
-    setPalette(next);
-    applyPalette(next);
+    applyPalette(palette === "ocean" ? "sunset" : "ocean");
   }
 
   return (

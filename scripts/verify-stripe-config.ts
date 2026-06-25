@@ -21,7 +21,7 @@ dotenv.config({ path: resolve(process.cwd(), ".env.local") });
 import { PLANS } from "../src/5-shared/lib/billing/plans";
 
 let passed = 0;
-let failed: string[] = [];
+const failed: string[] = [];
 
 function assert(condition: boolean, message: string) {
   if (condition) {

@@ -256,7 +256,7 @@ async function main() {
 
   // Process entries in REVERSE order so splices don't shift earlier indices
   const sorted = [...englishOnly].sort((a, b) => b.lineStart - a.lineStart);
-  let modifiedLines = [...lines];
+  const modifiedLines = [...lines];
 
   for (const item of sorted) {
     const startLine = item.lineStart;

@@ -40,7 +40,7 @@ export function BlogDetail({ data, locale }: BlogDetailProps) {
 
         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8 pb-6 border-b border-border">
           {entity.publishedAt && (
-            <time dateTime={entity.publishedAt.toISOString?.() ?? entity.publishedAt as string}>
+            <time dateTime={entity.publishedAt.toISOString()}>
               {formatDate(entity.publishedAt, locale)}
             </time>
           )}
