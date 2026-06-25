@@ -54,7 +54,9 @@ export async function PricingSection({ translations, locale }: PricingSectionPro
     monthly: prices[id].monthly,
     annual: prices[id].annual,
     currency: prices[id].currency,
-    features: featuresFor(id),
+    features: id === "pro"
+      ? featuresFor(id).map((f, i) => i === 0 ? `${f} (+ €19/site for more)` : f)
+      : featuresFor(id),
     popular: id === "pro",
     ctaHref: appAuthUrl("sign-up", locale ?? "en"),
   }));

@@ -72,6 +72,11 @@ export function parseDomain(
     return { type: 'TENANT_SUBDOMAIN', tenantKey: prodMatch[1] }
   }
 
+  // ── Vercel preview deployment: *.vercel.app → marketing ────────────────────
+  if (hostname.endsWith('.vercel.app')) {
+    return { type: 'MARKETING', tenantKey: null }
+  }
+
   // ── Custom domain: anything else ───────────────────────────────────────────
   return { type: 'TENANT_CUSTOM', tenantKey: hostname }
 }
