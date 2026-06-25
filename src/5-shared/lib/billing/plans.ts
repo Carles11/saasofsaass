@@ -35,8 +35,18 @@ export const PLANS = {
     label: "Free",
     stripePriceIds: { monthly: null, annual: null },
     fallbackPrice: { monthly: 0, annual: 0 },
-    limits: { publishedSites: 1, teamMembers: 1, languagesPerSite: 2, aiBlocksLifetime: 2 },
-    features: { customDomains: false, removeBranding: false, disableSeoIndex: false, prioritySupport: false },
+    limits: {
+      publishedSites: 1,
+      teamMembers: 1,
+      languagesPerSite: 2,
+      aiBlocksLifetime: 2,
+    },
+    features: {
+      customDomains: false,
+      removeBranding: false,
+      disableSeoIndex: false,
+      prioritySupport: false,
+    },
   },
   pro: {
     label: "Pro",
@@ -45,8 +55,18 @@ export const PLANS = {
       annual: process.env.STRIPE_PRICE_ID_PRO_ANNUAL ?? null,
     },
     fallbackPrice: { monthly: 79, annual: 790 },
-    limits: { publishedSites: 3, teamMembers: 10, languagesPerSite: -1, aiBlocksLifetime: -1 },
-    features: { customDomains: true, removeBranding: true, disableSeoIndex: true, prioritySupport: false },
+    limits: {
+      publishedSites: 3,
+      teamMembers: 10,
+      languagesPerSite: -1,
+      aiBlocksLifetime: -1,
+    },
+    features: {
+      customDomains: true,
+      removeBranding: true,
+      disableSeoIndex: true,
+      prioritySupport: false,
+    },
   },
   enterprise: {
     label: "Enterprise",
@@ -54,9 +74,19 @@ export const PLANS = {
       monthly: process.env.STRIPE_PRICE_ID_ENTERPRISE_MONTHLY ?? null,
       annual: process.env.STRIPE_PRICE_ID_ENTERPRISE_ANNUAL ?? null,
     },
-    fallbackPrice: { monthly: 399, annual: 3990 },
-    limits: { publishedSites: -1, teamMembers: -1, languagesPerSite: -1, aiBlocksLifetime: -1 },
-    features: { customDomains: true, removeBranding: true, disableSeoIndex: true, prioritySupport: true },
+    fallbackPrice: { monthly: 199, annual: 1990 },
+    limits: {
+      publishedSites: -1,
+      teamMembers: -1,
+      languagesPerSite: -1,
+      aiBlocksLifetime: -1,
+    },
+    features: {
+      customDomains: true,
+      removeBranding: true,
+      disableSeoIndex: true,
+      prioritySupport: true,
+    },
   },
 } as const satisfies Record<string, PlanConfig>;
 
@@ -119,8 +149,12 @@ export function getNextPlan(currentPlan: string): PlanId | null {
   return PLAN_ORDER[idx + 1];
 }
 
-export function getStripePriceId(plan: string, cadence: Cadence = "monthly"): string {
+export function getStripePriceId(
+  plan: string,
+  cadence: Cadence = "monthly",
+): string {
   const id = getPlan(plan).stripePriceIds[cadence];
-  if (!id) throw new Error(`Missing Stripe price ID for plan "${plan}" (${cadence})`);
+  if (!id)
+    throw new Error(`Missing Stripe price ID for plan "${plan}" (${cadence})`);
   return id;
 }

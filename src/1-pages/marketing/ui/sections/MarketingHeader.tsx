@@ -55,12 +55,8 @@ export function MarketingHeader({ translations }: MarketingHeaderProps) {
       href: navHref("features"),
     },
     {
-      label: resolveTranslation(
-        translations,
-        "nav.structure-vs-ai",
-        "Structure vs AI",
-      ),
-      href: navHref("structure-vs-ai", "structure-vs-ai-faq"),
+      label: resolveTranslation(translations, "nav.why-sos", "Why SoS"),
+      href: navHref("why-sos"),
     },
     {
       label: resolveTranslation(translations, "nav.pricing", "Pricing"),
