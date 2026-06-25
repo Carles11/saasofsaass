@@ -46,7 +46,8 @@ async function fetchAmount(
 
     const cur = (price.currency ?? "eur").toUpperCase();
     return { amount: toMajor(price.unit_amount, cur), currency: cur };
-  } catch {
+  } catch (err) {
+    console.error("[prices] fetchAmount failed", priceId, currency, err);
     return null;
   }
 }
@@ -63,12 +64,14 @@ export async function getStripePrices(currency?: string): Promise<PriceMap> {
   if (entry && Date.now() - entry.at < TTL_MS) return entry.data;
 
   const data = {} as PriceMap;
+  let hasLive = false;
   for (const id of PLAN_ORDER) {
     const plan = PLANS[id];
     const [monthly, annual] = await Promise.all([
       fetchAmount(plan.stripePriceIds.monthly, currency),
       fetchAmount(plan.stripePriceIds.annual, currency),
     ]);
+    if (monthly || annual) hasLive = true;
     data[id] = {
       monthly: monthly?.amount ?? plan.fallbackPrice.monthly,
       annual: annual?.amount ?? plan.fallbackPrice.annual,
@@ -76,7 +79,7 @@ export async function getStripePrices(currency?: string): Promise<PriceMap> {
     };
   }
 
-  cache.set(key, { at: Date.now(), data });
+  if (hasLive) cache.set(key, { at: Date.now(), data });
   return data;
 }
 
