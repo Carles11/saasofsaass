@@ -141,7 +141,7 @@ async function checkSiteLimits() {
       .select({ count: sql<number>`count(*)` })
       .from(tenants)
       .where(
-        and(eq(tenants.workspaceId, ws.id), eq(tenants.isActive, true)),
+        and(eq(tenants.workspaceId, ws.id), eq(tenants.status, 'published')),
       );
 
     const currentCount = Number(countResult?.count ?? 0);

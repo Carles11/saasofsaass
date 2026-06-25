@@ -6,6 +6,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { RateLimitError, translatePayload, TranslationError } from "../api/translateWithGemini";
 import { assertCanEditContent } from "@/5-shared/lib/auth/authorization";
+import { getAiQuota, incrementAiBlocksUsed } from "@/5-shared/lib/billing/workspace";
 
 const BATCH_LIMIT = 30;
 const RATE_LIMIT_DELAY_MS = 150;
@@ -21,6 +22,7 @@ export interface TranslationResult {
   totalJobCount: number;
   needsSeed?: boolean;
   rateLimitRetryAfter?: number;
+  quotaReached?: boolean;
 }
 
 type EntityJob = {
@@ -65,6 +67,11 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
     .limit(1);
 
   if (!tenant) throw new Error("Tenant not found");
+
+  const quota = await getAiQuota(tenantId);
+  if (quota.remaining <= 0) {
+    return { succeeded: 0, failed: 0, remaining: 0, totalJobCount: 0, quotaReached: true };
+  }
 
   console.log(
     `[AutoTranslate] Tenant: "${tenant.name}" | defaultLocale: ${tenant.defaultLocale} | locales: [${tenant.locales.join(", ")}]`
@@ -235,8 +242,11 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
     needsSeed = !hasAnyContent;
   }
 
-  const batch = jobs.slice(0, BATCH_LIMIT);
-  const remaining = Math.max(0, totalJobs - BATCH_LIMIT);
+  const runLimit = Number.isFinite(quota.remaining)
+    ? Math.min(BATCH_LIMIT, quota.remaining)
+    : BATCH_LIMIT;
+  const batch = jobs.slice(0, runLimit);
+  const remaining = Math.max(0, totalJobs - batch.length);
 
   let succeeded = 0;
   let failed = 0;
@@ -284,6 +294,7 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
         // Abort the rest of the batch — all subsequent calls will also 429.
         // Return as data, NOT re-throw: Server Actions can't serialize custom classes.
 
+        if (quota.workspaceId) await incrementAiBlocksUsed(quota.workspaceId, succeeded);
         revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, "page");
         return {
           succeeded,
@@ -311,7 +322,12 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
     }
   }
 
+  if (quota.workspaceId) await incrementAiBlocksUsed(quota.workspaceId, succeeded);
+
   revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, "page");
 
-  return { succeeded, failed, remaining, totalJobCount: totalJobs, needsSeed };
+  const quotaReached =
+    Number.isFinite(quota.remaining) && succeeded >= quota.remaining && remaining > 0;
+
+  return { succeeded, failed, remaining, totalJobCount: totalJobs, needsSeed, quotaReached };
 }

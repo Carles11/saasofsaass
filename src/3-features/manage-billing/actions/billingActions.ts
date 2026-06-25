@@ -6,7 +6,7 @@ import { workspaces } from "@/5-shared/lib/db/schema";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
 import { getStripe } from "@/5-shared/lib/billing/stripe";
-import { getPlan, getStripePriceId, getSiteLimit } from "@/5-shared/lib/billing/plans";
+import { getPlan, getStripePriceId, getSiteLimit, type Cadence } from "@/5-shared/lib/billing/plans";
 
 function getBaseUrl(): string {
   const host = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.localhost";
@@ -42,7 +42,7 @@ async function getOrCreateCustomer(workspaceId: string): Promise<string> {
  *
  * If the workspace already has an active subscription, redirects to Billing Portal instead.
  */
-export async function createCheckoutSession(workspaceId: string, plan: string) {
+export async function createCheckoutSession(workspaceId: string, plan: string, cadence: Cadence = "monthly") {
   const profile = await requireProfile();
 
   // Validate plan
@@ -64,7 +64,7 @@ export async function createCheckoutSession(workspaceId: string, plan: string) {
 
   const stripe = getStripe();
   const customerId = await getOrCreateCustomer(workspaceId);
-  const priceId = getStripePriceId(plan);
+  const priceId = getStripePriceId(plan, cadence);
 
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
@@ -303,8 +303,16 @@ function derivePlanFromSubscription(subscription: Stripe.Subscription): string {
   for (const item of items) {
     const priceId = item.price.id;
 
-    if (priceId === process.env.STRIPE_PRICE_ID_STARTER) return "starter";
-    if (priceId === process.env.STRIPE_PRICE_ID_PRO) return "pro";
+    if (
+      priceId === process.env.STRIPE_PRICE_ID_PRO_MONTHLY ||
+      priceId === process.env.STRIPE_PRICE_ID_PRO_ANNUAL
+    )
+      return "pro";
+    if (
+      priceId === process.env.STRIPE_PRICE_ID_ENTERPRISE_MONTHLY ||
+      priceId === process.env.STRIPE_PRICE_ID_ENTERPRISE_ANNUAL
+    )
+      return "enterprise";
   }
 
   return "free";

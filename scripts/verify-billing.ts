@@ -140,7 +140,7 @@ async function testSiteLimitEnforcement() {
         defaultLocale: 'en',
         locales: ['en'],
         branding: {},
-        isActive: true,
+        status: 'published',
         workspaceId: ws.id,
       })
     }
@@ -152,7 +152,7 @@ async function testSiteLimitEnforcement() {
       .where(
         and(
           eq(tenants.workspaceId, ws.id),
-          eq(tenants.isActive, true),
+          eq(tenants.status, 'published'),
         ),
       )
 
@@ -170,7 +170,7 @@ async function testSiteLimitEnforcement() {
       defaultLocale: 'en',
       locales: ['en'],
       branding: {},
-      isActive: false,
+      status: 'draft',
       workspaceId: ws.id,
     })
 
@@ -180,7 +180,7 @@ async function testSiteLimitEnforcement() {
       .where(
         and(
           eq(tenants.workspaceId, ws.id),
-          eq(tenants.isActive, true),
+          eq(tenants.status, 'published'),
         ),
       )
 
@@ -226,9 +226,9 @@ async function testSeedIntegrity() {
 function testPlanConfig() {
   console.log('\n─── Test 4: Plan config integrity ───')
 
-  assert(getSiteLimit('free') === 1, 'Free plan: siteLimit = 1')
-  assert(getSiteLimit('starter') === 3, 'Starter plan: siteLimit = 3')
-  assert(getSiteLimit('pro') === 10, 'Pro plan: siteLimit = 10')
+  assert(getSiteLimit('free') === 1, 'Free plan: publishedSites = 1')
+  assert(getSiteLimit('pro') === 10, 'Pro plan: publishedSites = 10')
+  assert(getSiteLimit('enterprise') === -1, 'Enterprise plan: publishedSites = unlimited (-1)')
 
   const plans = Object.keys(PLANS)
   assert(plans.length === 3, 'Exactly 3 plans defined')
@@ -236,12 +236,12 @@ function testPlanConfig() {
   // Verify every plan resolves cleanly
   for (const plan of plans) {
     const cfg = getPlan(plan)
-    assert(typeof cfg.siteLimit === 'number' && cfg.siteLimit > 0, `${plan}.siteLimit is positive`)
+    assert(typeof cfg.limits.publishedSites === 'number', `${plan}.limits.publishedSites is a number`)
   }
 
   // Verify unknown plan throws
   let threw = false
-  try { getSiteLimit('enterprise') } catch { threw = true }
+  try { getSiteLimit('bogus-plan') } catch { threw = true }
   assert(threw, 'Unknown plan throws')
 
   return []

@@ -1,6 +1,6 @@
 'use server'
 
-import { tenants, tenantEntities, tenantTranslations } from '@/5-shared/lib/db/schema'
+import { tenants, tenantEntities, tenantTranslations, workspaces } from '@/5-shared/lib/db/schema'
 import { db } from '@/5-shared/lib/db'
 import { blocks } from '@/5-shared/lib/db/schema'
 import { asc, sql, eq, inArray, and } from 'drizzle-orm'
@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache'
 import type { BlockKind } from '@/5-shared/types/tenants/blocks'
 import type { SupportedLocaleType } from '@/5-shared/types'
 import { assertCanEditContent, assertCanManageStructure } from '@/5-shared/lib/auth/authorization'
+import { getLimit, isUnlimited } from '@/5-shared/lib/billing/plans'
 
 function revalidateSiteBuilder(tenantId: string): void {
   revalidatePath(`/[locale]/dashboard/site-builder/${tenantId}`, 'page')
@@ -199,8 +200,22 @@ export async function updateTenantLocales(
 ) {
   await assertCanManageStructure(tenantId)
 
-  const [tenant] = await db.select({ locales: tenants.locales }).from(tenants).where(eq(tenants.id, tenantId)).limit(1)
+  const [tenant] = await db
+    .select({ locales: tenants.locales, plan: workspaces.plan })
+    .from(tenants)
+    .leftJoin(workspaces, eq(tenants.workspaceId, workspaces.id))
+    .where(eq(tenants.id, tenantId))
+    .limit(1)
   const prevLocales: string[] = tenant?.locales ?? []
+
+  // Plan gate: limit languages per site (adding only — never block removals)
+  const plan = tenant?.plan ?? "free"
+  const langLimit = getLimit(plan, "languagesPerSite")
+  if (!isUnlimited(langLimit) && locales.length > langLimit && locales.length > prevLocales.length) {
+    throw new Error(
+      `Your plan allows ${langLimit} languages per site. Upgrade to add more.`,
+    )
+  }
 
   await db
     .update(tenants)

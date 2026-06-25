@@ -84,7 +84,7 @@ export function BillingStatus({
             {planLabel}
           </span>
           <span className="text-sm text-muted-foreground">
-            {currentSites} / {siteLimit} sites used
+            {currentSites} / {siteLimit < 0 ? "∞" : siteLimit} published sites
           </span>
         </div>
         <div className="flex items-center gap-2">

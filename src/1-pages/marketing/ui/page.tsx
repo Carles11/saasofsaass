@@ -39,7 +39,7 @@ export async function MarketingPage() {
         <FeaturesSection translations={translations["marketing.features"]} />
         <StructuredVsAISection translations={translations["marketing.structured-vs-ai"]} locale={locale} />
         {/* <StructuredVsAIFaq translations={translations["marketing.structured-vs-ai"]} /> */}
-        <PricingSection translations={translations["marketing.pricing"]} />
+        <PricingSection translations={translations["marketing.pricing"]} locale={locale} />
         <TestimonialsSection translations={translations["marketing.testimonials"]} />
         <FaqSection translations={translations["marketing.faq"]} />
         <CtaSection translations={translations["marketing.cta"]} />

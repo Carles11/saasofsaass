@@ -6,9 +6,14 @@ const ROOT_DOMAIN = (
 
 const handler = authApiHandler()
 
-async function patchCookieDomain(
+/**
+ * Production / shared-domain mode: ensure every auth cookie carries the
+ * shared parent Domain (e.g. ".saasofsaass.com") so the session is visible
+ * across marketing, app, and tenant subdomains.
+ */
+async function patchCookieSharedDomain(
   response: Response,
-  rootDomain: string,
+  domain: string,
 ): Promise<Response> {
   const setCookies = response.headers.getSetCookie?.()
   if (!setCookies?.length) return response
@@ -20,15 +25,45 @@ async function patchCookieDomain(
     if (/Domain=/i.test(cookie)) {
       newHeaders.append("Set-Cookie", cookie)
     } else {
-      newHeaders.append("Set-Cookie", `${cookie}; Domain=${rootDomain}`)
+      newHeaders.append("Set-Cookie", `${cookie}; Domain=${domain}`)
     }
   }
 
+  return rebuild(response, newHeaders)
+}
+
+/**
+ * Dev mode on a *.localhost host: Chrome rejects any explicit `Domain` that
+ * points at `localhost` (it's treated as a special TLD), and `Partitioned` +
+ * `SameSite=None` add further breakage. We strip Domain entirely so the cookie
+ * becomes "host-only" (bound to the exact host that set it — e.g. app.localhost),
+ * which Chrome stores and resends reliably. Secure is kept (required by the
+ * `__Secure-` cookie-name prefix; *.localhost counts as a secure context over http).
+ */
+async function patchCookieHostOnly(response: Response): Promise<Response> {
+  const setCookies = response.headers.getSetCookie?.()
+  if (!setCookies?.length) return response
+
+  const newHeaders = new Headers(response.headers)
+  newHeaders.delete("Set-Cookie")
+
+  for (const cookie of setCookies) {
+    const stripped = cookie
+      .replace(/;\s*Domain=[^;]*/gi, "")
+      .replace(/;\s*SameSite=[^;]*/gi, "")
+      .replace(/;\s*Partitioned/gi, "")
+    newHeaders.append("Set-Cookie", `${stripped}; SameSite=Lax`)
+  }
+
+  return rebuild(response, newHeaders)
+}
+
+async function rebuild(response: Response, headers: Headers): Promise<Response> {
   const body = await response.text()
   return new Response(body, {
     status: response.status,
     statusText: response.statusText,
-    headers: newHeaders,
+    headers,
   })
 }
 
@@ -43,13 +78,14 @@ function wrapHandler(
       hostname.endsWith(".localhost")
 
     if (!isDev) {
+      // Production: share the session cookie across all subdomains.
       const response = await nextHandler(req, ctx)
-      return patchCookieDomain(response, `.${ROOT_DOMAIN}`)
+      return patchCookieSharedDomain(response, `.${ROOT_DOMAIN}`)
     }
 
-    // Neon Auth validates the Origin header against its allowlist.
-    // Local dev subdomains (app.localhost) are not in that list.
-    // Override the Origin to the root localhost so Neon Auth accepts the proxy.
+    // Dev: Neon Auth's allow_localhost only matches exact "localhost" — not
+    // subdomains. Override Origin to root localhost so subdomain requests
+    // (app.localhost, *.localhost) pass Neon Auth's origin validation.
     const rootOrigin = `${url.protocol}//localhost${url.port ? `:${url.port}` : ""}`
     const headers = new Headers(req.headers)
     headers.set("Origin", rootOrigin)
@@ -65,7 +101,10 @@ function wrapHandler(
     })
 
     const response = await nextHandler(newReq, ctx)
-    return patchCookieDomain(response, ".localhost")
+
+    // Host-only cookie — bound to the exact host (app.localhost). Reliable in
+    // dev where Chrome rejects any explicit Domain pointing at localhost.
+    return patchCookieHostOnly(response)
   }
 }
 

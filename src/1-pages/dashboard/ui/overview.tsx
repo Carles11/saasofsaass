@@ -1,11 +1,13 @@
 import {
-  countActiveTenants,
+  countPublishedTenants,
   getWorkspaceByProfileId,
 } from "@/3-features/manage-billing/actions/billingHelpers";
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
 import { db } from "@/5-shared/lib/db";
+import { tenants } from "@/5-shared/lib/db/schema";
 import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
+import { PLAN_LABELS, type PlanId } from "@/5-shared/lib/billing/plans";
 
 function StatCard({
   label,
@@ -46,7 +48,15 @@ export async function DashboardOverview({ locale }: { locale?: string }) {
   }
 
   const workspace = await getWorkspaceByProfileId(roles.profileId);
-  const currentSites = workspace ? await countActiveTenants(workspace.id) : 0;
+  const publishedSites = workspace ? await countPublishedTenants(workspace.id) : 0;
+
+  const [draftResult] = workspace
+    ? await db
+        .select({ count: sql<number>`count(*)` })
+        .from(tenants)
+        .where(and(eq(tenants.workspaceId, workspace.id), eq(tenants.status, "draft")))
+    : [{ count: 0 }];
+  const draftSites = Number(draftResult?.count ?? 0);
 
   const [editorResult] = await db
     .select({ count: sql<number>`count(*)` })
@@ -55,8 +65,9 @@ export async function DashboardOverview({ locale }: { locale?: string }) {
 
   const myMemberships = Number(editorResult?.count ?? 0);
 
-  const planLabel = workspace?.plan ?? "—";
+  const planLabel = workspace ? PLAN_LABELS[workspace.plan as PlanId] ?? workspace.plan : "—";
   const siteLimit = workspace?.siteLimit ?? 0;
+  const limitLabel = siteLimit < 0 ? "∞" : String(siteLimit);
 
   return (
     <main className="min-h-screen bg-background p-6 md:p-12">
@@ -66,21 +77,19 @@ export async function DashboardOverview({ locale }: { locale?: string }) {
         </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <StatCard label="Total Sites" value={currentSites} />
+          <StatCard label="Published" value={publishedSites} />
+          <StatCard label="Drafts" value={draftSites} sub="Unlimited on every plan" />
           <StatCard label="Active Editors" value={myMemberships} />
-          <StatCard
-            label="Pending Invites"
-            value="—"
-            sub="TODO: invite system"
-          />
           <StatCard label="Workspace Plan" value={planLabel} />
           <StatCard
-            label="Site Usage"
-            value={`${currentSites} / ${siteLimit}`}
+            label="Published Usage"
+            value={`${publishedSites} / ${limitLabel}`}
             sub={
               siteLimit > 0
-                ? `${Math.round((currentSites / siteLimit) * 100)}% used`
-                : undefined
+                ? `${Math.round((publishedSites / siteLimit) * 100)}% used`
+                : siteLimit < 0
+                  ? "Unlimited"
+                  : undefined
             }
           />
           <StatCard

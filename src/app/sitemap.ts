@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       updatedAt: tenants.updatedAt,
     })
     .from(tenants)
-    .where(eq(tenants.isActive, true));
+    .where(eq(tenants.status, "published"));
 
   const publishedEntities = await db
     .select({
@@ -31,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       and(
         inArray(tenantEntities.kind, ["blog_post", "podcast_episode"]),
         eq(tenantEntities.status, "published"),
-        eq(tenants.isActive, true),
+        eq(tenants.status, "published"),
       ),
     );
 

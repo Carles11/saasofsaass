@@ -22,6 +22,7 @@ import {
   addDomainToVercelProject,
   getVercelDomainStatus,
 } from "@/5-shared/lib/vercel/vercel-domains";
+import { planAllowsCustomDomains } from "@/5-shared/lib/billing/plans";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -52,7 +53,7 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
     .where(eq(workspaces.id, tenant.workspaceId!))
     .limit(1);
 
-  if (!ws || ws.plan !== "pro") {
+  if (!ws || !planAllowsCustomDomains(ws.plan)) {
     throw new Error(
       "Custom domains are available on the Pro plan. Please upgrade.",
     );

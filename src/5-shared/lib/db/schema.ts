@@ -24,6 +24,8 @@ export const workspaces = pgTable("workspaces", {
   ownerProfileId: uuid("owner_profile_id").notNull(),
   plan: text("plan").notNull().default("free"),
   siteLimit: integer("site_limit").notNull().default(1),
+  addonSites: integer("addon_sites").notNull().default(0), // purchased extra published-site slots
+  aiBlocksUsed: integer("ai_blocks_used").notNull().default(0), // lifetime AI-translated blocks (Free quota)
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionStatus: text("subscription_status"),
@@ -46,7 +48,7 @@ export const tenants = pgTable("tenants", {
   defaultLocale: text("default_locale").notNull().default("en"),
   branding: jsonb("branding").default({}), // HSL vars, logo, fonts
   templateId: text("template_id").notNull().default("default"),
-  isActive: boolean("is_active").notNull().default(true),
+  status: text("status").notNull().default("draft"), // "draft" | "published" (reserve "archived")
   seoEnabled: boolean("seo_enabled").notNull().default(true),
   workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

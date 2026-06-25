@@ -41,6 +41,15 @@ export function AutoTranslateButton({ tenantId, blockId, defaultLocale, onTransl
           return;
         }
 
+        if (result.quotaReached) {
+          toast.warning(
+            result.succeeded > 0
+              ? `✨ ${result.succeeded} translated. You've reached your plan's AI translation limit — upgrade to translate more.`
+              : `You've reached your plan's AI translation limit. Upgrade to Pro for unlimited AI translations.`,
+          );
+          return;
+        }
+
         if (result.failed === 0 && result.remaining === 0) {
           if (result.totalJobCount > 0) {
             toast.success(`✨ ${result.succeeded} row${result.succeeded !== 1 ? 's' : ''} translated successfully.`);

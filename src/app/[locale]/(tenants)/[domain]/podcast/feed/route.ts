@@ -33,7 +33,7 @@ export async function GET(
   const tenant = await db
     .select()
     .from(tenants)
-    .where(and(eq(tenants.slug, tenantKey), eq(tenants.isActive, true)))
+    .where(and(eq(tenants.slug, tenantKey), eq(tenants.status, "published")))
     .limit(1)
     .then((rows) => rows[0] ?? null)
 

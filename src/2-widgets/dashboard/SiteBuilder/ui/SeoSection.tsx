@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateTenantSeo } from "@/3-features/manage-tenants/actions/updateTenantSeo";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { hasFeature } from "@/5-shared/lib/billing/plans";
 import { Search } from "lucide-react";
 
 interface SeoSectionProps {
@@ -42,8 +43,8 @@ export function SeoSection({
     "Your site is currently hidden from search engines.",
   );
 
-  const isPro = plan === "pro";
-  const canToggle = isPro;
+  const canToggle = hasFeature(plan, "disableSeoIndex");
+  const isPro = canToggle;
 
   function handleToggle() {
     if (!canToggle) return;

@@ -1,5 +1,6 @@
 import { CreateTenantDialog } from "@/2-widgets/dashboard/CreateTenantDialog";
 import { BillingStatus } from "@/2-widgets/dashboard/BillingStatus";
+import { SitePublishToggle } from "@/2-widgets/dashboard/SitePublishToggle";
 import { db } from "@/5-shared/lib/db";
 import { tenants } from "@/5-shared/lib/db/schema";
 import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
@@ -12,7 +13,7 @@ import Link from "next/link";
 import { getCurrentProfile } from "@/5-shared/lib/auth/authorization";
 import {
   getWorkspaceByProfileId,
-  countActiveTenants,
+  countPublishedTenants,
 } from "@/3-features/manage-billing/actions/billingHelpers";
 import { getNextPlan } from "@/5-shared/lib/billing/plans";
 
@@ -31,7 +32,7 @@ export async function DashboardPage({ locale }: { locale?: string }) {
     : [];
 
   const workspace = profile ? await getWorkspaceByProfileId(profile.id) : null;
-  const currentSites = workspace ? await countActiveTenants(workspace.id) : 0;
+  const currentSites = workspace ? await countPublishedTenants(workspace.id) : 0;
 
   const ownerTenantIds = memberships.filter((m) => m.role === "owner").map((m) => m.tenantId);
 
@@ -119,27 +120,39 @@ export async function DashboardPage({ locale }: { locale?: string }) {
           />
         )}
         <section className="grid grid-cols-1 gap-6">
-          {userTenants.map((tenant) => (
-            <Link
-              key={tenant.id}
-              href={`/${locale ?? "en"}/dashboard/site-builder/${tenant.id}`}
-              className="block bg-card p-8 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-card-foreground">{tenant.name}</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {tenant.locales?.length || 0} {languagesLabel}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                    {ownerTenantIds.includes(tenant.id) ? ownerRoleLabel : editorRoleLabel}
-                  </span>
+          {userTenants.map((tenant) => {
+            const isOwner = ownerTenantIds.includes(tenant.id);
+            return (
+              <div
+                key={tenant.id}
+                className="bg-card p-8 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <Link
+                    href={`/${locale ?? "en"}/dashboard/site-builder/${tenant.id}`}
+                    className="group flex-1 min-w-0"
+                  >
+                    <h2 className="text-2xl font-bold text-card-foreground group-hover:text-primary transition-colors">
+                      {tenant.name}
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {tenant.locales?.length || 0} {languagesLabel}
+                    </p>
+                  </Link>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                      {isOwner ? ownerRoleLabel : editorRoleLabel}
+                    </span>
+                    <SitePublishToggle
+                      tenantId={tenant.id}
+                      status={tenant.status}
+                      canManage={isOwner}
+                    />
+                  </div>
                 </div>
               </div>
-            </Link>
-          ))}
+            );
+          })}
         </section>
         {userTenants.length === 0 && (
           <section className="mt-8 bg-card p-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">

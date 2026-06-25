@@ -45,7 +45,7 @@ async function isTenantActive(
   try {
     // neon driver requires tagged template literals — use separate queries per lookup type
     const rows = isSubdomain
-      ? await sql`SELECT id FROM tenants WHERE slug = ${tenantKey} AND is_active = true LIMIT 1`
+      ? await sql`SELECT id FROM tenants WHERE slug = ${tenantKey} AND status = 'published' LIMIT 1`
       : await sql`SELECT td.tenant_id FROM tenant_domains td WHERE td.domain = ${tenantKey} AND td.status = 'verified' LIMIT 1`;
     const exists = rows.length > 0;
     await tenantCache.set(cacheKey, { exists }, TENANT_CACHE_TTL_MS);

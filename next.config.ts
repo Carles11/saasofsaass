@@ -5,7 +5,7 @@ const withNextIntl = createNextIntlPlugin("./src/5-shared/lib/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
-  allowedDevOrigins: ["agora.localhost", "*.localhost"],
+  allowedDevOrigins: ["agora.localhost", "*.localhost", "*.lvh.me", "lvh.me"],
   images: {
     remotePatterns: [
       {

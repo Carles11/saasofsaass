@@ -28,12 +28,12 @@ export async function getWorkspaceByProfileId(
   return ws ?? null;
 }
 
-export async function countActiveTenants(workspaceId: string): Promise<number> {
+export async function countPublishedTenants(workspaceId: string): Promise<number> {
   const [result] = await db
     .select({ count: sql<number>`count(*)` })
     .from(tenants)
     .where(
-      and(eq(tenants.workspaceId, workspaceId), eq(tenants.isActive, true)),
+      and(eq(tenants.workspaceId, workspaceId), eq(tenants.status, "published")),
     );
 
   return Number(result?.count ?? 0);

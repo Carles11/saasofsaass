@@ -107,7 +107,7 @@ async function main() {
         slug:          'agora',
         locales:       ['en', 'es', 'ca'],
         defaultLocale: 'en',
-        isActive:      true,
+        status:        'published',
         branding:      {},
         workspaceId,
       })

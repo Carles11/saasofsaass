@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
 import { authServer } from "@/5-shared/lib/auth/server";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
+import { ensureWorkspace } from "@/5-shared/lib/billing/workspace";
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
 import { redirect } from "next/navigation";
 
@@ -34,7 +35,10 @@ export default async function DashboardLayout({
     redirect(`/${locale}/auth/sign-in`);
   }
 
-  await syncProfile(session);
+  const profile = await syncProfile(session);
+  if (profile) {
+    await ensureWorkspace(profile.id, profile.name);
+  }
 
   const resolvedRoles = await resolveRoles(session);
 
