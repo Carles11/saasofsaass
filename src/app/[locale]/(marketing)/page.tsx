@@ -40,6 +40,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Page() {
-  return <MarketingPage />;
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ cc?: string }>;
+}) {
+  const { cc } = await searchParams;
+  return <MarketingPage ccOverride={cc} />;
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { formatPrice } from "@/5-shared/lib/billing/prices";
 
 export interface PricingTier {
   id: string;
@@ -27,15 +28,10 @@ interface PricingCardsProps {
     save: string;
     getStarted: string;
   };
+  locale: string;
 }
 
-function fmt(amount: number, currency: string): string {
-  if (amount === 0) return "€0";
-  const symbol = currency === "EUR" ? "€" : currency === "USD" ? "$" : `${currency} `;
-  return `${symbol}${amount}`;
-}
-
-export function PricingCards({ tiers, labels }: PricingCardsProps) {
+export function PricingCards({ tiers, labels, locale }: PricingCardsProps) {
   const [annual, setAnnual] = useState(false);
 
   return (
@@ -90,7 +86,7 @@ export function PricingCards({ tiers, labels }: PricingCardsProps) {
               </div>
 
               <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-black text-foreground">{fmt(amount, tier.currency)}</span>
+                <span className="text-4xl font-black text-foreground">{formatPrice(amount, tier.currency, locale)}</span>
                 {isPaid && (
                   <span className="text-sm text-muted-foreground">
                     {annual ? labels.billedAnnually : labels.perMonth}

@@ -10,9 +10,13 @@ import { CtaSection } from "./sections/CtaSection";
 import { FooterSection } from "./sections/FooterSection";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
 import { getLocale } from "next-intl/server";
+import { detectCountry } from "@/5-shared/lib/geo/detect";
+import { countryToCurrency } from "@/5-shared/lib/geo/currency";
 
-export async function MarketingPage() {
+export async function MarketingPage({ ccOverride }: { ccOverride?: string }) {
   const locale = await getLocale();
+  const country = await detectCountry(ccOverride ?? null);
+  const currency = countryToCurrency(country);
   const translations = await getPlatformTranslationsByNamespaces(
     [
       "marketing.header",
@@ -37,7 +41,7 @@ export async function MarketingPage() {
         <HowItWorksSection translations={translations["marketing.howitworks"]} />
         <FeaturesSection translations={translations["marketing.features"]} />
         <WhySoSSection translations={translations["marketing.why-sos"]} locale={locale} />
-        <PricingSection translations={translations["marketing.pricing"]} locale={locale} />
+        <PricingSection translations={translations["marketing.pricing"]} locale={locale} currency={currency} />
         <TestimonialsSection translations={translations["marketing.testimonials"]} />
         <FaqSection translations={translations["marketing.faq"]} />
         <CtaSection translations={translations["marketing.cta"]} />

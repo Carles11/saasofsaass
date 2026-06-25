@@ -7,6 +7,7 @@ import { PricingCards, type PricingTier } from "./PricingCards";
 interface PricingSectionProps {
   translations?: TranslationDict;
   locale?: string;
+  currency?: string;
 }
 
 const DESCRIPTIONS: Record<string, string> = {
@@ -36,8 +37,8 @@ function featuresFor(planId: keyof typeof PLANS): string[] {
   ];
 }
 
-export async function PricingSection({ translations, locale }: PricingSectionProps) {
-  const prices = await getStripePrices();
+export async function PricingSection({ translations, locale, currency }: PricingSectionProps) {
+  const prices = await getStripePrices(currency);
 
   const badge = resolveTranslation(translations, "badge", "Pricing");
   const title = resolveTranslation(translations, "title", "Plans that grow with your practice.");
@@ -80,7 +81,7 @@ export async function PricingSection({ translations, locale }: PricingSectionPro
           <p className="mt-4 text-muted-foreground max-w-xl mx-auto leading-relaxed">{subtitle}</p>
         </div>
 
-        <PricingCards tiers={tiers} labels={labels} />
+        <PricingCards tiers={tiers} labels={labels} locale={locale ?? "en"} />
       </div>
     </section>
   );
