@@ -1,7 +1,7 @@
 # 🧭 AI Usage Guide — how to drive Claude Code & OpenCode here
 
 A goal-oriented cheat sheet for the AI tooling in this repo. "I want to **X** →
-do **Y**." The shared rules live in [`AGENTS.md`](../../../../AGENTS.md)
+do **Y**." The shared rules live in [`AGENTS.md`](../AGENTS.md)
 (§ "🤝 Working Protocol & AI Agent Routing"); this file is just the operator's
 quick reference.
 
