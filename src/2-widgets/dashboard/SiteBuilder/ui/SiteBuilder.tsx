@@ -2,12 +2,15 @@
 
 import TenantLayoutResolver from "@/2-widgets/tenant/ui/TenantLayoutResolver";
 import { updateTenantLocales } from "@/3-features/manage-site-blocks/actions/blockActions";
+import { generatePreviewToken } from "@/3-features/manage-site-blocks/actions/generatePreviewToken";
 import { TemplatePicker } from "@/3-features/manage-site-blocks/ui/TemplatePicker";
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
 import type { Block, Tenant, TenantDomain, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
 import type { SupportedLocaleType } from "@/5-shared/types";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
+import { getPlan } from "@/5-shared/lib/billing/plans";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCallback, useState, useTransition } from "react";
 import { BlockList } from "./BlockList";
@@ -66,6 +69,13 @@ export function SiteBuilder({
     import("@/5-shared/config/templates").TenantTemplateId
   >(tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId);
 
+  // Preview token state
+  const [isPreviewing, startPreviewTransition] = useTransition();
+  const [isSharing, startShareTransition] = useTransition();
+  const [showSharePanel, setShowSharePanel] = useState(false);
+  const [shareExpiryDays, setShareExpiryDays] = useState<number>(1);
+  const [copiedLink, setCopiedLink] = useState(false);
+
   const handleLocaleChange = useCallback(
     (locale: SupportedLocaleType) => {
       setActiveLocale(locale);
@@ -73,20 +83,43 @@ export function SiteBuilder({
     [],
   );
 
-const devPort =
-  process.env.NEXT_PUBLIC_DEV_PORT || "3000";
+  const devPort = process.env.NEXT_PUBLIC_DEV_PORT || "3000";
+  const prodRoot = (process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com")
+    .replace(/https?:\/\//, "")
+    .replace(/\/+$/, "");
+  const isDev = process.env.NODE_ENV === "development";
 
-const prodRoot = (
-  process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com"
-)
-  .replace(/https?:\/\//, "")
-  .replace(/\/+$/, "");
+  const planConfig = getPlan(plan);
+  const previewLinkMaxDays = planConfig.features.previewLinkMaxDays;
+  const canSharePreviewLink = previewLinkMaxDays !== null;
 
-const isDev = process.env.NODE_ENV === "development";
+  function getShareExpiryOptions(): { label: string; days: number }[] {
+    const ladder = [
+      { label: resolveTranslation(translations, "settings.preview.expiry-1d", "1 day"), days: 1 },
+      { label: resolveTranslation(translations, "settings.preview.expiry-7d", "7 days"), days: 7 },
+      { label: resolveTranslation(translations, "settings.preview.expiry-30d", "30 days"), days: 30 },
+      { label: resolveTranslation(translations, "settings.preview.expiry-90d", "90 days"), days: 90 },
+      { label: resolveTranslation(translations, "settings.preview.expiry-180d", "6 months"), days: 180 },
+    ];
+    return ladder.filter((o) => o.days <= (previewLinkMaxDays ?? 0));
+  }
 
-const previewUrl = isDev
-  ? `http://${currentSlug}.localhost:${devPort}/${activeLocale}`
-  : `https://${currentSlug}.${prodRoot}/${activeLocale}`;
+  function handlePreview() {
+    startPreviewTransition(async () => {
+      const url = await generatePreviewToken(tenant.id);
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  }
+
+  function handleCopyShareLink() {
+    startShareTransition(async () => {
+      const url = await generatePreviewToken(tenant.id, shareExpiryDays);
+      await navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      setShowSharePanel(false);
+      setTimeout(() => setCopiedLink(false), 3000);
+    });
+  }
 
   const subtitle = resolveTranslation(translations, "subtitle", "Site Builder");
   const tabBlocks = resolveTranslation(translations, "tab.blocks", "Blocks");
@@ -115,15 +148,49 @@ const previewUrl = isDev
           <h2 className="text-2xl font-bold text-foreground">{tenant.name}</h2>
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <a
-            href={previewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
-          >
-            {translations?.preview ?? "Preview"}
-          </a>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePreview}
+              disabled={isPreviewing}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors disabled:opacity-50"
+            >
+              {isPreviewing
+                ? resolveTranslation(translations, "settings.preview.opening", "Opening…")
+                : resolveTranslation(translations, "preview", "Preview")}
+            </button>
+            {canSharePreviewLink && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setShowSharePanel((v) => !v)}
+              >
+                {copiedLink
+                  ? resolveTranslation(translations, "settings.preview.copied", "Copied!")
+                  : resolveTranslation(translations, "settings.preview.share", "Share Preview Link")}
+              </Button>
+            )}
+          </div>
+          {showSharePanel && canSharePreviewLink && (
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 shadow-sm">
+              <select
+                value={shareExpiryDays}
+                onChange={(e) => setShareExpiryDays(Number(e.target.value))}
+                className="text-xs bg-transparent focus:outline-none"
+              >
+                {getShareExpiryOptions().map((opt) => (
+                  <option key={opt.days} value={opt.days}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <Button size="sm" onClick={handleCopyShareLink} disabled={isSharing}>
+                {isSharing
+                  ? resolveTranslation(translations, "settings.preview.copying", "Copying…")
+                  : resolveTranslation(translations, "settings.preview.copy-link", "Copy link")}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -192,6 +259,7 @@ const previewUrl = isDev
                 devPort={devPort}
                 prodRoot={prodRoot}
                 activeLocale={activeLocale}
+                plan={plan}
               />
               <CustomDomainSection
                 tenantId={tenant.id}

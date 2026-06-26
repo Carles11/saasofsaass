@@ -19,6 +19,10 @@ export interface PlanFeatures {
   removeBranding: boolean;
   disableSeoIndex: boolean;
   prioritySupport: boolean;
+  /** Max days a share-preview link can be valid. null = feature unavailable.
+   * Always a finite number when present — preview links never live forever, so
+   * a leaked URL is always bound in time. */
+  previewLinkMaxDays: number | null;
 }
 
 export interface PlanConfig {
@@ -46,6 +50,7 @@ export const PLANS = {
       removeBranding: false,
       disableSeoIndex: false,
       prioritySupport: false,
+      previewLinkMaxDays: null,
     },
   },
   pro: {
@@ -66,6 +71,7 @@ export const PLANS = {
       removeBranding: true,
       disableSeoIndex: true,
       prioritySupport: false,
+      previewLinkMaxDays: 7,
     },
   },
   enterprise: {
@@ -86,6 +92,7 @@ export const PLANS = {
       removeBranding: true,
       disableSeoIndex: true,
       prioritySupport: true,
+      previewLinkMaxDays: 180,
     },
   },
 } as const satisfies Record<string, PlanConfig>;
@@ -119,9 +126,18 @@ export function getLimit(plan: string, key: keyof PlanLimits): number {
   return getPlan(plan).limits[key];
 }
 
+type BooleanFeatureKeys = {
+  [K in keyof PlanFeatures]: PlanFeatures[K] extends boolean ? K : never;
+}[keyof PlanFeatures];
+
 /** Read a boolean feature flag for a plan. */
-export function hasFeature(plan: string, key: keyof PlanFeatures): boolean {
-  return getPlan(plan).features[key];
+export function hasFeature(plan: string, key: BooleanFeatureKeys): boolean {
+  return getPlan(plan).features[key] as boolean;
+}
+
+/** Read the max days allowed for a share-preview link. null = feature unavailable. */
+export function getPreviewLinkMaxDays(plan: string): number | null {
+  return getPlan(plan).features.previewLinkMaxDays;
 }
 
 /** Max published sites = base plan limit + purchased add-on sites (unless unlimited). */

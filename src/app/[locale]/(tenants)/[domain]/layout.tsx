@@ -64,7 +64,7 @@ export default async function TenantLayout({
     .map((b) => {
       const entry = blockRegistry[b.type as keyof typeof blockRegistry];
       const t = resolveBlockT(b.translations, locale, defaultLocale);
-      const label = resolveTranslation(navT, b.type, entry?.navLabel ?? "") || t.title ?? t.heading ?? "";
+      const label = resolveTranslation(navT, b.type, entry?.navLabel ?? "") || t.title || t.heading || "";
       const href = entry?.archivePath ?? `#${b.id}`;
       return { label, href };
     });

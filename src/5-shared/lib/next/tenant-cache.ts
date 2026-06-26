@@ -9,9 +9,17 @@
  * (exists but draft), or missing (no such tenant). */
 export type TenantState = 'published' | 'unpublished' | 'missing'
 
+/** Cached resolution result. `tenantId` is null for missing hosts and
+ * unverified custom domains; it lets the proxy bind a preview token to the
+ * exact tenant being visited. */
+export interface TenantCacheValue {
+  state: TenantState
+  tenantId: string | null
+}
+
 export interface TenantCacheAdapter {
-  get(key: string): Promise<{ state: TenantState } | null>
-  set(key: string, value: { state: TenantState }, ttlMs: number): Promise<void>
+  get(key: string): Promise<TenantCacheValue | null>
+  set(key: string, value: TenantCacheValue, ttlMs: number): Promise<void>
   delete(key: string): Promise<void>
 }
 
@@ -21,6 +29,7 @@ export interface TenantCacheAdapter {
 
 interface Entry {
   state: TenantState
+  tenantId: string | null
   expiresAt: number
 }
 
@@ -34,7 +43,7 @@ export const inMemoryCache: TenantCacheAdapter = {
       store.delete(key)
       return null
     }
-    return { state: entry.state }
+    return { state: entry.state, tenantId: entry.tenantId }
   },
   async set(key, value, ttlMs) {
     store.set(key, { ...value, expiresAt: Date.now() + ttlMs })

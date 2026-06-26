@@ -1,13 +1,15 @@
 "use client";
 
 import { updateTenantSlug } from "@/3-features/manage-tenants/actions/updateTenantSlug";
+import { generatePreviewToken } from "@/3-features/manage-site-blocks/actions/generatePreviewToken";
 import {
   resolveTranslation,
   type TranslationDict,
 } from "@/5-shared/lib/translations/resolve";
+import { getPlan } from "@/5-shared/lib/billing/plans";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 
 interface SubdomainSectionProps {
   tenantId: string;
@@ -18,6 +20,7 @@ interface SubdomainSectionProps {
   devPort: string;
   prodRoot: string;
   activeLocale: string;
+  plan: string;
 }
 
 export function SubdomainSection({
@@ -29,11 +32,23 @@ export function SubdomainSection({
   devPort,
   prodRoot,
   activeLocale,
+  plan,
 }: SubdomainSectionProps) {
   const [slug, setSlug] = useState(initialSlug);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isPreviewing, startPreviewTransition] = useTransition();
+
+  const planConfig = getPlan(plan);
+  const canSharePreviewLink = planConfig.features.previewLinkMaxDays !== null;
+
+  function handlePreview() {
+    startPreviewTransition(async () => {
+      const url = await generatePreviewToken(tenantId);
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+  }
 
   const title = resolveTranslation(
     translations,
@@ -58,10 +73,6 @@ export function SubdomainSection({
   const previewLabel = resolveTranslation(translations, "preview", "Preview");
 
   const suffix = isDev ? `.localhost:${devPort}` : `.${prodRoot}`;
-
-  const previewUrl = isDev
-    ? `http://${slug}.localhost:${devPort}/${activeLocale}`
-    : `https://${slug}.${prodRoot}/${activeLocale}`;
 
   const hasChanged = slug !== initialSlug;
 
@@ -131,14 +142,20 @@ export function SubdomainSection({
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        <a
-          href={previewUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-block text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+        <button
+          onClick={handlePreview}
+          disabled={isPreviewing}
+          className="inline-block text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors disabled:opacity-50"
         >
-          {previewLabel}
-        </a>
+          {isPreviewing
+            ? resolveTranslation(translations, "settings.preview.opening", "Opening…")
+            : previewLabel}
+        </button>
+        {!canSharePreviewLink && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {resolveTranslation(translations, "settings.preview.share-pro-hint", "Share Preview Link is available on Pro and above.")}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
