@@ -45,6 +45,14 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
       ),
       href: `${langPrefix}/features/structured-websites-vs-ai-generated-websites`,
     },
+    {
+      label: resolveTranslation(
+        translations,
+        "feature-seo-geo",
+        "SEO & GEO for Tenant Sites",
+      ),
+      href: `${langPrefix}/features/seo-geo-for-tenants`,
+    },
   ];
 
   const legalLinks = [

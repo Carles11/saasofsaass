@@ -12,27 +12,29 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="border-b border-border/50 last:border-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between py-5 text-left gap-4 group"
-        aria-expanded={open}
-      >
-        <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
-          {question}
-        </span>
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
-            open ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-      <div
+      <dt>
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex w-full items-center justify-between py-5 text-left gap-4 group"
+          aria-expanded={open}
+        >
+          <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors leading-snug">
+            {question}
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
+              open ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+      </dt>
+      <dd
         className={`overflow-hidden transition-all duration-200 ease-in-out ${
           open ? "max-h-64 pb-5" : "max-h-0"
         }`}
       >
         <p className="text-sm text-muted-foreground leading-relaxed">{answer}</p>
-      </div>
+      </dd>
     </div>
   );
 }
@@ -127,11 +129,11 @@ export function StructuredVsAIFaq({ translations }: StructuredVsAIFaqProps) {
           </h2>
         </div>
 
-        <div className="rounded-2xl border border-border/50 bg-card px-6">
+        <dl className="rounded-2xl border border-border/50 bg-card px-6">
           {faqs.map((faq) => (
             <FaqItem key={faq.q} question={faq.q} answer={faq.a} />
           ))}
-        </div>
+        </dl>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Globe, TrendingUp, FileStack } from "lucide-react";
+import { ArrowRight, Globe, TrendingUp, FileStack, Search } from "lucide-react";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 
 interface WhySoSSectionProps {
@@ -23,6 +23,11 @@ const CARDS = [
     icon: FileStack,
     slug: "structured-websites-vs-ai-generated-websites",
   },
+  {
+    key: "seo-geo",
+    icon: Search,
+    slug: "seo-geo-for-tenants",
+  },
 ] as const;
 
 export function WhySoSSection({ translations, locale }: WhySoSSectionProps) {
@@ -31,7 +36,7 @@ export function WhySoSSection({ translations, locale }: WhySoSSectionProps) {
   const subtitle = resolveTranslation(
     translations,
     "subtitle",
-    "Three reasons freelancers and agencies choose SaaS of SaaS over every other website builder.",
+    "Why freelancers and agencies choose SaaS of SaaS over every other website builder.",
   );
 
   return (
@@ -46,7 +51,7 @@ export function WhySoSSection({ translations, locale }: WhySoSSectionProps) {
           <p className="mt-4 text-muted-foreground max-w-2xl mx-auto leading-relaxed">{subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           {CARDS.map(({ key, icon: Icon, slug }) => (
             <Link
               key={key}
