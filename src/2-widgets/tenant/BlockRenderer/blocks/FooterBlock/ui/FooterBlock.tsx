@@ -10,14 +10,13 @@ function normalizeUrl(url: string): string {
   return `https://${trimmed}`;
 }
 
-export function FooterBlock({ t, config, blockId, tenant, locale }: BlockProps) {
+export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
   const rawSocialLinks =
     (config.socialLinks as Array<{ label: string; url: string }>) ?? [];
   const socialLinks = rawSocialLinks.map((l) => ({
     ...l,
     url: normalizeUrl(l.url),
   }));
-  const showPoweredBy = (config.showPoweredBy as boolean) ?? true;
   const description = t.description;
   const copyright = `${tenant.name} © ${new Date().getFullYear()}`;
   const email = (config.email as string) ?? "";
@@ -73,25 +72,9 @@ export function FooterBlock({ t, config, blockId, tenant, locale }: BlockProps) 
             </p>
           )}
           <p className="text-xs text-muted-foreground">{copyright}</p>
-          {showPoweredBy && (
-            <a
-              href={homeUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 font-serif text-base font-normal leading-none tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <>
-                Powered by{" "}
-                <h3 className="font-serif text-2xl font-normal leading-none tracking-wide">
-                  SaaS<em className="italic text-primary">of</em>SaaSs
-                  <em className="italic text-primary">.com</em>
-                </h3>
-              </>
-            </a>
-          )}
         </div>
 
-        {/* ── Center column: Contact + Legal ──────────────────────────── */}
+        {/* ── Center column: Contact ──────────────────────────────────── */}
         <div className="flex flex-col items-start gap-4">
           <h3 className="text-sm font-semibold text-foreground">Contact</h3>
           {email && (
@@ -113,38 +96,6 @@ export function FooterBlock({ t, config, blockId, tenant, locale }: BlockProps) 
           {!email && !phone && (
             <p className="text-sm text-muted-foreground italic">Coming soon</p>
           )}
-
-          <div className="mt-2">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Legal
-            </h4>
-            <div className="flex flex-col gap-1.5">
-              <a
-                href={`${homeUrl}/${locale}/terms-of-service`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Terms of Service
-              </a>
-              <a
-                href={`${homeUrl}/${locale}/privacy-policy`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Privacy Policy
-              </a>
-              <a
-                href={`${homeUrl}/${locale}/cookie-policy`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Cookie Policy
-              </a>
-            </div>
-          </div>
         </div>
 
         {/* ── Right column: Social links ──────────────────────────────── */}

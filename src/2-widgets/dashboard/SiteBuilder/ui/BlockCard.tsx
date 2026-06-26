@@ -65,7 +65,6 @@ export function BlockCard({
   userRole,
   translations,
   onLocaleChange,
-  plan,
 }: BlockCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -147,11 +146,6 @@ export function BlockCard({
     : ((blockConfig.includeInNav as boolean | undefined) ??
       includeInNavDefault);
 
-  const isPaidPlan = plan === "pro";
-  const showPoweredByValue = isPaidPlan
-    ? ((blockConfig.showPoweredBy as boolean | undefined) ?? true)
-    : true;
-
   const includeInNavLabel = resolveTranslation(
     translations,
     "include-in-nav",
@@ -168,10 +162,6 @@ export function BlockCard({
     await updateBlockConfig(block.id, tenantId, newConfig);
   }
 
-  async function handleShowPoweredByChange(checked: boolean) {
-    const newConfig = { ...blockConfig, showPoweredBy: checked };
-    await updateBlockConfig(block.id, tenantId, newConfig);
-  }
 
   return (
     <div
@@ -302,6 +292,7 @@ export function BlockCard({
             onLocaleChange={onLocaleChange ?? (() => {})}
             defaultLocale={tenant.defaultLocale}
             onTranslate={setIsTranslating}
+            translations={translations}
           />
 
           {/* ── includeInNav toggle — not shown for footer ──────────── */}
@@ -332,42 +323,6 @@ export function BlockCard({
                 {isHero && (
                   <span className="text-xs text-muted-foreground">
                     {includeInNavDisabledNote}
-                  </span>
-                )}
-              </div>
-            </label>
-          )}
-
-          {/* ── showPoweredBy toggle — footer only ──────────────────── */}
-          {isFooter && (
-            <label className="flex items-center gap-3 cursor-pointer px-4 py-3 border-t border-border">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={showPoweredByValue}
-                disabled={!isPaidPlan}
-                onClick={() =>
-                  isPaidPlan && handleShowPoweredByChange(!showPoweredByValue)
-                }
-                className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                  showPoweredByValue ? "bg-primary" : "bg-input"
-                }`}
-              >
-                <span
-                  className={`pointer-events-none block h-4 w-4 rounded-full bg-background shadow-sm ring-0 transition-transform ${
-                    showPoweredByValue
-                      ? "translate-x-[18px]"
-                      : "translate-x-[2px]"
-                  }`}
-                />
-              </button>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">
-                  Show Powered by SofS
-                </span>
-                {!isPaidPlan && (
-                  <span className="text-xs text-muted-foreground">
-                    (free plan — always shown)
                   </span>
                 )}
               </div>

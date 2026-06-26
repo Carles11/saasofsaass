@@ -4,18 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { formatPrice } from "@/5-shared/lib/billing/prices";
+import type { PricingTier } from "@/5-shared/lib/billing/pricing-content";
 
-export interface PricingTier {
-  id: string;
-  name: string;
-  description: string;
-  monthly: number;
-  annual: number;
-  currency: string;
-  features: string[];
-  popular: boolean;
-  ctaHref: string;
-}
+export type { PricingTier };
 
 interface PricingCardsProps {
   tiers: PricingTier[];
@@ -29,9 +20,17 @@ interface PricingCardsProps {
     getStarted: string;
   };
   locale: string;
+  /**
+   * When provided, the CTA becomes a button that calls this with the plan id and
+   * current cadence (instead of a plain link to `ctaHref`). Used by the /pricing
+   * page to start checkout for signed-in users. `pendingId` disables that card's
+   * button while its request is in flight.
+   */
+  onSelect?: (tierId: string, annual: boolean) => void;
+  pendingId?: string | null;
 }
 
-export function PricingCards({ tiers, labels, locale }: PricingCardsProps) {
+export function PricingCards({ tiers, labels, locale, onSelect, pendingId }: PricingCardsProps) {
   const [annual, setAnnual] = useState(false);
 
   return (
@@ -105,9 +104,21 @@ export function PricingCards({ tiers, labels, locale }: PricingCardsProps) {
                 ))}
               </ul>
 
-              <Button className="w-full mt-2" variant={tier.popular ? "default" : "outline"} size="lg" asChild>
-                <a href={tier.ctaHref}>{labels.getStarted}</a>
-              </Button>
+              {onSelect ? (
+                <Button
+                  className="w-full mt-2"
+                  variant={tier.popular ? "default" : "outline"}
+                  size="lg"
+                  disabled={pendingId === tier.id}
+                  onClick={() => onSelect(tier.id, annual)}
+                >
+                  {pendingId === tier.id ? "…" : labels.getStarted}
+                </Button>
+              ) : (
+                <Button className="w-full mt-2" variant={tier.popular ? "default" : "outline"} size="lg" asChild>
+                  <a href={tier.ctaHref}>{labels.getStarted}</a>
+                </Button>
+              )}
             </div>
           );
         })}

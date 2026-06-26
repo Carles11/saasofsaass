@@ -1,22 +1,47 @@
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
 import { db } from "@/5-shared/lib/db";
-import { tenants, tenantEntities } from "@/5-shared/lib/db/schema";
+import { tenants, tenantEntities, workspaces, tenantDomains } from "@/5-shared/lib/db/schema";
 import { eq, and, inArray } from "drizzle-orm";
+import { isTenantIndexable } from "@/5-shared/lib/billing/plans";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "saasofsaass.com";
   const rootUrl = `https://${rootDomain}`;
 
-  const activeTenants = await db
-    .select({
-      slug: tenants.slug,
-      locales: tenants.locales,
-      defaultLocale: tenants.defaultLocale,
-      updatedAt: tenants.updatedAt,
-    })
-    .from(tenants)
-    .where(eq(tenants.status, "published"));
+  // Only list sites that are actually indexable: published AND seoEnabled AND on a
+  // plan that permits indexing (free sites are noindex, so they never belong here).
+  const activeTenants = (
+    await db
+      .select({
+        slug: tenants.slug,
+        locales: tenants.locales,
+        defaultLocale: tenants.defaultLocale,
+        updatedAt: tenants.updatedAt,
+        seoEnabled: tenants.seoEnabled,
+        plan: workspaces.plan,
+        customDomain: tenantDomains.domain,
+      })
+      .from(tenants)
+      .leftJoin(workspaces, eq(tenants.workspaceId, workspaces.id))
+      .leftJoin(
+        tenantDomains,
+        and(
+          eq(tenantDomains.tenantId, tenants.id),
+          eq(tenantDomains.status, "verified"),
+        ),
+      )
+      .where(eq(tenants.status, "published"))
+  ).filter((t) => isTenantIndexable(t.seoEnabled, t.plan ?? "free"));
+
+  // Primary host per tenant — the verified custom domain wins over the subdomain
+  // so the sitemap only ever lists the canonical URL.
+  const hostForSlug = new Map(
+    activeTenants.map((t) => [
+      t.slug,
+      t.customDomain ?? `${t.slug}.${rootDomain}`,
+    ]),
+  );
 
   const publishedEntities = await db
     .select({
@@ -50,7 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Tenant sites — each locale on its own subdomain
   for (const tenant of activeTenants) {
     const locales = (tenant.locales ?? [tenant.defaultLocale]) as string[];
-    const tenantUrl = `https://${tenant.slug}.${rootDomain}`;
+    const tenantUrl = `https://${hostForSlug.get(tenant.slug)}`;
 
     for (const locale of locales) {
       // Homepage
@@ -85,7 +110,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     if (!tenant) continue;
 
     const locales = (tenant.locales ?? [tenant.defaultLocale]) as string[];
-    const tenantUrl = `https://${entity.tenantSlug}.${rootDomain}`;
+    const tenantUrl = `https://${hostForSlug.get(entity.tenantSlug)}`;
     const path = entity.kind === "blog_post" ? "blog" : "podcast";
 
     for (const locale of locales) {

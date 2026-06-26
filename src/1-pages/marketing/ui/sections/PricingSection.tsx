@@ -1,40 +1,14 @@
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
-import { PLANS, PLAN_ORDER, isUnlimited } from "@/5-shared/lib/billing/plans";
+import { PLAN_DESCRIPTIONS, buildPricingTiers } from "@/5-shared/lib/billing/pricing-content";
+import type { PlanId } from "@/5-shared/lib/billing/plans";
 import { getStripePrices } from "@/5-shared/lib/billing/prices";
 import { appAuthUrl } from "@/5-shared/lib/auth/auth-urls";
-import { PricingCards, type PricingTier } from "./PricingCards";
+import { PricingCards } from "./PricingCards";
 
 interface PricingSectionProps {
   translations?: TranslationDict;
   locale?: string;
   currency?: string;
-}
-
-const DESCRIPTIONS: Record<string, string> = {
-  free: "Build and launch your first site, free forever.",
-  pro: "For professionals offering sites to their clients.",
-  enterprise: "For agencies managing sites at scale.",
-};
-
-function num(n: number): string {
-  return isUnlimited(n) ? "Unlimited" : String(n);
-}
-
-function featuresFor(planId: keyof typeof PLANS): string[] {
-  const { limits, features } = PLANS[planId];
-  return [
-    `${num(limits.publishedSites)} published site${limits.publishedSites === 1 ? "" : "s"}`,
-    "Unlimited draft sites",
-    "Free *.saasofsaass.com subdomain",
-    features.customDomains ? "Custom domains" : "Custom domains — Pro+",
-    isUnlimited(limits.aiBlocksLifetime)
-      ? "Unlimited AI translations"
-      : `${limits.aiBlocksLifetime} AI translations (trial)`,
-    `${num(limits.teamMembers)} team member${limits.teamMembers === 1 ? "" : "s"}`,
-    `${num(limits.languagesPerSite)} languages per site`,
-    ...(features.removeBranding ? ['Remove "Made with" badge'] : []),
-    features.prioritySupport ? "Priority support" : "Community support",
-  ];
 }
 
 export async function PricingSection({ translations, locale, currency }: PricingSectionProps) {
@@ -48,19 +22,12 @@ export async function PricingSection({ translations, locale, currency }: Pricing
     "Start free. Publish more sites and unlock custom domains as your client list grows.",
   );
 
-  const tiers: PricingTier[] = PLAN_ORDER.map((id) => ({
-    id,
-    name: PLANS[id].label,
-    description: resolveTranslation(translations, `tier.${id}.description`, DESCRIPTIONS[id] ?? ""),
-    monthly: prices[id].monthly,
-    annual: prices[id].annual,
-    currency: prices[id].currency,
-    features: id === "pro"
-      ? featuresFor(id).map((f, i) => i === 0 ? `${f} (+ €19/site for more)` : f)
-      : featuresFor(id),
-    popular: id === "pro",
-    ctaHref: appAuthUrl("sign-up", locale ?? "en"),
-  }));
+  const tiers = buildPricingTiers(
+    prices,
+    (id: PlanId) =>
+      resolveTranslation(translations, `tier.${id}.description`, PLAN_DESCRIPTIONS[id] ?? ""),
+    () => appAuthUrl("sign-up", locale ?? "en"),
+  );
 
   const labels = {
     popular: resolveTranslation(translations, "popular-badge", "Most Popular"),

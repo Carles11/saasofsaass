@@ -8,6 +8,8 @@ import { authServer } from "@/5-shared/lib/auth/server";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
 import { ensureWorkspace } from "@/5-shared/lib/billing/workspace";
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
+import { getPlatformTranslations } from "@/5-shared/lib/db/platform-translations";
+import { UpgradeModalProvider } from "@/2-widgets/dashboard/UpgradeModal";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -46,6 +48,8 @@ export default async function DashboardLayout({
     redirect(`/${locale}/auth/sign-in`);
   }
 
+  const upgradeTranslations = await getPlatformTranslations("upgrade", locale);
+
   return (
     <div className="flex min-h-screen bg-background">
       <TranslationProgressBar />
@@ -57,7 +61,9 @@ export default async function DashboardLayout({
           <PaletteSwitcher />
         </div>
         <div className="flex-1 overflow-y-auto">
-          {children}
+          <UpgradeModalProvider translations={upgradeTranslations}>
+            {children}
+          </UpgradeModalProvider>
         </div>
       </main>
       <MobileBottomNav resolvedRoles={resolvedRoles} />

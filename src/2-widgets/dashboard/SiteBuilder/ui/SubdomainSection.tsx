@@ -6,7 +6,6 @@ import {
   resolveTranslation,
   type TranslationDict,
 } from "@/5-shared/lib/translations/resolve";
-import { getPlan } from "@/5-shared/lib/billing/plans";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useTransition } from "react";
@@ -20,7 +19,6 @@ interface SubdomainSectionProps {
   devPort: string;
   prodRoot: string;
   activeLocale: string;
-  plan: string;
 }
 
 export function SubdomainSection({
@@ -32,16 +30,12 @@ export function SubdomainSection({
   devPort,
   prodRoot,
   activeLocale,
-  plan,
 }: SubdomainSectionProps) {
   const [slug, setSlug] = useState(initialSlug);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPreviewing, startPreviewTransition] = useTransition();
-
-  const planConfig = getPlan(plan);
-  const canSharePreviewLink = planConfig.features.previewLinkMaxDays !== null;
 
   function handlePreview() {
     startPreviewTransition(async () => {
@@ -151,11 +145,6 @@ export function SubdomainSection({
             ? resolveTranslation(translations, "settings.preview.opening", "Opening…")
             : previewLabel}
         </button>
-        {!canSharePreviewLink && (
-          <p className="text-xs text-muted-foreground mt-1">
-            {resolveTranslation(translations, "settings.preview.share-pro-hint", "Share Preview Link is available on Pro and above.")}
-          </p>
-        )}
       </CardContent>
     </Card>
   );

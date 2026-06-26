@@ -3,6 +3,7 @@
 import { assertCanManageStructure } from "@/5-shared/lib/auth/authorization";
 import { db } from "@/5-shared/lib/db";
 import { tenants, workspaces } from "@/5-shared/lib/db/schema";
+import { hasFeature } from "@/5-shared/lib/billing/plans";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -28,9 +29,10 @@ export async function updateTenantSeo(tenantId: string, seoEnabled: boolean) {
 
   const plan = workspace?.plan ?? "free";
 
-  // Plan gate: only pro can disable indexing
-  if (!seoEnabled && plan !== "pro") {
-    throw new Error("Upgrade to Pro to disable search engine indexing");
+  // Plan gate: only plans eligible for indexing can control it. Free sites are
+  // never indexed, so the toggle is meaningless for them.
+  if (!hasFeature(plan, "searchIndexing")) {
+    throw new Error("Search engine indexing is available on Pro and Enterprise plans.");
   }
 
   await db

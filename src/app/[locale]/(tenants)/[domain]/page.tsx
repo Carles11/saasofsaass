@@ -1,6 +1,8 @@
 import { TenantPage } from "@/1-pages/tenants";
-import { getTenantByDomain } from "@/4-entities/tenant";
+import { getTenantByDomain, getVerifiedCustomDomain } from "@/4-entities/tenant";
 import { getServerParams, Params, SearchParams } from "@/5-shared/lib/next/params.server";
+import { isTenantIndexable } from "@/5-shared/lib/billing/plans";
+import { getPlanForWorkspace } from "@/5-shared/lib/billing/workspace";
 import { getLocale } from "next-intl/server";
 import type { Metadata } from "next";
 
@@ -23,8 +25,6 @@ export async function generateMetadata({
     isSubdomain,
   });
 
-  const baseUrl = `https://${domain}`;
-
   if (!tenant) {
     return {
       title: "Site Not Found",
@@ -37,6 +37,17 @@ export async function generateMetadata({
     typeof heroTranslations.description === "string"
       ? heroTranslations.description
       : `${tenant.name} — Professional website`;
+
+  // Indexing requires both the site's own SEO toggle and a plan that permits it
+  // (free sites are never indexed — domain-reputation hygiene).
+  const plan = await getPlanForWorkspace(tenant.workspaceId);
+  const indexable = isTenantIndexable(tenant.seoEnabled, plan);
+
+  // Canonicalize to the tenant's primary host (verified custom domain if any,
+  // else the requested subdomain) so the subdomain and custom domain don't
+  // compete as duplicate content. Applies to Pro and Enterprise alike.
+  const verifiedCustomDomain = await getVerifiedCustomDomain(tenant.id);
+  const baseUrl = `https://${verifiedCustomDomain ?? domain}`;
 
   return {
     title: {
@@ -64,8 +75,8 @@ export async function generateMetadata({
       description,
     },
     robots: {
-      index: tenant.seoEnabled !== false,
-      follow: tenant.seoEnabled !== false,
+      index: indexable,
+      follow: indexable,
     },
   };
 }

@@ -44,6 +44,17 @@ export async function ensureWorkspace(profileId: string, profileName?: string | 
   }
 }
 
+/** Resolve a workspace's plan slug, defaulting to "free" when absent. */
+export async function getPlanForWorkspace(workspaceId: string | null): Promise<string> {
+  if (!workspaceId) return "free";
+  const [ws] = await db
+    .select({ plan: workspaces.plan })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+  return ws?.plan ?? "free";
+}
+
 export interface AiQuota {
   workspaceId: string | null;
   /** -1 = unlimited */

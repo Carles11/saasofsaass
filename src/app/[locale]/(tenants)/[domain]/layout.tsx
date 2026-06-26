@@ -4,7 +4,10 @@ import { StoreHydrator } from "@/5-shared/store/StoreHydrator";
 import UnifiedHeader from "@/2-widgets/tenant/header/tenantHeader";
 import { blockRegistry } from "@/2-widgets/tenant/BlockRenderer/config/registry";
 import { resolveBlockT } from "@/2-widgets/tenant/BlockRenderer/config/utils/block";
+import { PoweredByBadge, PoweredByStrip } from "@/2-widgets/tenant/ui/PoweredByBadge";
 import { getPlatformTranslations, resolveTranslation } from "@/5-shared/lib/db/platform-translations";
+import { getPlanForWorkspace } from "@/5-shared/lib/billing/workspace";
+import { showsCornerBadge, showsFooterBadge } from "@/5-shared/lib/billing/plans";
 import type { SupportedLocaleType } from "@/5-shared/types/languages/supportedLocales";
 import { getLocale } from "next-intl/server";
 
@@ -50,6 +53,15 @@ export default async function TenantLayout({
 
   const navT = await getPlatformTranslations("tenant.nav", locale);
 
+  // Platform branding (plan-driven): Free = corner badge + footer strip,
+  // Pro = corner badge only, Enterprise = none.
+  const plan = tenant ? await getPlanForWorkspace(tenant.workspaceId) : "free";
+  const poweredByLabel = resolveTranslation(navT, "powered-by", "Powered by");
+  const brandingHref =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : `https://${rootDomain}`;
+
   const navLinks = tenantBlocks
     .filter((b) => b.isVisible)
     .filter((b) => {
@@ -82,7 +94,13 @@ export default async function TenantLayout({
       )}
       <div className={`min-h-screen selection:bg-foreground selection:text-background theme-${palette}`}>
         {children}
+        {tenant && showsFooterBadge(plan) && (
+          <PoweredByStrip href={brandingHref} label={poweredByLabel} />
+        )}
       </div>
+      {tenant && showsCornerBadge(plan) && (
+        <PoweredByBadge href={brandingHref} label={poweredByLabel} />
+      )}
     </StoreHydrator>
   );
 }

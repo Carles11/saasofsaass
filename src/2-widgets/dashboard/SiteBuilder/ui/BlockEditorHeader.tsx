@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { SupportedLocaleType } from "@/5-shared/types";
+import type { TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { AutoTranslateButton } from "./AutoTranslateButton";
 import { LanguageSelector } from "./LanguageSelector";
 
@@ -13,6 +14,7 @@ interface BlockEditorHeaderProps {
   onLocaleChange: (locale: SupportedLocaleType) => void;
   defaultLocale: string;
   onTranslate?: (isTranslating: boolean) => void;
+  translations?: TranslationDict;
 }
 
 export function BlockEditorHeader({
@@ -23,6 +25,7 @@ export function BlockEditorHeader({
   onLocaleChange,
   defaultLocale,
   onTranslate,
+  translations,
 }: BlockEditorHeaderProps) {
   const [isTranslating, setIsTranslating] = useState(false);
 
@@ -44,6 +47,7 @@ export function BlockEditorHeader({
         blockId={blockId}
         defaultLocale={defaultLocale}
         onTranslate={handleTranslate}
+        translations={translations}
       />
     </div>
   );

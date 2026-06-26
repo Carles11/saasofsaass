@@ -14,10 +14,19 @@ export interface PlanLimits {
   aiBlocksLifetime: number;
 }
 
+/** Platform branding shown on a tenant's public site:
+ * - `full`    — fixed corner badge + a "Powered by" footer strip (Free).
+ * - `minimal` — fixed corner badge only (Pro): a discreet, dofollow backlink.
+ * - `none`    — fully unbranded / white-label (Enterprise). */
+export type BrandingLevel = "full" | "minimal" | "none";
+
 export interface PlanFeatures {
   customDomains: boolean;
-  removeBranding: boolean;
-  disableSeoIndex: boolean;
+  branding: BrandingLevel;
+  /** Whether sites on this plan are eligible to be indexed by search/AI engines.
+   * Free sites are never indexed (domain-reputation hygiene); paid plans are
+   * indexed by default and may opt out via the per-site `seoEnabled` flag. */
+  searchIndexing: boolean;
   prioritySupport: boolean;
   /** Max days a share-preview link can be valid. null = feature unavailable.
    * Always a finite number when present — preview links never live forever, so
@@ -47,8 +56,8 @@ export const PLANS = {
     },
     features: {
       customDomains: false,
-      removeBranding: false,
-      disableSeoIndex: false,
+      branding: "full",
+      searchIndexing: false,
       prioritySupport: false,
       previewLinkMaxDays: null,
     },
@@ -68,8 +77,8 @@ export const PLANS = {
     },
     features: {
       customDomains: true,
-      removeBranding: true,
-      disableSeoIndex: true,
+      branding: "minimal",
+      searchIndexing: true,
       prioritySupport: false,
       previewLinkMaxDays: 7,
     },
@@ -89,8 +98,8 @@ export const PLANS = {
     },
     features: {
       customDomains: true,
-      removeBranding: true,
-      disableSeoIndex: true,
+      branding: "none",
+      searchIndexing: true,
       prioritySupport: true,
       previewLinkMaxDays: 180,
     },
@@ -157,6 +166,30 @@ export function getTeamLimit(plan: string): number {
 
 export function planAllowsCustomDomains(plan: string): boolean {
   return hasFeature(plan, "customDomains");
+}
+
+/** Platform-branding level for a plan (full / minimal / none). */
+export function getBranding(plan: string): BrandingLevel {
+  return getPlan(plan).features.branding;
+}
+
+/** Whether the fixed corner badge shows (Free + Pro). */
+export function showsCornerBadge(plan: string): boolean {
+  return getBranding(plan) !== "none";
+}
+
+/** Whether the "Powered by" footer strip shows (Free only). */
+export function showsFooterBadge(plan: string): boolean {
+  return getBranding(plan) === "full";
+}
+
+/** Whether a tenant site should be indexed: its own SEO toggle must be on AND
+ * the plan must permit indexing. Free sites are never indexed. */
+export function isTenantIndexable(
+  seoEnabled: boolean | null | undefined,
+  plan: string,
+): boolean {
+  return seoEnabled !== false && hasFeature(plan, "searchIndexing");
 }
 
 export function getNextPlan(currentPlan: string): PlanId | null {

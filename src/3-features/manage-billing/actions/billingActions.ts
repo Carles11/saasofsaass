@@ -79,6 +79,30 @@ export async function createCheckoutSession(workspaceId: string, plan: string, c
 }
 
 /**
+ * Start checkout for the currently signed-in user's own workspace.
+ *
+ * Used by public surfaces (e.g. the /pricing page) where the workspace id isn't
+ * in scope — resolves the caller's owned workspace from the session, then
+ * delegates to createCheckoutSession. Throws if the user owns no workspace.
+ */
+export async function createCheckoutSessionForCurrentUser(
+  plan: string,
+  cadence: Cadence = "monthly",
+) {
+  const profile = await requireProfile();
+
+  const [ws] = await db
+    .select({ id: workspaces.id })
+    .from(workspaces)
+    .where(eq(workspaces.ownerProfileId, profile.id))
+    .limit(1);
+
+  if (!ws) throw new Error("No workspace found for current user");
+
+  return createCheckoutSession(ws.id, plan, cadence);
+}
+
+/**
  * Create a Stripe Billing Portal session for managing the subscription.
  */
 export async function createBillingPortalSession(workspaceId: string) {
