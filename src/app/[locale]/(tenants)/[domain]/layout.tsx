@@ -4,6 +4,7 @@ import { StoreHydrator } from "@/5-shared/store/StoreHydrator";
 import UnifiedHeader from "@/2-widgets/tenant/header/tenantHeader";
 import { blockRegistry } from "@/2-widgets/tenant/BlockRenderer/config/registry";
 import { resolveBlockT } from "@/2-widgets/tenant/BlockRenderer/config/utils/block";
+import { getPlatformTranslations, resolveTranslation } from "@/5-shared/lib/db/platform-translations";
 import type { SupportedLocaleType } from "@/5-shared/types/languages/supportedLocales";
 import { getLocale } from "next-intl/server";
 
@@ -47,6 +48,8 @@ export default async function TenantLayout({
     tenantBlocks = await getBlocksByTenantId(tenant.id);
   }
 
+  const navT = await getPlatformTranslations("tenant.nav", locale);
+
   const navLinks = tenantBlocks
     .filter((b) => b.isVisible)
     .filter((b) => {
@@ -61,7 +64,7 @@ export default async function TenantLayout({
     .map((b) => {
       const entry = blockRegistry[b.type as keyof typeof blockRegistry];
       const t = resolveBlockT(b.translations, locale, defaultLocale);
-      const label = entry?.navLabel ?? t.title ?? t.heading ?? "";
+      const label = resolveTranslation(navT, b.type, entry?.navLabel ?? "") || t.title ?? t.heading ?? "";
       const href = entry?.archivePath ?? `#${b.id}`;
       return { label, href };
     });

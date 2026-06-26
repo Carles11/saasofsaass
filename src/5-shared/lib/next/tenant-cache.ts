@@ -5,9 +5,13 @@
  * implementation without touching the middleware or any call sites.
  */
 
+/** Resolution state of a tenant host: published (serve it), unpublished
+ * (exists but draft), or missing (no such tenant). */
+export type TenantState = 'published' | 'unpublished' | 'missing'
+
 export interface TenantCacheAdapter {
-  get(key: string): Promise<{ exists: boolean } | null>
-  set(key: string, value: { exists: boolean }, ttlMs: number): Promise<void>
+  get(key: string): Promise<{ state: TenantState } | null>
+  set(key: string, value: { state: TenantState }, ttlMs: number): Promise<void>
   delete(key: string): Promise<void>
 }
 
@@ -16,7 +20,7 @@ export interface TenantCacheAdapter {
 // instance begins with an empty store and will query Neon once per unique key.
 
 interface Entry {
-  exists: boolean
+  state: TenantState
   expiresAt: number
 }
 
@@ -30,7 +34,7 @@ export const inMemoryCache: TenantCacheAdapter = {
       store.delete(key)
       return null
     }
-    return { exists: entry.exists }
+    return { state: entry.state }
   },
   async set(key, value, ttlMs) {
     store.set(key, { ...value, expiresAt: Date.now() + ttlMs })

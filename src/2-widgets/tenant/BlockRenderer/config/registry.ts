@@ -10,7 +10,9 @@ import { TextContentBlock } from "../blocks/TextContentBlock/ui/TextContentBlock
 import { MapBlock } from "../blocks/MapBlock/ui/MapBlock";
 import { FooterBlock } from "../blocks/FooterBlock/ui/FooterBlock";
 import { TestimonialsBlock } from "../blocks/TestimonialsBlock/ui/TestimonialsBlock";
-import type { BlockComponent, BlockProps, BlockRegistry } from "./types";
+import type { BlockComponent, BlockProps, BlockRegistry, BlockRegistryEntry } from "./types";
+import { BLOCK_CATALOG } from "./blockCatalog";
+import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 
 const adaptImageGalleryBlock: BlockComponent = function AdaptImageGalleryBlock(props: BlockProps) {
   return React.createElement(ImageGalleryBlock, {
@@ -21,103 +23,41 @@ const adaptImageGalleryBlock: BlockComponent = function AdaptImageGalleryBlock(p
   });
 };
 
+const COMPONENTS: Record<BlockKind, BlockComponent> = {
+  hero: HeroBlock,
+  "blog-feed": BlogFeedBlock,
+  "podcast-feed": PodcastFeedBlock,
+  awards: AwardsBlock,
+  contact: ContactBlock,
+  "cta-banner": CtaBannerBlock,
+  "text-content": TextContentBlock,
+  "image-gallery": adaptImageGalleryBlock,
+  map: MapBlock,
+  footer: FooterBlock,
+  testimonials: TestimonialsBlock,
+};
+
+function buildEntry(kind: BlockKind, component: BlockComponent): BlockRegistryEntry {
+  return {
+    component,
+    includeInNav: BLOCK_CATALOG[kind].includeInNav,
+    navLabel: BLOCK_CATALOG[kind].navLabel,
+    archivePath: BLOCK_CATALOG[kind].archivePath,
+    defaultConfig: BLOCK_CATALOG[kind].defaultConfig,
+    fields: BLOCK_CATALOG[kind].fields,
+  };
+}
+
 export const blockRegistry: BlockRegistry = {
-  hero: {
-    component: HeroBlock,
-    includeInNav: false,
-    defaultConfig: { layout: "centered", ctaUrl: "/", heroImage: null },
-    fields: [
-      { key: "title", label: "Title", inputType: "input" },
-      { key: "subtitle", label: "Subtitle", inputType: "textarea" },
-      { key: "ctaLabel", label: "CTA Button Label", inputType: "input" },
-      { key: "heroImage", label: "Hero Image", inputType: "image" },
-    ],
-  },
-  "blog-feed": {
-    component: BlogFeedBlock,
-    includeInNav: true,
-    navLabel: "Blog",
-    archivePath: "/blog",
-    defaultConfig: { maxItems: 9, archivePath: "/blog" },
-    fields: [], // collection blocks — managed via CollectionManager tab
-  },
-  "podcast-feed": {
-    component: PodcastFeedBlock,
-    includeInNav: true,
-    navLabel: "Podcast",
-    archivePath: "/podcast",
-    defaultConfig: { maxItems: 9, archivePath: "/podcast" },
-    fields: [], // collection blocks — managed via CollectionManager tab
-  },
-  awards: {
-    component: AwardsBlock,
-    includeInNav: true,
-    navLabel: "Awards",
-    defaultConfig: {},
-    fields: [],
-  },
-  contact: {
-    component: ContactBlock,
-    includeInNav: true,
-    navLabel: "Contact",
-    defaultConfig: { email: "", phone: "", address: "" },
-    fields: [
-      { key: "title", label: "Title", inputType: "input" },
-      { key: "description", label: "Description", inputType: "textarea" },
-    ],
-  },
-  "cta-banner": {
-    component: CtaBannerBlock,
-    includeInNav: false,
-    defaultConfig: { ctaUrl: "/" },
-    fields: [
-      { key: "heading", label: "Heading", inputType: "input" },
-      { key: "subtitle", label: "Subtitle", inputType: "textarea" },
-      { key: "ctaLabel", label: "CTA Button Label", inputType: "input" },
-    ],
-  },
-  "text-content": {
-    component: TextContentBlock,
-    includeInNav: true,
-    defaultConfig: {},
-    fields: [
-      { key: "heading", label: "Heading", inputType: "input" },
-      { key: "body", label: "Body", inputType: "textarea" },
-    ],
-  },
-  "image-gallery": {
-    component: adaptImageGalleryBlock,
-    includeInNav: false,
-    defaultConfig: {
-      images: [], // Will be managed via a gallery manager/editor
-      lang: "en",
-    },
-    fields: [
-      { key: "images", label: "Images", inputType: "input" }, // Placeholder, real editing via gallery UI
-      { key: "lang", label: "Language", inputType: "input" },
-    ],
-  },
-  map: {
-    component: MapBlock,
-    includeInNav: true,
-    navLabel: "Location",
-    defaultConfig: {},
-    fields: [],
-  },
-  footer: {
-    component: FooterBlock,
-    includeInNav: false,
-    defaultConfig: { showPoweredBy: true, socialLinks: [], email: "", phone: "" },
-    fields: [],
-  },
-  testimonials: {
-    component: TestimonialsBlock,
-    includeInNav: true,
-    navLabel: "Testimonials",
-    defaultConfig: { maxItems: 12 },
-    fields: [
-      { key: "heading", label: "Section Heading", inputType: "input" },
-      { key: "emptyState", label: "Empty State Text", inputType: "input" },
-    ],
-  },
+  hero: buildEntry("hero", HeroBlock),
+  "blog-feed": buildEntry("blog-feed", BlogFeedBlock),
+  "podcast-feed": buildEntry("podcast-feed", PodcastFeedBlock),
+  awards: buildEntry("awards", AwardsBlock),
+  contact: buildEntry("contact", ContactBlock),
+  "cta-banner": buildEntry("cta-banner", CtaBannerBlock),
+  "text-content": buildEntry("text-content", TextContentBlock),
+  "image-gallery": buildEntry("image-gallery", adaptImageGalleryBlock),
+  map: buildEntry("map", MapBlock),
+  footer: buildEntry("footer", FooterBlock),
+  testimonials: buildEntry("testimonials", TestimonialsBlock),
 };

@@ -34,99 +34,21 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import {
-  ArrowRightCircle,
-  FileText,
   GripVertical,
-  Images,
-  Mail,
-  MapPin,
-  Mic2,
-  Newspaper,
-  Sparkles,
-  Star,
-  Trophy,
   XIcon,
-  type LucideIcon,
-  Copyright,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BlockCard } from "./BlockCard";
+import { BLOCK_CATALOG, BLOCK_ORDER, type BlockCategory } from "@/2-widgets/tenant/BlockRenderer/config/blockCatalog";
+import type { LucideIcon } from "lucide-react";
 
-// ── Block picker data ──────────────────────────────────────────────────────
+// ── Derive picker data from the catalog ────────────────────────────────────
 
-const BLOCK_PICKER_ITEMS: {
-  kind: BlockKind;
-  icon: LucideIcon;
-  name: string;
-  description: string;
-}[] = [
-  {
-    kind: "hero",         icon: Sparkles,         name: "Hero Section",
-    description: "Headline, subtitle, and primary call-to-action",
-  },
-  {
-    kind: "blog-feed",    icon: Newspaper,        name: "Blog Feed",
-    description: "Blog posts displayed in a grid layout",
-  },
-  {
-    kind: "podcast-feed", icon: Mic2,             name: "Podcast Feed",
-    description: "Podcast episodes with cover art and descriptions",
-  },
-  {
-    kind: "awards",       icon: Trophy,           name: "Awards",
-    description: "Awards, certifications, or recognitions",
-  },
-  {
-    kind: "testimonials", icon: Star,             name: "Testimonials",
-    description: "Customer/client testimonials with quotes, ratings, and author info",
-  },
-  {
-    kind: "contact",      icon: Mail,             name: "Contact Section",
-    description: "Email, phone, address, and optional contact form",
-  },
-  {
-    kind: "cta-banner",   icon: ArrowRightCircle, name: "CTA Banner",
-    description: "Call-to-action with heading, text, and button",
-  },
-  {
-    kind: "text-content", icon: FileText,         name: "Text Content",
-    description: "Freeform prose — about us, policies, or text-only",
-  },
-  {
-    kind: "image-gallery",icon: Images,           name: "Image Gallery",
-    description: "Visual image gallery with lightbox viewing",
-  },
-  {
-    kind: "map",           icon: MapPin,           name: "Location",
-    description: "Map with address and embedded Google Maps view",
-  },
-  {
-    kind: "footer",        icon: Copyright,        name: "Footer",
-    description: "Copyright, social links, and powered-by branding",
-  },
-];
+type PickerItem = { kind: BlockKind; icon: LucideIcon; name: string; description: string };
 
-const CATEGORY_MAP: Record<string, string> = {
-  hero: "structure",
-  "blog-feed": "content",
-  "podcast-feed": "content",
-  awards: "content",
-  testimonials: "content",
-  "text-content": "content",
-  "image-gallery": "media",
-  contact: "interactive",
-  "cta-banner": "interactive",
-  map: "interactive",
-  footer: "structure",
-};
-
-const CATEGORIES = [
-  { id: "all", label: "All" },
-  { id: "structure", label: "Structure" },
-  { id: "content", label: "Content" },
-  { id: "media", label: "Media" },
-  { id: "interactive", label: "Interactive" },
-] as const;
+const CATEGORY_MAP: Record<string, BlockCategory> = Object.fromEntries(
+  BLOCK_ORDER.map((k) => [k, BLOCK_CATALOG[k].category]),
+) as Record<string, BlockCategory>;
 
 // ── Selectable picker card ─────────────────────────────────────────────────
 
@@ -135,7 +57,7 @@ function PickerCard({
   isSelected,
   onToggle,
 }: {
-  item: (typeof BLOCK_PICKER_ITEMS)[number];
+  item: PickerItem;
   isSelected: boolean;
   onToggle: () => void;
 }) {
@@ -276,12 +198,28 @@ export function BlockList({
 
   // ── Filtering ────────────────────────────────────────────────────────
 
+  const categories = useMemo(
+    () => [
+      { id: "all", label: resolveTranslation(translations, "category.all", "All") },
+      { id: "structure", label: resolveTranslation(translations, "category.structure", "Structure") },
+      { id: "content", label: resolveTranslation(translations, "category.content", "Content") },
+      { id: "media", label: resolveTranslation(translations, "category.media", "Media") },
+      { id: "interactive", label: resolveTranslation(translations, "category.interactive", "Interactive") },
+    ],
+    [translations],
+  );
+
   const pickerItems = useMemo(
     () =>
-      BLOCK_PICKER_ITEMS.filter(
-        (i) => !(existingKinds.has(i.kind) && (i.kind === "hero" || i.kind === "footer")),
-      ),
-    [existingKinds],
+      BLOCK_ORDER.filter(
+        (kind) => !(existingKinds.has(kind) && (kind === "hero" || kind === "footer")),
+      ).map((kind) => ({
+        kind,
+        icon: BLOCK_CATALOG[kind].icon,
+        name: resolveTranslation(translations, `picker.${kind}.name`, BLOCK_CATALOG[kind].name),
+        description: resolveTranslation(translations, `picker.${kind}.description`, BLOCK_CATALOG[kind].description),
+      })),
+    [existingKinds, translations],
   );
 
   const filteredItems = useMemo(
@@ -380,7 +318,7 @@ export function BlockList({
 
               {/* Category pills */}
               <div className="flex gap-2 px-6 pb-4 shrink-0 overflow-x-auto">
-                {CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
@@ -400,7 +338,7 @@ export function BlockList({
               {/* Block grid */}
               <div className="flex-1 overflow-y-auto px-6 pb-4">
                 {category === "all" ? (
-                  CATEGORIES.filter((c) => c.id !== "all").map((cat) => {
+                  categories.filter((c) => c.id !== "all").map((cat) => {
                     const catItems = pickerItems.filter(
                       (i) => CATEGORY_MAP[i.kind] === cat.id,
                     );

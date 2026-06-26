@@ -1,6 +1,7 @@
 "use client";
 
-import { blockIncludeInNav } from "@/2-widgets/tenant/BlockRenderer/config/block-fields";
+import { BLOCK_CATALOG } from "@/2-widgets/tenant/BlockRenderer/config/blockCatalog";
+import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import {
   deleteBlock,
   toggleBlockVisibility,
@@ -140,7 +141,7 @@ export function BlockCard({
   const isHero = block.type === "hero";
   const isFooter = block.type === "footer";
   const blockConfig = (block.config ?? {}) as Record<string, unknown>;
-  const includeInNavDefault = blockIncludeInNav[block.type] ?? false;
+  const includeInNavDefault = BLOCK_CATALOG[block.type as BlockKind]?.includeInNav ?? false;
   const includeInNavValue = isHero
     ? true
     : ((blockConfig.includeInNav as boolean | undefined) ??

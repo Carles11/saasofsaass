@@ -1,6 +1,6 @@
 "use client";
 
-import { blockFields } from "@/2-widgets/tenant/BlockRenderer/config/block-fields";
+import { BLOCK_CATALOG } from "@/2-widgets/tenant/BlockRenderer/config/blockCatalog";
 import { updateBlockConfig, updateBlockTranslations } from "@/3-features/manage-site-blocks";
 import type { Block, Tenant } from "@/5-shared/lib/db/schema";
 import { isRtl } from "@/5-shared/lib/next/rtl";
@@ -52,7 +52,7 @@ export function BlockEditForm({
   translations,
   onSuccess,
 }: BlockEditFormProps) {
-  const entry = blockFields[block.type as BlockKind];
+  const entry = BLOCK_CATALOG[block.type as BlockKind]?.fields;
   const fields = entry ?? [];
   const cfFields = CONFIG_FIELDS[block.type as BlockKind] ?? [];
 

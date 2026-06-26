@@ -8,7 +8,7 @@ import {
   normalizeHostname,
   parseDomain,
 } from "./5-shared/lib/next/domain-parser";
-import { tenantCache } from "./5-shared/lib/next/tenant-cache";
+import { tenantCache, type TenantState } from "./5-shared/lib/next/tenant-cache";
 import { SIDEBAR_TABS } from "./5-shared/config/sidebar-tabs";
 
 // ── Constants — resolved once per worker instance ──────────────────────────────
@@ -18,7 +18,6 @@ const rootDomain = (
 const appDomain = (
   process.env.NEXT_PUBLIC_APP_DOMAIN || `app.${rootDomain}`
 ).toLowerCase();
-const TENANT_NOT_FOUND_URL = `https://${rootDomain}`;
 const TENANT_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 // Dashboard route prefixes derived from the canonical sidebar-tabs config.
@@ -31,28 +30,41 @@ const sql = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
 const intlMiddleware = createIntlMiddleware(routing);
 const localePattern = new RegExp(`^/(${routing.locales.join("|")})(/|$)`);
 
-// ── Tenant existence check with cache ──────────────────────────────────────────
-async function isTenantActive(
+// ── Tenant resolution with cache ────────────────────────────────────────────────
+// Returns the host's state so the proxy can serve the site (published), or rewrite
+// to the localized "site unavailable" page for draft (unpublished) vs unknown
+// (missing) hosts. Custom domains are never "missing" — an unverified custom
+// domain is treated as "unpublished".
+async function resolveTenantState(
   tenantKey: string,
   isSubdomain: boolean,
-): Promise<boolean> {
+): Promise<TenantState> {
   const cacheKey = isSubdomain ? `slug:${tenantKey}` : `domain:${tenantKey}`;
   const cached = await tenantCache.get(cacheKey);
-  if (cached !== null) return cached.exists;
+  if (cached !== null) return cached.state;
 
-  if (!sql) return true; // No DB configured — let the page handle it
+  if (!sql) return "published"; // No DB configured — let the page handle it
 
   try {
     // neon driver requires tagged template literals — use separate queries per lookup type
-    const rows = isSubdomain
-      ? await sql`SELECT id FROM tenants WHERE slug = ${tenantKey} AND status = 'published' LIMIT 1`
-      : await sql`SELECT td.tenant_id FROM tenant_domains td WHERE td.domain = ${tenantKey} AND td.status = 'verified' LIMIT 1`;
-    const exists = rows.length > 0;
-    await tenantCache.set(cacheKey, { exists }, TENANT_CACHE_TTL_MS);
-    return exists;
+    let state: TenantState;
+    if (isSubdomain) {
+      const rows = await sql`SELECT status FROM tenants WHERE slug = ${tenantKey} LIMIT 1`;
+      state =
+        rows.length === 0
+          ? "missing"
+          : rows[0].status === "published"
+            ? "published"
+            : "unpublished";
+    } else {
+      const rows = await sql`SELECT td.tenant_id FROM tenant_domains td WHERE td.domain = ${tenantKey} AND td.status = 'verified' LIMIT 1`;
+      state = rows.length > 0 ? "published" : "unpublished";
+    }
+    await tenantCache.set(cacheKey, { state }, TENANT_CACHE_TTL_MS);
+    return state;
   } catch {
-    // DB error: fail open — TenantPage.notFound() handles the miss gracefully
-    return true;
+    // DB error: fail open — serve the tenant route, which notFound()s gracefully.
+    return "published";
   }
 }
 
@@ -154,10 +166,19 @@ export default async function proxy(req: NextRequest) {
       const tenantKey = parsed.tenantKey!;
       const isSubdomain = parsed.type === "TENANT_SUBDOMAIN";
 
-      const exists = await isTenantActive(tenantKey, isSubdomain);
-      if (!exists) {
-        // Unknown/inactive domain → send to marketing root
-        return NextResponse.redirect(TENANT_NOT_FOUND_URL, { status: 302 });
+      const state = await resolveTenantState(tenantKey, isSubdomain);
+      if (state !== "published") {
+        // Draft or unknown host → rewrite (URL stays on the subdomain) to the
+        // localized status page. "missing" returns 404; "unpublished" returns 200.
+        const url = req.nextUrl.clone();
+        url.pathname = `/${locale}/site-unavailable`;
+        url.search = "";
+        url.searchParams.set("reason", state === "missing" ? "missing" : "draft");
+        url.searchParams.set("slug", tenantKey);
+        return NextResponse.rewrite(url, {
+          status: state === "missing" ? 404 : 200,
+          headers,
+        });
       }
 
       // Use the normalized hostname as the [domain] route param so
