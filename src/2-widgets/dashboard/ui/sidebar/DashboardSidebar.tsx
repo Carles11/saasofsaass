@@ -3,26 +3,38 @@
 import { useStore } from "@/5-shared/store/index";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { ChevronDown, LogOut, PanelRightOpen, PanelRightClose } from "lucide-react";
 import type { AuthSession } from "@/5-shared/lib/auth/server";
 import { SIDEBAR_TABS } from "@/5-shared/config/sidebar-tabs";
 import { can } from "@/5-shared/config/permissions";
 import type { ResolvedRoles } from "@/5-shared/config/permissions";
-import { LogOutButton } from "@/components/ui/log-out-button";
+import { authClient } from "@/5-shared/lib/auth/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/5-shared/lib/utils";
 
 interface DashboardSidebarProps {
   session: AuthSession;
   resolvedRoles: ResolvedRoles;
+  planLabel?: string;
 }
 
 export const DashboardSidebar = ({
   session,
   resolvedRoles,
+  planLabel = "Free",
 }: DashboardSidebarProps) => {
   const isOpen = useStore((state) => state.isSidebarOpen);
   const toggle = useStore((state) => state.toggleSidebar);
   const params = useParams();
   const pathname = usePathname();
+  const router = useRouter();
   const locale = (params.locale as string) || "en";
 
   const user = session?.user;
@@ -33,6 +45,14 @@ export const DashboardSidebar = ({
   const visibleTabs = SIDEBAR_TABS.filter((tab) =>
     can(resolvedRoles, tab.permission),
   );
+
+  async function handleSignOut() {
+    await authClient.signOut();
+    const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "localhost";
+    const isDev = process.env.NODE_ENV === "development";
+    const base = isDev ? `http://${rootDomain}:3000` : `https://${rootDomain}`;
+    window.location.href = `${base}/${locale}`;
+  }
 
   return (
     <motion.aside
@@ -47,7 +67,7 @@ export const DashboardSidebar = ({
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="font-black tracking-tighter text-xl cursor-pointer"
+              className="font-semibold tracking-tight text-lg cursor-pointer"
             >
               SoSs
             </motion.span>
@@ -55,58 +75,75 @@ export const DashboardSidebar = ({
         )}
         <button
           onClick={toggle}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+          className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           aria-label={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
         >
           {isOpen ? (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
+            <PanelRightOpen className="h-4 w-4" />
           ) : (
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            </svg>
+            <PanelRightClose className="h-4 w-4" />
           )}
         </button>
       </div>
 
       {user && (
         <div className="flex items-center gap-3 px-2 mb-6">
-          <div className="h-9 w-9 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0 shrink-0">
+          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium shrink-0">
             {initials}
           </div>
           {isOpen && (
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">{user.name || user.email}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
-              <LogOutButton size="xs" className="mt-1 h-6 px-2 text-[10px]" label="Sign out" />
+            <div className="min-w-0 flex-1 flex items-center justify-between gap-1">
+              <div className="truncate">
+                <p className="text-sm font-medium truncate">{user.name || user.email}</p>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={4} className="w-56">
+                  <div className="px-2 py-1.5">
+                    <p className="text-xs font-medium text-muted-foreground">{planLabel}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <div className="px-2 py-1.5">
+                    <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-sm cursor-pointer">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           )}
         </div>
       )}
 
-      <nav className="flex-1 space-y-2">
+      <nav className="flex-1 space-y-1">
         {visibleTabs.map((tab) => {
           const href = `/${locale}${tab.href}`;
           const isActive = pathname === href || pathname.startsWith(`${href}/`);
+          const Icon = tab.icon;
           return (
             <Link
               key={tab.id}
               href={href}
-              className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-colors group ${
+              className={cn(
+                "flex items-center gap-3 px-3 py-2 rounded-md transition-colors group",
                 isActive
-                  ? "bg-primary/10 text-primary"
-                  : "hover:bg-white/5 text-foreground"
-              }`}
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+              )}
             >
-              <span className="text-xl w-6 flex justify-center group-hover:scale-110 transition-transform font-mono">
-                {tab.icon}
-              </span>
+              <Icon className="h-5 w-5 shrink-0" />
               {isOpen && (
                 <motion.span
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="text-sm font-medium tracking-tight"
+                  className="text-sm font-medium"
                 >
                   {tab.label}
                 </motion.span>
@@ -117,11 +154,11 @@ export const DashboardSidebar = ({
       </nav>
 
       {isOpen && (
-        <div className="p-4 bg-white/5 rounded-3xl border border-white/10">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-bold mb-1">
+        <div className="p-3 rounded-lg border border-border">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium mb-1">
             Active Engine
           </p>
-          <p className="text-xs font-mono text-emerald-400">v16.2.0-turbo</p>
+          <p className="text-xs text-muted-foreground font-mono">v16.2.0-turbo</p>
         </div>
       )}
     </motion.aside>

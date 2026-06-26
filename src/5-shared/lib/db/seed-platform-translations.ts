@@ -117,6 +117,20 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       ga: "As seccións de Hero e Pé de páxina son obrigatorias e non se poden eliminar.",
     }),
   },
+  {
+    namespace: "common",
+    key: "sign-out",
+    translations: t({
+      en: "Sign out",
+      es: "Cerrar sesión",
+      ca: "Tancar sessió",
+      fr: "Se déconnecter",
+      de: "Abmelden",
+      it: "Esci",
+      eu: "Saioa itxi",
+      ga: "Pechar sesión",
+    }),
+  },
 
   // ── Marketing: Header ───────────────────────────────────────────────────
   {

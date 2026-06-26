@@ -6,10 +6,11 @@ import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
 import { authServer } from "@/5-shared/lib/auth/server";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
-import { ensureWorkspace } from "@/5-shared/lib/billing/workspace";
+import { ensureWorkspace, getPlanForWorkspace } from "@/5-shared/lib/billing/workspace";
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
 import { getPlatformTranslations } from "@/5-shared/lib/db/platform-translations";
 import { UpgradeModalProvider } from "@/2-widgets/dashboard/UpgradeModal";
+import { PLANS } from "@/5-shared/lib/billing/plans";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -38,8 +39,10 @@ export default async function DashboardLayout({
   }
 
   const profile = await syncProfile(session);
+  let planLabel = "Free";
   if (profile) {
-    await ensureWorkspace(profile.id, profile.name);
+    const workspace = await ensureWorkspace(profile.id, profile.name);
+    planLabel = PLANS[workspace.plan as keyof typeof PLANS]?.label ?? "Free";
   }
 
   const resolvedRoles = await resolveRoles(session);
@@ -53,7 +56,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen bg-background">
       <TranslationProgressBar />
-      <DashboardSidebar session={session} resolvedRoles={resolvedRoles} />
+      <DashboardSidebar session={session} resolvedRoles={resolvedRoles} planLabel={planLabel} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden pb-16 md:pb-0">
         <div className="flex items-center justify-end gap-2 px-6 pt-4">
           <LanguageSwitcher />

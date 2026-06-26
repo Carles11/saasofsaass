@@ -25,23 +25,24 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground group-data-horizontal/tabs:h-8 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col data-[variant=line]:rounded-none",
+  "group/tabs-list inline-flex w-fit items-center justify-center text-muted-foreground group-data-vertical/tabs:flex-col",
   {
     variants: {
       variant: {
-        default: "bg-muted",
-        line: "gap-1 bg-transparent",
+        underline: "bg-transparent border-b border-border rounded-none",
+        pills: "rounded-lg bg-muted p-[3px]",
+        outline: "bg-transparent rounded-none gap-2",
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "underline",
     },
   }
 )
 
 function TabsList({
   className,
-  variant = "default",
+  variant = "underline",
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> &
   VariantProps<typeof tabsListVariants>) {
@@ -63,10 +64,25 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pe-1 has-data-[icon=inline-start]:ps-1 dark:text-muted-foreground dark:hover:text-foreground group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
-        "data-active:bg-background data-active:text-foreground dark:data-active:border-input dark:data-active:bg-input/30 dark:data-active:text-foreground",
-        "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-0 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-vertical/tabs:after:inset-y-0 group-data-vertical/tabs:after:-end-1 group-data-vertical/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
+        "relative inline-flex items-center justify-center gap-1.5 whitespace-nowrap text-sm font-medium transition-all cursor-pointer",
+        // ── underline (default) variant ──
+        "px-4 py-2.5",
+        "text-muted-foreground hover:text-foreground hover:bg-accent/30",
+        "data-active:text-primary",
+        "after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary after:opacity-0 after:transition-opacity",
+        "data-active:after:opacity-100",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "disabled:pointer-events-none disabled:opacity-50",
+        "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // ── pills variant overrides ──
+        "group-data-[variant=pills]/tabs-list:rounded-md group-data-[variant=pills]/tabs-list:border group-data-[variant=pills]/tabs-list:border-transparent group-data-[variant=pills]/tabs-list:h-[calc(100%-1px)] group-data-[variant=pills]/tabs-list:px-1.5 group-data-[variant=pills]/tabs-list:py-0.5 group-data-[variant=pills]/tabs-list:data-active:bg-background group-data-[variant=pills]/tabs-list:data-active:shadow-sm group-data-[variant=pills]/tabs-list:[&::after]:hidden group-data-[variant=pills]/tabs-list:hover:bg-transparent",
+        "group-data-[variant=pills]/tabs-list:text-foreground/60 group-data-[variant=pills]/tabs-list:hover:text-foreground",
+        "group-data-[variant=pills]/tabs-list:dark:text-muted-foreground group-data-[variant=pills]/tabs-list:dark:hover:text-foreground",
+        "group-data-[variant=pills]/tabs-list:data-active:text-foreground group-data-[variant=pills]/tabs-list:dark:data-active:border-input group-data-[variant=pills]/tabs-list:dark:data-active:bg-input/30 group-data-[variant=pills]/tabs-list:dark:data-active:text-foreground",
+        // ── outline variant overrides (subtabs) ──
+        "group-data-[variant=outline]/tabs-list:border group-data-[variant=outline]/tabs-list:border-border/50 group-data-[variant=outline]/tabs-list:rounded-lg group-data-[variant=outline]/tabs-list:px-4 group-data-[variant=outline]/tabs-list:py-2 group-data-[variant=outline]/tabs-list:bg-transparent group-data-[variant=outline]/tabs-list:[&::after]:hidden",
+        "group-data-[variant=outline]/tabs-list:hover:border-muted-foreground/30 group-data-[variant=outline]/tabs-list:hover:text-muted-foreground",
+        "group-data-[variant=outline]/tabs-list:data-active:border-primary group-data-[variant=outline]/tabs-list:data-active:text-primary",
         className
       )}
       {...props}

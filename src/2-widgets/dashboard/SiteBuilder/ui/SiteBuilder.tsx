@@ -165,7 +165,7 @@ export function SiteBuilder({
 
         <TabsContent value="settings" className="mt-4">
           <Tabs value={settingsTab} onValueChange={setSettingsTab} defaultValue="appearance">
-            <TabsList className="mb-6">
+            <TabsList variant="outline" className="mb-6">
               <TabsTrigger value="appearance">{tabAppearance}</TabsTrigger>
               <TabsTrigger value="domain">{tabDomain}</TabsTrigger>
               <TabsTrigger value="site">{tabSite}</TabsTrigger>

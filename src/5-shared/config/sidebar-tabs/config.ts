@@ -1,9 +1,11 @@
+import { LayoutGrid, Globe, Users, CreditCard, User, Cog } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import type { Permission } from "../permissions/permissions"
 
 export interface SidebarTab {
   id: string
   label: string
-  icon: string
+  icon: LucideIcon
   href: string
   permission: Permission
 }
@@ -12,42 +14,42 @@ export const SIDEBAR_TABS: SidebarTab[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    icon: "⊞",
+    icon: LayoutGrid,
     href: "/dashboard",
     permission: "viewDashboard",
   },
   {
     id: "sites",
     label: "Sites",
-    icon: "◎",
+    icon: Globe,
     href: "/sites",
     permission: "manageSites",
   },
   {
     id: "team",
     label: "Team",
-    icon: "👥",
+    icon: Users,
     href: "/team",
     permission: "manageTeam",
   },
   {
     id: "billing",
     label: "Billing",
-    icon: "💳",
+    icon: CreditCard,
     href: "/billing",
     permission: "manageBilling",
   },
   {
     id: "account",
     label: "Account",
-    icon: "⚙️",
+    icon: User,
     href: "/account",
     permission: "viewAccount",
   },
   {
     id: "settings",
     label: "Settings",
-    icon: "🔧",
+    icon: Cog,
     href: "/settings",
     permission: "viewSettings",
   },
