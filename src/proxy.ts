@@ -122,8 +122,11 @@ export default async function proxy(req: NextRequest) {
     // Auth pages are publicly accessible — skip the middleware so /auth/sign-in,
     // /auth/sign-up etc. don't get redirected to loginUrl before they can render.
     const isAuthPath = strippedPath === "/auth" || strippedPath.startsWith("/auth/");
+    // The invitation accept page must render for not-yet-signed-in invitees, who
+    // then authenticate from it — so it is public too.
+    const isInvitePath = strippedPath === "/invite" || strippedPath.startsWith("/invite/");
 
-    if (!isAuthPath) {
+    if (!isAuthPath && !isInvitePath) {
       const runAuthMiddleware = neonAuthMiddleware({
         loginUrl: `/${locale}/auth/sign-in`,
       });

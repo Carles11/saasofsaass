@@ -8,6 +8,7 @@ import {
   type TranslationDict,
 } from "@/5-shared/lib/translations/resolve";
 import { cn } from "@/5-shared/lib/utils";
+import { canManageStructure } from "@/5-shared/config/permissions";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import { Button } from "@/components/tenant/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,7 +108,7 @@ interface BlockListProps {
   tenant: Tenant;
   activeLocale: SupportedLocaleType;
   initialEntities: EntityRow[];
-  userRole?: "owner" | "editor" | null;
+  userRole?: "owner" | "webmaster" | "editor" | null;
   translations?: TranslationDict;
   onLocaleChange?: (locale: SupportedLocaleType) => void;
   plan?: string;
@@ -289,7 +290,7 @@ export function BlockList({
         </DragOverlay>
 
         {/* ── Add Block Sheet ─────────────────────────────────────────── */}
-        {userRole === "owner" && (
+        {canManageStructure(userRole) && (
           <Sheet onOpenChange={(open) => { if (!open) clearSelection(); }}>
             <SheetTrigger asChild>
               <Button tenantVariant="outline" className="mt-2">

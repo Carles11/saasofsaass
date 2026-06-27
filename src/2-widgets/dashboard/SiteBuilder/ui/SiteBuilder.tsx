@@ -5,6 +5,7 @@ import { updateTenantLocales } from "@/3-features/manage-site-blocks/actions/blo
 import { generatePreviewToken } from "@/3-features/manage-site-blocks/actions/generatePreviewToken";
 import { TemplatePicker } from "@/3-features/manage-site-blocks/ui/TemplatePicker";
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
+import { canManageStructure } from "@/5-shared/config/permissions";
 import type { Block, Tenant, TenantDomain, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
 import type { SupportedLocaleType } from "@/5-shared/types";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
@@ -21,7 +22,7 @@ import { LogoSection } from "./LogoSection";
 import { SeoSection } from "./SeoSection";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
-type UserRole = "owner" | "editor" | null;
+type UserRole = "owner" | "webmaster" | "editor" | null;
 
 interface SiteBuilderProps {
   tenant: Tenant;
@@ -132,7 +133,7 @@ export function SiteBuilder({
             tenantId={tenant.id}
             plan={plan}
             locale={activeLocale}
-            isOwner={userRole === "owner"}
+            isOwner={canManageStructure(userRole)}
             translations={translations}
           />
         </div>
@@ -142,7 +143,7 @@ export function SiteBuilder({
       <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="blocks">
         <TabsList>
           <TabsTrigger value="blocks">{tabBlocks}</TabsTrigger>
-          {userRole === "owner" && <TabsTrigger value="settings">{tabSettings}</TabsTrigger>}
+          {canManageStructure(userRole) && <TabsTrigger value="settings">{tabSettings}</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="blocks" className="mt-4">

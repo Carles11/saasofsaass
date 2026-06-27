@@ -1,5 +1,5 @@
 import { db } from "@/5-shared/lib/db"
-import { profiles, tenantMemberships } from "@/5-shared/lib/db/schema/auth"
+import { profiles, workspaceMemberships, membershipSites } from "@/5-shared/lib/db/schema/auth"
 import { workspaces } from "@/5-shared/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { authServer, type AuthSession } from "@/5-shared/lib/auth/server"
@@ -31,20 +31,34 @@ export async function resolveRoles(
   const isWorkspaceOwner = !!workspace
 
   const memberships = await db
-    .select()
-    .from(tenantMemberships)
-    .where(eq(tenantMemberships.profileId, profile.id))
+    .select({
+      role: workspaceMemberships.role,
+      siteScope: workspaceMemberships.siteScope,
+    })
+    .from(workspaceMemberships)
+    .where(eq(workspaceMemberships.profileId, profile.id))
 
+  const hasWebmaster = memberships.some((m) => m.role === "webmaster")
+  const hasEditor = memberships.some((m) => m.role === "editor")
+
+  // Per-site roles for specific-scope memberships. Owner-of-workspace and
+  // all-scope memberships are resolved on demand via getTenantRole rather than
+  // enumerated here (would require listing every tenant in the workspace).
   const tenantRoles: Record<string, TenantRole> = {}
-  for (const m of memberships) {
-    tenantRoles[m.tenantId] = m.role as TenantRole
+  if (memberships.some((m) => m.siteScope === "specific")) {
+    const links = await db
+      .select({ tenantId: membershipSites.tenantId, role: workspaceMemberships.role })
+      .from(membershipSites)
+      .innerJoin(workspaceMemberships, eq(membershipSites.membershipId, workspaceMemberships.id))
+      .where(eq(workspaceMemberships.profileId, profile.id))
+    for (const l of links) tenantRoles[l.tenantId] = l.role as TenantRole
   }
 
   const roles: string[] = []
   if (isSuperAdmin) roles.push("super_admin")
   if (isWorkspaceOwner) roles.push("workspace_owner")
-  if (Object.values(tenantRoles).includes("owner")) roles.push("tenant_owner")
-  if (Object.values(tenantRoles).includes("editor")) roles.push("tenant_editor")
+  if (hasWebmaster) roles.push("tenant_webmaster")
+  if (hasEditor) roles.push("tenant_editor")
 
   return {
     profileId: profile.id,

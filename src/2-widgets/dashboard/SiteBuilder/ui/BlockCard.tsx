@@ -1,6 +1,7 @@
 "use client";
 
 import { BLOCK_CATALOG } from "@/2-widgets/tenant/BlockRenderer/config/blockCatalog";
+import { canManageStructure } from "@/5-shared/config/permissions";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import {
   deleteBlock,
@@ -50,7 +51,7 @@ interface BlockCardProps {
   tenant: Tenant;
   activeLocale: SupportedLocaleType;
   initialEntities: EntityRow[];
-  userRole?: "owner" | "editor" | null;
+  userRole?: "owner" | "webmaster" | "editor" | null;
   translations?: TranslationDict;
   onLocaleChange?: (locale: SupportedLocaleType) => void;
   plan?: string;
@@ -87,7 +88,7 @@ export function BlockCard({
     isDragging,
   } = useSortable({
     id: block.id,
-    disabled: userRole !== "owner",
+    disabled: !canManageStructure(userRole),
   });
 
   const style = transform
@@ -174,7 +175,7 @@ export function BlockCard({
       {/* ── Card header ─────────────────────────────────────────────── */}
       <div className="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 sm:p-4">
         <div className="flex items-center gap-2 min-w-0">
-          {userRole === "owner" && (
+          {canManageStructure(userRole) && (
             <button
               type="button"
               suppressHydrationWarning
@@ -242,7 +243,7 @@ export function BlockCard({
             >
               {deleteLabel}
             </Button>
-          ) : userRole === "owner" ? (
+          ) : canManageStructure(userRole) ? (
             <Dialog>
               <DialogTrigger asChild>
                 <Button

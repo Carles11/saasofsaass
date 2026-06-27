@@ -1,7 +1,7 @@
 "use client"
 
 import { NeonAuthUIProvider } from "@neondatabase/auth-ui"
-// CSS loaded only in AuthViewClient.tsx via @neondatabase/auth-ui/tailwind (layered, no utility duplication)
+// All auth forms use custom shadcn components — no library AuthView CSS needed
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { authClient } from "./client"
@@ -17,6 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       navigate={router.push}
       replace={router.replace}
       Link={Link}
+      basePath={`/${locale}/auth`}
       redirectTo={`/${locale}/dashboard`}
     >
       {children}

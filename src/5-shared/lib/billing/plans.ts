@@ -164,6 +164,12 @@ export function getTeamLimit(plan: string): number {
   return getLimit(plan, "teamMembers");
 }
 
+/** Whether a plan permits inviting team members at all (Free is solo-owner only). */
+export function planAllowsTeam(plan: string): boolean {
+  const limit = getTeamLimit(plan);
+  return isUnlimited(limit) || limit > 1;
+}
+
 export function planAllowsCustomDomains(plan: string): boolean {
   return hasFeature(plan, "customDomains");
 }

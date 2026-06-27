@@ -1,15 +1,14 @@
 import { CreateTenantDialog } from "@/2-widgets/dashboard/CreateTenantDialog";
 import { BillingStatus } from "@/2-widgets/dashboard/BillingStatus";
-import { SitePublishToggle } from "@/2-widgets/dashboard/SitePublishToggle";
+import { SitesTable } from "@/2-widgets/dashboard/SitesTable";
 import { db } from "@/5-shared/lib/db";
-import { tenants } from "@/5-shared/lib/db/schema";
-import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
+import { tenantDomains } from "@/5-shared/lib/db/schema";
+import { getAccessibleSites } from "@/4-entities/tenant";
 import {
   getPlatformTranslationsByNamespaces,
   resolveNamespacedTranslation,
 } from "@/5-shared/lib/db/platform-translations";
-import { eq, inArray } from "drizzle-orm";
-import Link from "next/link";
+import { and, eq, inArray } from "drizzle-orm";
 import { getCurrentProfile } from "@/5-shared/lib/auth/authorization";
 import {
   getWorkspaceByProfileId,
@@ -19,22 +18,24 @@ import { getNextPlan } from "@/5-shared/lib/billing/plans";
 
 export async function DashboardPage({ locale }: { locale?: string }) {
   const profile = await getCurrentProfile();
-  const memberships = profile
-    ? await db
-        .select()
-        .from(tenantMemberships)
-        .where(eq(tenantMemberships.profileId, profile.id))
-    : [];
+  const accessible = profile ? await getAccessibleSites(profile.id) : [];
 
-  const tenantIds = memberships.map((m) => m.tenantId);
-  const userTenants = tenantIds.length > 0
-    ? await db.select().from(tenants).where(inArray(tenants.id, tenantIds))
-    : [];
+  const userTenants = accessible.map((a) => a.tenant);
+  const roles = accessible.map((a) => ({ tenantId: a.tenant.id, role: a.role }));
+  const manageableTenantIds = accessible
+    .filter((a) => a.role === "owner" || a.role === "webmaster")
+    .map((a) => a.tenant.id);
+  const tenantIds = userTenants.map((t) => t.id);
 
   const workspace = profile ? await getWorkspaceByProfileId(profile.id) : null;
   const currentSites = workspace ? await countPublishedTenants(workspace.id) : 0;
 
-  const ownerTenantIds = memberships.filter((m) => m.role === "owner").map((m) => m.tenantId);
+  const domains = tenantIds.length > 0
+    ? await db
+        .select({ tenantId: tenantDomains.tenantId, domain: tenantDomains.domain, status: tenantDomains.status })
+        .from(tenantDomains)
+        .where(and(eq(tenantDomains.isPrimary, true), inArray(tenantDomains.tenantId, tenantIds)))
+    : [];
 
   const translations = await getPlatformTranslationsByNamespaces(
     ["dashboard.page", "dashboard.create-tenant"],
@@ -53,36 +54,6 @@ export async function DashboardPage({ locale }: { locale?: string }) {
     "tenant-count",
     "{count} tenant(s)",
     { count: userTenants.length },
-  );
-  const languagesLabel = resolveNamespacedTranslation(
-    translations,
-    "dashboard.page",
-    "languages-count",
-    "languages",
-  );
-  const ownerRoleLabel = resolveNamespacedTranslation(
-    translations,
-    "dashboard.page",
-    "role.owner",
-    "owner",
-  );
-  const editorRoleLabel = resolveNamespacedTranslation(
-    translations,
-    "dashboard.page",
-    "role.editor",
-    "editor",
-  );
-  const emptyTitle = resolveNamespacedTranslation(
-    translations,
-    "dashboard.page",
-    "empty.title",
-    "No Tenants Found",
-  );
-  const emptySubtitle = resolveNamespacedTranslation(
-    translations,
-    "dashboard.page",
-    "empty.subtitle",
-    "Your workshop is initialized. Awaiting the first deployment.",
   );
   const createTenantTranslations = translations["dashboard.create-tenant"];
 
@@ -119,49 +90,13 @@ export async function DashboardPage({ locale }: { locale?: string }) {
             nextPlan={getNextPlan(workspace.plan)}
           />
         )}
-        <section className="grid grid-cols-1 gap-6">
-          {userTenants.map((tenant) => {
-            const isOwner = ownerTenantIds.includes(tenant.id);
-            return (
-              <div
-                key={tenant.id}
-                className="bg-card p-8 rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <Link
-                    href={`/${locale ?? "en"}/dashboard/site-builder/${tenant.id}`}
-                    className="group flex-1 min-w-0"
-                  >
-                    <h2 className="text-2xl font-bold text-card-foreground group-hover:text-primary transition-colors">
-                      {tenant.name}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {tenant.locales?.length || 0} {languagesLabel}
-                    </p>
-                  </Link>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                      {isOwner ? ownerRoleLabel : editorRoleLabel}
-                    </span>
-                    <SitePublishToggle
-                      tenantId={tenant.id}
-                      status={tenant.status}
-                      canManage={isOwner}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </section>
-        {userTenants.length === 0 && (
-          <section className="mt-8 bg-card p-20 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">
-            <h3 className="text-xl font-bold text-card-foreground mb-2">{emptyTitle}</h3>
-            <p className="text-muted-foreground max-w-sm mx-auto italic font-medium">
-              {emptySubtitle}
-            </p>
-          </section>
-        )}
+        <SitesTable
+          userTenants={userTenants}
+          roles={roles}
+          manageableTenantIds={manageableTenantIds}
+          locale={locale ?? "en"}
+          domains={domains}
+        />
       </div>
     </main>
   );

@@ -6,7 +6,7 @@ export type Permission =
   | "createSite"
   | "deleteSite"
   | "manageTeam"
-  | "inviteOwner"
+  | "inviteWebmaster"
   | "inviteEditor"
   | "manageBilling"
   | "manageWorkspace"
@@ -27,7 +27,7 @@ export const ROLE_PERMISSIONS: Record<
     createSite: true,
     deleteSite: true,
     manageTeam: true,
-    inviteOwner: true,
+    inviteWebmaster: true,
     inviteEditor: true,
     manageBilling: true,
     manageWorkspace: true,
@@ -43,6 +43,8 @@ export const ROLE_PERMISSIONS: Record<
     manageSites: true,
     createSite: true,
     manageTeam: true,
+    inviteWebmaster: true,
+    inviteEditor: true,
     manageBilling: true,
     viewAccount: true,
     viewSettings: true,
@@ -50,11 +52,10 @@ export const ROLE_PERMISSIONS: Record<
     manageTemplate: true,
     editContent: true,
   },
-  tenant_owner: {
+  tenant_webmaster: {
     viewDashboard: true,
     manageSites: true,
     manageTeam: true,
-    inviteOwner: true,
     inviteEditor: true,
     viewAccount: true,
     viewSettings: true,

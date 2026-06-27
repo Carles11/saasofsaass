@@ -5,7 +5,7 @@ import {
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
 import { db } from "@/5-shared/lib/db";
 import { tenants } from "@/5-shared/lib/db/schema";
-import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
+import { workspaceMemberships } from "@/5-shared/lib/db/schema/auth";
 import { and, eq, sql } from "drizzle-orm";
 import { PLAN_LABELS, type PlanId } from "@/5-shared/lib/billing/plans";
 
@@ -58,12 +58,14 @@ export async function DashboardOverview({ locale }: { locale?: string }) {
     : [{ count: 0 }];
   const draftSites = Number(draftResult?.count ?? 0);
 
-  const [editorResult] = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(tenantMemberships)
-    .where(eq(tenantMemberships.profileId, roles.profileId));
+  const [teamResult] = workspace
+    ? await db
+        .select({ count: sql<number>`count(*)` })
+        .from(workspaceMemberships)
+        .where(eq(workspaceMemberships.workspaceId, workspace.id))
+    : [{ count: 0 }];
 
-  const myMemberships = Number(editorResult?.count ?? 0);
+  const teamMembers = Number(teamResult?.count ?? 0);
 
   const planLabel = workspace ? PLAN_LABELS[workspace.plan as PlanId] ?? workspace.plan : "—";
   const siteLimit = workspace?.siteLimit ?? 0;
@@ -79,7 +81,7 @@ export async function DashboardOverview({ locale }: { locale?: string }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <StatCard label="Published" value={publishedSites} />
           <StatCard label="Drafts" value={draftSites} sub="Unlimited on every plan" />
-          <StatCard label="Active Editors" value={myMemberships} />
+          <StatCard label="Team Members" value={teamMembers} />
           <StatCard label="Workspace Plan" value={planLabel} />
           <StatCard
             label="Published Usage"

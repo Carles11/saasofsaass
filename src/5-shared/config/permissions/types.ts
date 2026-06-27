@@ -1,4 +1,4 @@
-export type TenantRole = "owner" | "editor"
+export type TenantRole = "owner" | "webmaster" | "editor"
 
 export interface ResolvedRoles {
   profileId: string

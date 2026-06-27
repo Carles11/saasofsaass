@@ -13,6 +13,11 @@ export function appDashboardUrl(locale: string): string {
   return `${APP_BASE}/${locale}/dashboard`;
 }
 
+/** Public URL where an invitee lands to view + accept a team invitation. */
+export function appInviteUrl(token: string, locale: string): string {
+  return `${APP_BASE}/${locale}/invite/${token}`;
+}
+
 /** Absolute URL to a page on the public marketing domain (e.g. the pricing page).
  * Used to cross from the app domain to marketing. `path` may include a query string. */
 export function marketingUrl(path: string, locale: string): string {
