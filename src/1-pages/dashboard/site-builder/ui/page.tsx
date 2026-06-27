@@ -5,6 +5,7 @@ import { getEntitiesByTenant } from "@/4-entities/tenant-content";
 import { StoreHydrator } from "@/5-shared/store/StoreHydrator";
 import { getCurrentProfile, getTenantRole } from "@/5-shared/lib/auth/authorization";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
+import { listSiteCollaborators } from "@/3-features/team-management/queries/teamQueries";
 import { tenantDomains, workspaces } from "@/5-shared/lib/db/schema";
 import { getFontIdByVariableRef } from "@/5-shared/lib/fonts/fontRegistry";
 import { eq } from "drizzle-orm";
@@ -23,8 +24,10 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
 
   const profile = await getCurrentProfile();
   const role = profile ? await getTenantRole(tenantId, profile.id) : null;
+  const canManage = role === "owner" || role === "webmaster";
 
-  const [blocks, entities, namespacedTranslations, domainRows, workspace] = await Promise.all([
+  const [blocks, entities, namespacedTranslations, domainRows, workspace, collaborators] =
+    await Promise.all([
     getBlocksByTenantId(tenant.id),
     getEntitiesByTenant({ tenantId: tenant.id, locale }),
     getPlatformTranslationsByNamespaces(
@@ -34,6 +37,7 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
         "dashboard.blocks",
         "dashboard.collection",
         "dashboard.block-edit",
+        "dashboard.collaborators",
       ],
       locale,
     ),
@@ -46,6 +50,7 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
           .limit(1)
           .then((r) => r[0] ?? null)
       : Promise.resolve(null),
+    canManage ? listSiteCollaborators(tenant.id) : Promise.resolve(null),
   ]);
 
   const plan = workspace?.plan ?? "free";
@@ -91,6 +96,9 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
             initialLogoUrl={initialLogoUrl}
             initialLogoS3Key={initialLogoS3Key}
             initialLogoLinkUrl={initialLogoLinkUrl}
+            workspaceId={tenant.workspaceId}
+            collaborators={collaborators}
+            collabTranslations={namespacedTranslations["dashboard.collaborators"]}
           />
         </StoreHydrator>
       </div>

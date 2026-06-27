@@ -13,16 +13,15 @@ if (!API_KEY) throw new Error("GEMINI_API_KEY not set");
 const TARGET_LOCALES = ["es", "ca", "fr", "de", "it", "eu", "ga"];
 const ALL_LOCALES = ["en", ...TARGET_LOCALES];
 
-// Target namespaces and keys
+// Target namespaces and keys — Users & Teams feature (run after adding the
+// English-only keys to seed-platform-translations.ts).
 const TARGET_NAMESPACES = [
-  "marketing.legal.terms",
-  "marketing.legal.privacy",
-  "marketing.legal.cookie",
-  "marketing.structured-vs-ai",
+  "invite",
+  "dashboard.team",
+  "dashboard.collaborators",
+  "dashboard.account",
 ];
-const TARGET_FOOTER_KEYS = [
-  "at_a_glance.body",
-];
+const TARGET_FOOTER_KEYS = [];
 
 const FILE = resolve(ROOT, "src/5-shared/lib/db/seed-platform-translations.ts");
 

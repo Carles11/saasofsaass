@@ -36,7 +36,7 @@ src/
     dashboard/
       CreateTenantDialog/  → "Create Site" dialog (name, slug)
       SiteBuilder/         → Block management UI + CollectionManager + BlockEditSheet + BlockList
-      TeamManager/         → Team member management
+      TeamManager/         → Workspace-wide team management (invitations, roles, seat caps)
       ui/sidebar/          → DashboardSidebar (collapsible, user info, nav)
     tenant/
       BlockRenderer/       → Renders blocks by type (Hero, Navbar, BlogFeed, etc.)
@@ -54,12 +54,12 @@ src/
      config/
     lib/
       auth/
-        authorization.ts   → getCurrentProfile, assertTenantRole, assertCanEditContent
+        authorization.ts   → getCurrentProfile, getTenantRole, assertCanEditContent, assertCanManageStructure, assertWorkspaceOwner
         sync-profile.ts    → Syncs Neon Auth user to local profiles table
         server.ts          → AuthSession type
       db/
         schema.ts          → Drizzle schema (tenants, blocks, transactions, platform_translations)
-        schema/auth.ts     → Auth schema (profiles, tenant_memberships)
+        schema/auth.ts     → Auth schema (profiles, workspaces, workspace_memberships, membership_sites, workspace_invitations)
         index.ts           → Neon DB client
         platform-translations.ts → getPlatformTranslations() helper
         seed-platform-translations.ts → Seeds platform UI strings
@@ -89,9 +89,8 @@ app/
       auth/
         sign-in/page.tsx
         sign-up/page.tsx
-        login/page.tsx
-        register/page.tsx
         forgot-password/page.tsx
+        reset-password/page.tsx
     (tenants)/
       [domain]/
         page.tsx
@@ -109,7 +108,7 @@ drizzle.config.ts
 
 **Key paths:**
 
-- Auth pages: `src/app/[locale]/(marketing)/auth/{sign-in,sign-up,login,register,forgot-password}/page.tsx`
+- Auth pages: `src/app/[locale]/(marketing)/auth/{sign-in,sign-up,forgot-password,reset-password}/page.tsx`
 - Auth API proxy: `src/app/api/auth/[...path]/route.ts`
 - Schema (core): `src/5-shared/lib/db/schema.ts`
 - Schema (auth): `src/5-shared/lib/db/schema/auth.ts`
@@ -129,7 +128,14 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 - `locales` (text array — enabled languages per tenant)
 - `defaultLocale`, `branding` (JSONB — HSL vars, logo, fonts)
 - `templateId` (text, default `"default"` — slug referencing template in TypeScript config)
-- `isActive`, `createdAt`, `updatedAt`
+- `status` (`draft` | `published` | `archived`), `createdAt`, `updatedAt`
+
+### `workspaces`
+
+- `id`, `name`, `ownerProfileId` (FK → profiles)
+- `plan`, `siteLimit`, `addonSites`, `aiBlocksUsed`
+- `stripeCustomerId`, `stripeSubscriptionId`, `subscriptionStatus`
+- `createdAt`, `updatedAt`
 
 ### `blocks`
 
@@ -176,12 +182,26 @@ Core tables in `src/5-shared/lib/db/schema.ts` and `src/5-shared/lib/db/schema/a
 - `super_admin` bypasses all tenant permission checks (see `authorization.ts`)
 - Assigned via `seed-super-admin.ts` — run `npx dotenv -e .env.local -- npx tsx src/5-shared/lib/db/seed-super-admin.ts`
 
-#### `tenant_memberships`
+#### `workspace_memberships`
 
-- `id`, `tenantId` (FK → tenants), `profileId` (FK → profiles)
-- `role` (owner | editor)
+- `id`, `workspaceId` (FK → workspaces), `profileId` (FK → profiles)
+- `role` (`webmaster` | `editor`)
+- `siteScope` (`all` | `specific`)
 - `createdAt`, `updatedAt`
-- Unique on `(tenantId, profileId)`
+- Unique on `(workspaceId, profileId)`
+
+#### `membership_sites`
+
+- `membershipId`, `tenantId` (composite PK)
+- Links a `specific`-scope member to the sites they can access
+
+#### `workspace_invitations`
+
+- `id`, `workspaceId` (FK → workspaces), `email`, `invitedName`
+- `role`, `siteScope`, `siteIds` (JSONB)
+- `token` (unique), `status` (pending | accepted | revoked | expired)
+- `expiresAt`, `invitedByProfileId`
+- `createdAt`, `updatedAt`
 
 ---
 
@@ -254,10 +274,11 @@ NEXT_PUBLIC_AWS_CLOUDFRONT_URL
 - **Profile sync:** `sync-profile.ts` creates/updates a local `profiles` record when a Neon Auth user signs in (matched by email).
 - **Authorization helpers** in `src/5-shared/lib/auth/authorization.ts`:
   - `getCurrentProfile()` — returns local profile by matching session email
-  - `assertTenantRole(tenantId, profileId, ...roles)` — checks membership + role
-  - `assertCanEditContent(tenantId, profileId)` — owner or editor
-  - `assertCanManageStructure(tenantId, profileId)` — owner only
-- **Roles:** `owner` (full control), `editor` (content-only — cannot add/remove blocks, reorder, manage languages, invite members)
+  - `getTenantRole(tenantId, profileId)` — resolves role for a tenant (owner/webmaster/editor)
+  - `assertCanEditContent(tenantId, profileId)` — owner, webmaster, or editor
+  - `assertCanManageStructure(tenantId, profileId)` — webmaster or above
+  - `assertWorkspaceOwner(workspaceId, profileId)` — owner only
+- **Roles:** `super_admin` (platform owner, bypasses all checks), `owner` (one per workspace — account/site billing, full control), `webmaster` (full control on assigned sites), `editor` (content-only on assigned sites)
 
 ### 4. Theme System
 
@@ -369,13 +390,13 @@ This project's content is consumed by both traditional search crawlers and AI an
 ### Phase 2 — Auth, Dashboard & Team
 
 - [x] Neon Auth setup with API proxy route (`/api/auth/[...path]`) and Origin override for dev subdomains
-- [x] Local `profiles` + `tenant_memberships` schema with roles (owner/editor)
-- [x] Auth pages: sign-in, sign-up, login, register, forgot-password (all render `<AuthView />`)
-- [x] Authorization helpers: `getCurrentProfile`, `assertTenantRole`, `assertCanEditContent`, `assertCanManageStructure`
+- [x] Local `profiles` + `workspace_memberships` / `membership_sites` / `workspace_invitations` schema with roles (super_admin/owner/webmaster/editor)
+- [x] Auth pages: sign-in, sign-up, forgot-password (all render `<AuthView />`)
+- [x] Authorization helpers: `getCurrentProfile`, `getTenantRole`, `assertCanEditContent`, `assertCanManageStructure`, `assertWorkspaceOwner`
 - [x] Profile sync on sign-in (`sync-profile.ts`, matches by email)
 - [x] Dashboard scaffold with collapsible sidebar (user info, nav links)
-- [x] "Create Site" dialog (`CreateTenantDialog`) — name/slug fields, creates tenant + owner membership
-- [x] Team management page (`/dashboard/team`) with `TeamManager` widget
+- [x] "Create Site" dialog (`CreateTenantDialog`) — name/slug fields, creates tenant + workspace + owner membership
+- [x] Workspace-wide team management page (`/team`) with `TeamManager` widget (invitations, roles, seat caps, site scope)
 - [x] Site builder UI — block list, block edit sheet, collection manager, entity CRUD
 - [x] Entity system: blog_post, podcast_episode, award_item with per-type translation forms
 - [x] Platform translations table with unique constraint `(namespace, key, locale)`

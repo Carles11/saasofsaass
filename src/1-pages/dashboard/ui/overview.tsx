@@ -67,7 +67,9 @@ export async function DashboardOverview({ locale }: { locale?: string }) {
 
   const teamMembers = Number(teamResult?.count ?? 0);
 
-  const planLabel = workspace ? PLAN_LABELS[workspace.plan as PlanId] ?? workspace.plan : "—";
+  const planLabel = workspace
+    ? PLAN_LABELS[workspace.plan as PlanId] ?? workspace.plan
+    : "Collaborator";
   const siteLimit = workspace?.siteLimit ?? 0;
   const limitLabel = siteLimit < 0 ? "∞" : String(siteLimit);
 

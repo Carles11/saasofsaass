@@ -204,7 +204,7 @@ export const platformTranslations = pgTable("platform_translations", {
 // ============================================
 // AUTH (profiles + tenant memberships)
 // ============================================
-export { profiles, tenantMemberships, workspaceMemberships, membershipSites, workspaceInvitations } from "./schema/auth";
+export { profiles, workspaceMemberships, membershipSites, workspaceInvitations } from "./schema/auth";
 
 // ============================================
 // IMAGES (for image gallery block and HeroImages)
@@ -230,4 +230,4 @@ export type TenantDomain = typeof tenantDomains.$inferSelect;
 export type NewTenantDomain = typeof tenantDomains.$inferInsert;
 export type TenantDomainLog = typeof tenantDomainLogs.$inferSelect;
 export type NewTenantDomainLog = typeof tenantDomainLogs.$inferInsert;
-export type { Profile, NewProfile, TenantMembership, NewTenantMembership, WorkspaceMembership, NewWorkspaceMembership, MembershipSite, NewMembershipSite, WorkspaceInvitation, NewWorkspaceInvitation } from "./schema/auth";
+export type { Profile, NewProfile, WorkspaceMembership, NewWorkspaceMembership, MembershipSite, NewMembershipSite, WorkspaceInvitation, NewWorkspaceInvitation } from "./schema/auth";

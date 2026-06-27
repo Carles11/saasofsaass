@@ -5,7 +5,7 @@ const APP_BASE = IS_DEV ? `http://${APP_DOMAIN}:3000` : `https://${APP_DOMAIN}`;
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN ?? "saasofsaass.com";
 const MARKETING_BASE = IS_DEV ? "http://localhost:3000" : `https://${ROOT_DOMAIN}`;
 
-export function appAuthUrl(path: "sign-in" | "sign-up" | "login", locale: string): string {
+export function appAuthUrl(path: "sign-in" | "sign-up", locale: string): string {
   return `${APP_BASE}/${locale}/auth/${path}`;
 }
 

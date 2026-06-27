@@ -1,5 +1,6 @@
 import { db } from "@/5-shared/lib/db";
 import { tenants, workspaces } from "@/5-shared/lib/db/schema";
+import { workspaceMemberships } from "@/5-shared/lib/db/schema/auth";
 import { eq, sql } from "drizzle-orm";
 import { getSiteLimit, getLimit, isUnlimited } from "./plans";
 
@@ -42,6 +43,36 @@ export async function ensureWorkspace(profileId: string, profileName?: string | 
     }
     throw error;
   }
+}
+
+/**
+ * The user's own workspace for the dashboard chrome.
+ * - Returns their owned workspace if it exists.
+ * - For a brand-new user who isn't collaborating anywhere, lazily creates a Free
+ *   workspace so they can start building.
+ * - For a pure collaborator (member of someone else's workspace, owns none),
+ *   returns null — they shouldn't accrue a stray workspace or plan badge. They
+ *   can still create their own site, which provisions a workspace on demand.
+ */
+export async function getOwnWorkspaceForDashboard(
+  profileId: string,
+  profileName?: string | null,
+) {
+  const [existing] = await db
+    .select()
+    .from(workspaces)
+    .where(eq(workspaces.ownerProfileId, profileId))
+    .limit(1);
+  if (existing) return existing;
+
+  const [membership] = await db
+    .select({ id: workspaceMemberships.id })
+    .from(workspaceMemberships)
+    .where(eq(workspaceMemberships.profileId, profileId))
+    .limit(1);
+  if (membership) return null;
+
+  return ensureWorkspace(profileId, profileName);
 }
 
 /** Resolve a workspace's plan slug, defaulting to "free" when absent. */

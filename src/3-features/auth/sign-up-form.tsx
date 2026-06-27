@@ -25,7 +25,6 @@ export function SignUpForm() {
     credentials,
     localization,
     viewPaths,
-    navigate,
     toast,
     Link,
   } = useContext(AuthUIContext);
@@ -36,6 +35,7 @@ export function SignUpForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const confirmPasswordEnabled = credentials?.confirmPassword;
 
@@ -57,6 +57,7 @@ export function SignUpForm() {
         password,
         fetchOptions: { throw: true },
       });
+      setSubmitted(true);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : localization.REQUEST_FAILED;
@@ -65,6 +66,27 @@ export function SignUpForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (submitted) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{localization.SIGN_UP}</CardTitle>
+          <CardDescription>
+            Account created. Check your email to verify your address, then sign in.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter className="justify-center">
+          <Link
+            className="font-medium text-primary hover:underline"
+            href={`${basePath}/${viewPaths.SIGN_IN}`}
+          >
+            {localization.SIGN_IN}
+          </Link>
+        </CardFooter>
+      </Card>
+    );
   }
 
   return (

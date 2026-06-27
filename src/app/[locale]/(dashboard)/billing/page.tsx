@@ -11,7 +11,7 @@ export default async function BillingPage({
   const roles = await resolveRoles();
 
   if (!roles) {
-    redirect(`/${locale}/auth/login`);
+    redirect(`/${locale}/auth/sign-in`);
   }
 
   try {

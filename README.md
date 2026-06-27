@@ -173,11 +173,11 @@ components/
 
 ---
 
-## Database Schema (12 tables)
+## Database Schema (14 tables)
 
 | Table | Location | Purpose |
 |---|---|---|
-| `tenants` | `schema.ts` | Tenant organizations with branding, locale config, category |
+| `tenants` | `schema.ts` | Tenant organizations with branding, locale config |
 | `blocks` | `schema.ts` | Content blocks (navbar, hero, blog-feed, awards, podcast-feed, contact) with JSONB config + translations |
 | `tenants` | `schema.ts` | Tenant organizations with branding, locale config |
 | `blocks` | `schema.ts` | Content blocks (navbar, hero, blog-feed, awards, podcast-feed, contact) with JSONB config + translations |
@@ -186,7 +186,10 @@ components/
 | `transactions` | `schema.ts` | Stripe transaction records (1% platform fee) |
 | `platform_translations` | `schema.ts` | Platform UI string translations (namespace/key/locale, unique constraint) |
 | `profiles` | `schema/auth.ts` | Local user profiles synced from Neon Auth |
-| `tenant_memberships` | `schema/auth.ts` | Role-based access (owner/editor) per tenant |
+| `workspace_memberships` | `schema/auth.ts` | Role-based access (webmaster/editor) per workspace with site scope |
+| `membership_sites` | `schema/auth.ts` | Links specific-scope members to assigned tenants |
+| `workspace_invitations` | `schema/auth.ts` | Pending invitations with role, scope, site assignment |
+| `workspaces` | `schema.ts` | Workspace (account) with plan, site limits, Stripe subscription |
 | `tenant_domains` | `schema.ts` | Custom domain mappings |
 | `gallery_images` | `4-entities/gallery/model/image.ts` | Gallery image references with S3 keys |
 | `hero_images` | `4-entities/hero/model/image.ts` | Hero background images with S3 keys |
@@ -255,8 +258,8 @@ The marketing page is composed of individual sections in `src/1-pages/marketing/
 
 ### ✅ Phase 2 — Auth, Dashboard, Team & SEO (Complete)
 - Neon Auth fully working with API proxy route and Origin override for dev subdomains
-- Local profiles + tenant_memberships with role-based permissions (owner/editor)
-- 5 auth pages (sign-in, sign-up, login, register, forgot-password)
+- Local profiles + workspace_memberships / membership_sites / workspace_invitations with role-based permissions (super_admin/owner/webmaster/editor)
+- 4 auth pages (sign-in, sign-up, forgot-password, reset-password)
 - Dashboard with collapsible sidebar, site builder UI, team management
 - "Create Site" dialog
 - Entity CRUD (blog posts, podcast episodes, awards) with per-type translation forms

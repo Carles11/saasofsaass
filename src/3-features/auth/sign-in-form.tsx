@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useContext, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,10 @@ export function SignInForm() {
     Link,
   } = useContext(AuthUIContext);
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const locale = basePath?.split("/").filter(Boolean)[0] ?? "en";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,12 +52,18 @@ export function SignInForm() {
         password,
         fetchOptions: { throw: true },
       });
+      // Navigate on success. An explicit ?redirect= wins (must be a local path);
+      // otherwise land on the dashboard. Keep the spinner through navigation.
+      const redirect = searchParams.get("redirect");
+      const target =
+        redirect && redirect.startsWith("/") ? redirect : `/${locale}/dashboard`;
+      router.push(target);
+      router.refresh();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : localization.REQUEST_FAILED;
       setError(message);
       toast({ variant: "error", message });
-    } finally {
       setLoading(false);
     }
   }

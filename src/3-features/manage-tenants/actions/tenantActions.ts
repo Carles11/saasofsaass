@@ -3,7 +3,6 @@
 import { requireProfile } from "@/5-shared/lib/auth/authorization";
 import { db } from "@/5-shared/lib/db";
 import { tenants, blocks } from "@/5-shared/lib/db/schema";
-import { tenantMemberships } from "@/5-shared/lib/db/schema/auth";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { ensureWorkspace } from "@/5-shared/lib/billing/workspace";
@@ -77,12 +76,8 @@ export async function createTenant(raw: FormData | CreateTenantInput) {
     })
     .returning();
 
-  // Create owner membership
-  await db.insert(tenantMemberships).values({
-    tenantId: tenant.id,
-    profileId: profile.id,
-    role: "owner",
-  });
+  // Ownership is conferred by the workspace (workspaces.ownerProfileId) — no
+  // per-tenant membership row is needed for the owner.
 
   // Auto-create hero and footer blocks (always present, cannot be removed)
   await db.insert(blocks).values([

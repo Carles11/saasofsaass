@@ -20,6 +20,11 @@ import { TypographySection } from "./TypographySection";
 import { PaletteSection } from "./PaletteSection";
 import { LogoSection } from "./LogoSection";
 import { SeoSection } from "./SeoSection";
+import { SiteCollaborators } from "./SiteCollaborators";
+import type {
+  SiteCollaborator,
+  TeamPerson,
+} from "@/3-features/team-management/queries/teamQueries";
 
 type EntityRow = { entity: TenantEntity; translation: TenantTranslation | null };
 type UserRole = "owner" | "webmaster" | "editor" | null;
@@ -39,6 +44,9 @@ interface SiteBuilderProps {
   initialLogoUrl?: string | null;
   initialLogoS3Key?: string | null;
   initialLogoLinkUrl?: string | null;
+  workspaceId?: string | null;
+  collaborators?: { owner: TeamPerson | null; collaborators: SiteCollaborator[] } | null;
+  collabTranslations?: Record<string, string>;
 }
 
 export function SiteBuilder({
@@ -56,6 +64,9 @@ export function SiteBuilder({
   initialLogoUrl,
   initialLogoS3Key,
   initialLogoLinkUrl,
+  workspaceId,
+  collaborators,
+  collabTranslations,
 }: SiteBuilderProps) {
   const [activeLocale, setActiveLocale] = useState<SupportedLocaleType>(
     tenant.defaultLocale as SupportedLocaleType
@@ -257,6 +268,17 @@ export function SiteBuilder({
                 plan={plan}
                 translations={translations}
               />
+              {collaborators && workspaceId && userRole && userRole !== "editor" && (
+                <SiteCollaborators
+                  tenantId={tenant.id}
+                  workspaceId={workspaceId}
+                  callerRole={userRole === "owner" ? "owner" : "webmaster"}
+                  owner={collaborators.owner}
+                  collaborators={collaborators.collaborators}
+                  locale={activeLocale}
+                  translations={collabTranslations}
+                />
+              )}
             </TabsContent>
           </Tabs>
         </TabsContent>

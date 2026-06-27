@@ -14,7 +14,7 @@ dotenv.config({ path: resolve(process.cwd(), '.env.local') })
 
 import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import {
   tenants,
   blocks,
@@ -22,12 +22,12 @@ import {
   tenantTranslations,
   workspaces,
 } from './schema'
-import { profiles, tenantMemberships } from './schema/auth'
+import { profiles, workspaceMemberships, membershipSites } from './schema/auth'
 import { getSiteLimit } from '../billing/plans'
 
 const sql = neon(process.env.DATABASE_URL!)
 const db = drizzle(sql, {
-  schema: { tenants, blocks, tenantEntities, tenantTranslations, workspaces, profiles, tenantMemberships },
+  schema: { tenants, blocks, tenantEntities, tenantTranslations, workspaces, profiles, workspaceMemberships, membershipSites },
 })
 
 async function main() {
@@ -241,15 +241,8 @@ async function main() {
 
   // ── 6. Memberships ─────────────────────────────────────────────────────────
 
-  // Owner membership
-  if (ownerProfileId) {
-    await db.insert(tenantMemberships).values({
-      tenantId,
-      profileId: ownerProfileId,
-      role: 'owner',
-    }).onConflictDoNothing({ target: [tenantMemberships.tenantId, tenantMemberships.profileId] })
-    console.log(`  ✓ Owner membership ready (admin@agora-association.org)`)
-  }
+  // The owner is conferred by the workspace (workspaces.ownerProfileId) — no
+  // membership row is needed.
 
   // 3 Editors
   const editorEmails = [
@@ -270,11 +263,38 @@ async function main() {
     )[0]?.id
 
     if (editorProfileId) {
-      await db.insert(tenantMemberships).values({
-        tenantId,
-        profileId: editorProfileId,
-        role: 'editor',
-      }).onConflictDoNothing({ target: [tenantMemberships.tenantId, tenantMemberships.profileId] })
+      const [inserted] = await db
+        .insert(workspaceMemberships)
+        .values({
+          workspaceId,
+          profileId: editorProfileId,
+          role: 'editor',
+          siteScope: 'specific',
+        })
+        .onConflictDoNothing({ target: [workspaceMemberships.workspaceId, workspaceMemberships.profileId] })
+        .returning({ id: workspaceMemberships.id })
+
+      const membershipId =
+        inserted?.id ??
+        (
+          await db
+            .select({ id: workspaceMemberships.id })
+            .from(workspaceMemberships)
+            .where(
+              and(
+                eq(workspaceMemberships.workspaceId, workspaceId),
+                eq(workspaceMemberships.profileId, editorProfileId),
+              ),
+            )
+            .limit(1)
+        )[0]?.id
+
+      if (membershipId) {
+        await db
+          .insert(membershipSites)
+          .values({ membershipId, tenantId })
+          .onConflictDoNothing()
+      }
     }
   }
 

@@ -19,8 +19,8 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 
 **Key Source Files**
 - `src/5-shared/lib/db/schema.ts` — Core tables: tenants, blocks, tenant_entities, tenant_translations, transactions, platform_translations
-- `src/5-shared/lib/db/schema/auth.ts` — Auth tables: profiles, tenant_memberships
-- `src/5-shared/lib/auth/authorization.ts` — getCurrentProfile, assertTenantRole, assertCanEditContent, assertCanManageStructure
+- `src/5-shared/lib/db/schema/auth.ts` — Auth tables: profiles, workspace_memberships, membership_sites, workspace_invitations
+- `src/5-shared/lib/auth/authorization.ts` — getCurrentProfile, getTenantRole, assertCanEditContent, assertCanManageStructure, assertWorkspaceOwner
 - `src/5-shared/lib/auth/sync-profile.ts` — Syncs Neon Auth user to local profiles table by email
 - `src/5-shared/lib/db/platform-translations.ts` — getPlatformTranslations(namespace, locale) helper
 - `src/5-shared/theme/ThemeProvider.tsx` — next-themes wrapper (attribute="class")
@@ -37,7 +37,7 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 - `4-entities/` — Business logic (tenant, block, tenant-content)
 - `5-shared/` — Infrastructure (config, lib/auth, lib/db, lib/i18n, lib/next, store, theme, types)
 
-**Database (11 tables)**
+**Database (14 tables)**
 - `tenants` — Organizations with branding, locale config
 - `blocks` — Content blocks with JSONB config + translations
 - `tenant_entities` — Blog posts, podcast episodes, awards
@@ -46,15 +46,18 @@ Multi-tenant website factory — one Next.js codebase renders unique multilingua
 - `transactions` — Stripe records (1% platform fee)
 - `platform_translations` — UI strings, unique on (namespace, key, locale)
 - `profiles` — Local user profiles synced from Neon Auth
-- `tenant_memberships` — Role-based access (owner/editor)
+- `workspace_memberships` — Role-based access (webmaster/editor) per workspace
+- `membership_sites` — Specific-site scoping for members
+- `workspace_invitations` — Pending invitations with role & site assignment
+- `workspaces` — Workspace (account) with plan, billing, site limits
 - `gallery_images` — Gallery image references with S3 keys
 - `hero_images` — Hero background images with S3 keys
 
 **Auth & Roles**
-- Two roles: `owner` (full control), `editor` (content only)
-- Auth pages at `/auth/{sign-in,sign-up,login,register,forgot-password}`
+- Four tiers: `super_admin` (bypasses all checks), `owner` (workspace billing, full control), `webmaster` (full control on assigned sites), `editor` (content-only on assigned sites)
+- Auth pages at `/auth/{sign-in,sign-up,forgot-password,reset-password}`
 - Dashboard at `app.localhost:3000/{locale}/dashboard`
-- Team management at `/dashboard/team`
+- Team management at `app.localhost:3000/{locale}/team`
 
 **SEO**
 - Dynamic sitemap at `src/app/sitemap.ts`

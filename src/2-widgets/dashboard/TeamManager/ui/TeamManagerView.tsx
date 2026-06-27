@@ -1,5 +1,18 @@
 "use client";
 
+import {
+  resendInvitation,
+  revokeInvitation,
+} from "@/3-features/team-management/actions/invitations";
+import {
+  removeMember,
+  updateMemberRole,
+} from "@/3-features/team-management/actions/members";
+import type {
+  TeamMemberView,
+  TeamPendingInvite,
+  TeamPerson,
+} from "@/3-features/team-management/queries/teamQueries";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import {
   Avatar,
@@ -21,20 +34,7 @@ import { MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useTransition } from "react";
 import { toast } from "sonner";
-// import { InviteDialog } from "./InviteDialog";
-import {
-  resendInvitation,
-  revokeInvitation,
-} from "@/3-features/team-management/actions/invitations";
-import {
-  removeMember,
-  updateMemberRole,
-} from "@/3-features/team-management/actions/members";
-import type {
-  TeamMemberView,
-  TeamPendingInvite,
-  TeamPerson,
-} from "@/3-features/team-management/queries/teamQueries";
+import { InviteDialog } from "@/3-features/team-management/ui/InviteDialog";
 
 interface TeamManagerViewProps {
   workspaceId: string;
@@ -163,13 +163,13 @@ export function TeamManagerView({
             {tr("subtitle", "Invite and manage who can work on your sites.")}
           </p>
         </div>
-        {/* <InviteDialog
+        <InviteDialog
           workspaceId={workspaceId}
           locale={locale}
           callerRole={callerRole}
           sites={sites}
           translations={translations}
-        /> */}
+        />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

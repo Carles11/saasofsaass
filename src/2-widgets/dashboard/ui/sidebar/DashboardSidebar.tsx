@@ -22,13 +22,13 @@ import { cn } from "@/5-shared/lib/utils";
 interface DashboardSidebarProps {
   session: AuthSession;
   resolvedRoles: ResolvedRoles;
-  planLabel?: string;
+  planLabel?: string | null;
 }
 
 export const DashboardSidebar = ({
   session,
   resolvedRoles,
-  planLabel = "Free",
+  planLabel,
 }: DashboardSidebarProps) => {
   const isOpen = useStore((state) => state.isSidebarOpen);
   const toggle = useStore((state) => state.toggleSidebar);
@@ -103,10 +103,14 @@ export const DashboardSidebar = ({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={4} className="w-56">
-                  <div className="px-2 py-1.5">
-                    <p className="text-xs font-medium text-muted-foreground">{planLabel}</p>
-                  </div>
-                  <DropdownMenuSeparator />
+                  {planLabel && (
+                    <>
+                      <div className="px-2 py-1.5">
+                        <p className="text-xs font-medium text-muted-foreground">{planLabel}</p>
+                      </div>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
                   <div className="px-2 py-1.5">
                     <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                   </div>

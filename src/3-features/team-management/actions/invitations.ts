@@ -8,13 +8,13 @@ import {
   membershipSites,
   workspaceInvitations,
 } from "@/5-shared/lib/db/schema/auth";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireProfile } from "@/5-shared/lib/auth/authorization";
 import { authServer } from "@/5-shared/lib/auth/server";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
 import { getPlanForWorkspace } from "@/5-shared/lib/billing/workspace";
-import { planAllowsTeam } from "@/5-shared/lib/billing/plans";
+import { planAllowsTeam, getSeatLimit, isUnlimited } from "@/5-shared/lib/billing/plans";
 import { sendTeamInviteEmail } from "@/5-shared/lib/email/resend";
 import { generateInviteToken, getInviteExpiry } from "../lib/inviteToken";
 import {
@@ -114,6 +114,37 @@ export async function createInvitation(input: CreateInvitationInput): Promise<vo
     .limit(1);
   if (existingMember.length > 0) {
     throw new Error("That person is already on the team");
+  }
+
+  // Per-plan seat cap. Re-sending to an already-pending email doesn't take a new
+  // seat (that email is excluded from the pending count).
+  const seatLimit = getSeatLimit(plan, input.role);
+  if (!isUnlimited(seatLimit)) {
+    const [memberCount] = await db
+      .select({ n: sql<number>`count(*)` })
+      .from(workspaceMemberships)
+      .where(
+        and(
+          eq(workspaceMemberships.workspaceId, input.workspaceId),
+          eq(workspaceMemberships.role, input.role),
+        ),
+      );
+    const [inviteCount] = await db
+      .select({ n: sql<number>`count(*)` })
+      .from(workspaceInvitations)
+      .where(
+        and(
+          eq(workspaceInvitations.workspaceId, input.workspaceId),
+          eq(workspaceInvitations.status, "pending"),
+          eq(workspaceInvitations.role, input.role),
+          ne(workspaceInvitations.email, email),
+        ),
+      );
+    const used = Number(memberCount?.n ?? 0) + Number(inviteCount?.n ?? 0);
+    if (used >= seatLimit) {
+      const roleName = input.role === "webmaster" ? "web-master" : "editor";
+      throw new Error(`You've reached your ${roleName} seat limit for this plan.`);
+    }
   }
 
   const token = generateInviteToken();

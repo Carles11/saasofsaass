@@ -7,17 +7,29 @@ import { MoreHorizontal, Search } from "lucide-react";
 import {
   Badge,
   Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Input,
+  Label,
 } from "@/components/ui";
 import {
   publishTenant,
   unpublishTenant,
 } from "@/3-features/manage-tenants/actions/publishTenant";
+import {
+  archiveTenant,
+  restoreTenant,
+} from "@/3-features/manage-tenants/actions/archiveTenant";
+import { deleteTenant } from "@/3-features/manage-tenants/actions/deleteTenant";
 import type { Tenant } from "@/5-shared/lib/db/schema";
 
 interface TenantDomain {
@@ -40,7 +52,111 @@ function roleLabel(role: string): string {
   return "Editor";
 }
 
-type FilterStatus = "all" | "published" | "draft";
+function StatusPill({ status, compact = false }: { status: string; compact?: boolean }) {
+  const styles: Record<string, { label: string; pill: string; dot: string }> = {
+    published: {
+      label: "Published",
+      pill: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      dot: "bg-emerald-500",
+    },
+    archived: {
+      label: "Archived",
+      pill: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      dot: "bg-amber-500",
+    },
+    draft: {
+      label: "Draft",
+      pill: "bg-muted text-muted-foreground",
+      dot: "bg-muted-foreground",
+    },
+  };
+  const s = styles[status] ?? styles.draft;
+  return (
+    <span
+      className={`inline-flex items-center rounded-full font-semibold ${
+        compact ? "gap-1 px-2 py-0.5 text-[10px]" : "gap-1.5 px-2.5 py-0.5 text-xs"
+      } ${s.pill}`}
+    >
+      <span className={`rounded-full ${compact ? "size-1" : "size-1.5"} ${s.dot}`} />
+      {s.label}
+    </span>
+  );
+}
+
+interface RowActionsProps {
+  tenant: Tenant;
+  locale: string;
+  canManage: boolean;
+  isOwnerRow: boolean;
+  isPublished: boolean;
+  isArchived: boolean;
+  isPending: boolean;
+  onPublish: (id: string) => void;
+  onUnpublish: (id: string) => void;
+  onArchive: (id: string) => void;
+  onRestore: (id: string) => void;
+  onDelete: (tenant: Tenant) => void;
+}
+
+function RowActions({
+  tenant,
+  locale,
+  canManage,
+  isOwnerRow,
+  isPublished,
+  isArchived,
+  isPending,
+  onPublish,
+  onUnpublish,
+  onArchive,
+  onRestore,
+  onDelete,
+}: RowActionsProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon-xs" className="size-8 shrink-0">
+          <MoreHorizontal className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem asChild>
+          <Link href={`/${locale}/dashboard/site-builder/${tenant.id}`}>Edit</Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {!isArchived && canManage && (
+          <DropdownMenuItem
+            disabled={isPending}
+            onSelect={() => (isPublished ? onUnpublish(tenant.id) : onPublish(tenant.id))}
+          >
+            {isPublished ? "Unpublish" : "Publish"}
+          </DropdownMenuItem>
+        )}
+        {!isArchived && isOwnerRow && (
+          <DropdownMenuItem disabled={isPending} onSelect={() => onArchive(tenant.id)}>
+            Archive
+          </DropdownMenuItem>
+        )}
+        {isArchived && isOwnerRow && (
+          <DropdownMenuItem disabled={isPending} onSelect={() => onRestore(tenant.id)}>
+            Restore
+          </DropdownMenuItem>
+        )}
+        {isArchived && isOwnerRow && (
+          <DropdownMenuItem
+            disabled={isPending}
+            onSelect={() => onDelete(tenant)}
+            className="text-destructive focus:text-destructive"
+          >
+            Delete permanently
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+type FilterStatus = "all" | "published" | "draft" | "archived";
 type SortField = "name" | "status" | "updatedAt" | "locales";
 
 function timeAgo(date: Date): string {
@@ -91,9 +207,10 @@ export function SitesTable({
   }, [roles]);
 
   const statusCounts = useMemo(() => {
-    const counts = { all: tenants.length, published: 0, draft: 0 };
+    const counts = { all: tenants.length, published: 0, draft: 0, archived: 0 };
     for (const t of tenants) {
       if (t.status === "published") counts.published++;
+      else if (t.status === "archived") counts.archived++;
       else counts.draft++;
     }
     return counts;
@@ -201,6 +318,53 @@ export function SitesTable({
     [],
   );
 
+  const handleArchive = useCallback((tenantId: string) => {
+    startTransition(async () => {
+      try {
+        await archiveTenant(tenantId);
+        setTenants((prev) =>
+          prev.map((t) => (t.id === tenantId ? { ...t, status: "archived" } : t)),
+        );
+        toast.success("Site archived");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to archive");
+      }
+    });
+  }, []);
+
+  const handleRestore = useCallback((tenantId: string) => {
+    startTransition(async () => {
+      try {
+        await restoreTenant(tenantId);
+        setTenants((prev) =>
+          prev.map((t) => (t.id === tenantId ? { ...t, status: "draft" } : t)),
+        );
+        toast.success("Site restored");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to restore");
+      }
+    });
+  }, []);
+
+  const [deleteTarget, setDeleteTarget] = useState<Tenant | null>(null);
+  const [confirmName, setConfirmName] = useState("");
+
+  function handleDelete() {
+    if (!deleteTarget) return;
+    const target = deleteTarget;
+    startTransition(async () => {
+      try {
+        await deleteTenant(target.id, confirmName);
+        setTenants((prev) => prev.filter((t) => t.id !== target.id));
+        toast.success("Site deleted");
+        setDeleteTarget(null);
+        setConfirmName("");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to delete");
+      }
+    });
+  }
+
   const rootDomain =
     process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000";
 
@@ -220,6 +384,11 @@ export function SitesTable({
       label: "Drafts",
       count: statusCounts.draft,
     },
+    {
+      key: "archived" as FilterStatus,
+      label: "Archived",
+      count: statusCounts.archived,
+    },
   ];
 
   const noTenants = tenants.length === 0;
@@ -234,7 +403,7 @@ export function SitesTable({
   return (
     <div>
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {filterCards.map((card) => {
           const isActive = filterStatus === card.key;
           return (
@@ -302,7 +471,9 @@ export function SitesTable({
                 : filterStatus !== "all"
                   ? filterStatus === "published"
                     ? "Publish a site to see it here."
-                    : "Unpublish a site to see it here."
+                    : filterStatus === "archived"
+                      ? "Archive a site to see it here."
+                      : "Create a site to see it here."
                   : "Try a different search term."}
             </p>
           </section>
@@ -376,6 +547,8 @@ export function SitesTable({
                   const role = roleMap.get(tenant.id) ?? "editor";
                   const customDomain = domainMap.get(tenant.id);
                   const isPublished = tenant.status === "published";
+                  const isArchived = tenant.status === "archived";
+                  const isOwnerRow = role === "owner";
 
                   return (
                     <tr
@@ -394,22 +567,7 @@ export function SitesTable({
 
                       {/* Status */}
                       <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                            isPublished
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                              : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          <span
-                            className={`size-1.5 rounded-full ${
-                              isPublished
-                                ? "bg-emerald-500"
-                                : "bg-muted-foreground"
-                            }`}
-                          />
-                          {isPublished ? "Published" : "Draft"}
-                        </span>
+                        <StatusPill status={tenant.status} />
                       </td>
 
                       {/* Subdomain */}
@@ -461,41 +619,20 @@ export function SitesTable({
 
                       {/* Actions dropdown */}
                       <td className="px-2 py-3">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              className="size-8"
-                            >
-                              <MoreHorizontal className="size-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-40">
-                            <DropdownMenuItem asChild>
-                              <Link
-                                href={`/${locale}/dashboard/site-builder/${tenant.id}`}
-                              >
-                                Edit
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {canManage && (
-                              <DropdownMenuItem
-                                disabled={isPending}
-                                onSelect={() => {
-                                  if (isPublished) {
-                                    handleUnpublish(tenant.id);
-                                  } else {
-                                    handlePublish(tenant.id);
-                                  }
-                                }}
-                              >
-                                {isPublished ? "Unpublish" : "Publish"}
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <RowActions
+                          tenant={tenant}
+                          locale={locale}
+                          canManage={canManage}
+                          isOwnerRow={isOwnerRow}
+                          isPublished={isPublished}
+                          isArchived={isArchived}
+                          isPending={isPending}
+                          onPublish={handlePublish}
+                          onUnpublish={handleUnpublish}
+                          onArchive={handleArchive}
+                          onRestore={handleRestore}
+                          onDelete={setDeleteTarget}
+                        />
                       </td>
                     </tr>
                   );
@@ -537,6 +674,8 @@ export function SitesTable({
           const role = roleMap.get(tenant.id) ?? "editor";
           const customDomain = domainMap.get(tenant.id);
           const isPublished = tenant.status === "published";
+          const isArchived = tenant.status === "archived";
+          const isOwnerRow = role === "owner";
 
           return (
             <div
@@ -550,54 +689,24 @@ export function SitesTable({
                 >
                   {tenant.name}
                 </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon-xs" className="size-8 shrink-0">
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem asChild>
-                      <Link
-                        href={`/${locale}/dashboard/site-builder/${tenant.id}`}
-                      >
-                        Edit
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {canManage && (
-                      <DropdownMenuItem
-                        disabled={isPending}
-                        onSelect={() => {
-                          if (isPublished) {
-                            handleUnpublish(tenant.id);
-                          } else {
-                            handlePublish(tenant.id);
-                          }
-                        }}
-                      >
-                        {isPublished ? "Unpublish" : "Publish"}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <RowActions
+                  tenant={tenant}
+                  locale={locale}
+                  canManage={canManage}
+                  isOwnerRow={isOwnerRow}
+                  isPublished={isPublished}
+                  isArchived={isArchived}
+                  isPending={isPending}
+                  onPublish={handlePublish}
+                  onUnpublish={handleUnpublish}
+                  onArchive={handleArchive}
+                  onRestore={handleRestore}
+                  onDelete={setDeleteTarget}
+                />
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2 items-center">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    isPublished
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                      : "bg-muted text-muted-foreground"
-                  }`}
-                >
-                  <span
-                    className={`size-1 rounded-full ${
-                      isPublished ? "bg-emerald-500" : "bg-muted-foreground"
-                    }`}
-                  />
-                  {isPublished ? "Published" : "Draft"}
-                </span>
+                <StatusPill status={tenant.status} compact />
                 <Badge
                   variant={role === "editor" ? "secondary" : "default"}
                   className="text-[10px] uppercase tracking-wider font-semibold"
@@ -628,6 +737,60 @@ export function SitesTable({
           );
         })}
       </div>
+
+      {/* Permanent-delete confirmation */}
+      <Dialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+            setConfirmName("");
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete site permanently?</DialogTitle>
+            <DialogDescription>
+              This permanently deletes{" "}
+              <span className="font-semibold text-foreground">{deleteTarget?.name}</span>{" "}
+              and all of its content, languages, domains, and images. This cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-delete">
+              Type <span className="font-semibold">{deleteTarget?.name}</span> to confirm
+            </Label>
+            <Input
+              id="confirm-delete"
+              value={confirmName}
+              onChange={(e) => setConfirmName(e.target.value)}
+              placeholder={deleteTarget?.name ?? ""}
+              autoComplete="off"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteTarget(null);
+                setConfirmName("");
+              }}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isPending || confirmName.trim() !== (deleteTarget?.name ?? "")}
+            >
+              Delete permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

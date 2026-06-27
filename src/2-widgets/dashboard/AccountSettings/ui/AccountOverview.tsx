@@ -4,7 +4,7 @@ import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/transla
 
 interface MemberInfo {
   tenantId: string;
-  role: "owner" | "editor";
+  role: "owner" | "webmaster" | "editor";
   tenantName: string;
 }
 
@@ -20,6 +20,7 @@ export function AccountOverview({ profile, memberInfo, translations }: AccountOv
   const memberSince = resolveTranslation(translations, "overview.member-since", "Member since");
   const tenantsTitle = resolveTranslation(translations, "overview.tenants-title", "Your Tenants");
   const ownerLabel = resolveTranslation(translations, "overview.role-owner", "Owner");
+  const webmasterLabel = resolveTranslation(translations, "overview.role-webmaster", "Web-master");
   const editorLabel = resolveTranslation(translations, "overview.role-editor", "Editor");
   const noTenants = resolveTranslation(translations, "overview.no-tenants", "You don't belong to any tenants yet.");
 
@@ -57,8 +58,12 @@ export function AccountOverview({ profile, memberInfo, translations }: AccountOv
                   className="flex items-center justify-between p-3 rounded-lg border border-border"
                 >
                   <p className="text-sm font-medium">{m.tenantName}</p>
-                  <Badge variant={m.role === "owner" ? "default" : "secondary"}>
-                    {m.role === "owner" ? ownerLabel : editorLabel}
+                  <Badge variant={m.role === "editor" ? "secondary" : "default"}>
+                    {m.role === "owner"
+                      ? ownerLabel
+                      : m.role === "webmaster"
+                        ? webmasterLabel
+                        : editorLabel}
                   </Badge>
                 </div>
               ))}

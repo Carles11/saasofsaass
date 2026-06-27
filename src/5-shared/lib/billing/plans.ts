@@ -10,6 +10,10 @@ export type Cadence = "monthly" | "annual";
 export interface PlanLimits {
   publishedSites: number;
   teamMembers: number;
+  /** Invitable web-master seats (real collaborators). -1 = unlimited. */
+  webmasterSeats: number;
+  /** Invitable editor seats (often the client's own people). -1 = unlimited. */
+  editorSeats: number;
   languagesPerSite: number;
   aiBlocksLifetime: number;
 }
@@ -51,6 +55,8 @@ export const PLANS = {
     limits: {
       publishedSites: 1,
       teamMembers: 1,
+      webmasterSeats: 0,
+      editorSeats: 0,
       languagesPerSite: 2,
       aiBlocksLifetime: 2,
     },
@@ -72,6 +78,8 @@ export const PLANS = {
     limits: {
       publishedSites: 3,
       teamMembers: 10,
+      webmasterSeats: 3,
+      editorSeats: -1,
       languagesPerSite: -1,
       aiBlocksLifetime: -1,
     },
@@ -93,6 +101,8 @@ export const PLANS = {
     limits: {
       publishedSites: -1,
       teamMembers: -1,
+      webmasterSeats: -1,
+      editorSeats: -1,
       languagesPerSite: -1,
       aiBlocksLifetime: -1,
     },
@@ -168,6 +178,11 @@ export function getTeamLimit(plan: string): number {
 export function planAllowsTeam(plan: string): boolean {
   const limit = getTeamLimit(plan);
   return isUnlimited(limit) || limit > 1;
+}
+
+/** Invitable seat limit for a given tenant role. -1 = unlimited. */
+export function getSeatLimit(plan: string, role: "webmaster" | "editor"): number {
+  return getLimit(plan, role === "webmaster" ? "webmasterSeats" : "editorSeats");
 }
 
 export function planAllowsCustomDomains(plan: string): boolean {

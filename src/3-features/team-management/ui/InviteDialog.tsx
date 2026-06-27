@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { createInvitation } from "@/3-features/team-management/actions/invitations";
+import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import {
   Badge,
   Button,
@@ -21,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui";
-import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
-import { createInvitation } from "@/3-features/team-management/actions/invitations";
+import { useRouter } from "next/navigation";
+import { useState, useTransition, type ReactNode } from "react";
+import { toast } from "sonner";
 
 type Role = "webmaster" | "editor";
 type Scope = "all" | "specific";
@@ -51,8 +51,10 @@ export function InviteDialog({
 }: InviteDialogProps) {
   const router = useRouter();
   const constrained = mode === "constrained";
-  const roleOptions: Role[] = callerRole === "owner" ? ["webmaster", "editor"] : ["editor"];
-  const scopeOptions: Scope[] = callerRole === "owner" ? ["all", "specific"] : ["specific"];
+  const roleOptions: Role[] =
+    callerRole === "owner" ? ["webmaster", "editor"] : ["editor"];
+  const scopeOptions: Scope[] =
+    callerRole === "owner" ? ["all", "specific"] : ["specific"];
 
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -118,14 +120,20 @@ export function InviteDialog({
         setOpen(false);
         router.refresh();
       } catch (e) {
-        toast.error(e instanceof Error ? e.message : tr("error.generic", "Could not send invitation"));
+        toast.error(
+          e instanceof Error
+            ? e.message
+            : tr("invite.error", "Could not send invitation"),
+        );
       }
     });
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{trigger ?? <Button>{tr("invite", "Invite")}</Button>}</DialogTrigger>
+      <DialogTrigger asChild>
+        {trigger ?? <Button>{tr("invite", "Invite")}</Button>}
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
@@ -179,7 +187,10 @@ export function InviteDialog({
 
               <div className="space-y-1.5">
                 <Label>{tr("label.scope", "Sites")}</Label>
-                <Select value={scope} onValueChange={(v) => setScope(v as Scope)}>
+                <Select
+                  value={scope}
+                  onValueChange={(v) => setScope(v as Scope)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -200,14 +211,16 @@ export function InviteDialog({
                   <Label>{tr("label.select-sites", "Select sites")}</Label>
                   {sites.length === 0 ? (
                     <p className="text-xs text-muted-foreground">
-                      {tr("no-sites", "You have no sites yet.")}
+                      {tr("invite.no-sites", "You have no sites yet.")}
                     </p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {sites.map((s) => (
                         <Badge
                           key={s.id}
-                          variant={selectedSites.has(s.id) ? "default" : "secondary"}
+                          variant={
+                            selectedSites.has(s.id) ? "default" : "secondary"
+                          }
                           className="cursor-pointer select-none"
                           onClick={() => toggleSite(s.id)}
                         >
@@ -224,7 +237,9 @@ export function InviteDialog({
 
         <DialogFooter>
           <Button onClick={submit} disabled={pending}>
-            {pending ? tr("sending", "Sending…") : tr("send-invite", "Send invitation")}
+            {pending
+              ? tr("sending", "Sending…")
+              : tr("send-invite", "Send invitation")}
           </Button>
         </DialogFooter>
       </DialogContent>

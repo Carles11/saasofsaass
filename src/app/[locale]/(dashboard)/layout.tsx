@@ -6,10 +6,11 @@ import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
 import { authServer } from "@/5-shared/lib/auth/server";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
-import { ensureWorkspace, getPlanForWorkspace } from "@/5-shared/lib/billing/workspace";
+import { getOwnWorkspaceForDashboard } from "@/5-shared/lib/billing/workspace";
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
 import { getPlatformTranslations } from "@/5-shared/lib/db/platform-translations";
 import { UpgradeModalProvider } from "@/2-widgets/dashboard/UpgradeModal";
+import { PendingInviteConsumer } from "@/3-features/team-management/ui/PendingInviteConsumer";
 import { PLANS } from "@/5-shared/lib/billing/plans";
 import { redirect } from "next/navigation";
 
@@ -39,10 +40,14 @@ export default async function DashboardLayout({
   }
 
   const profile = await syncProfile(session);
-  let planLabel = "Free";
+  // Collaborators (members of someone else's workspace) don't get a stray
+  // workspace or plan badge; fresh builders still get one so they can onboard.
+  let planLabel: string | null = null;
   if (profile) {
-    const workspace = await ensureWorkspace(profile.id, profile.name);
-    planLabel = PLANS[workspace.plan as keyof typeof PLANS]?.label ?? "Free";
+    const workspace = await getOwnWorkspaceForDashboard(profile.id, profile.name);
+    planLabel = workspace
+      ? PLANS[workspace.plan as keyof typeof PLANS]?.label ?? "Free"
+      : null;
   }
 
   const resolvedRoles = await resolveRoles(session);
@@ -55,6 +60,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-background">
+      <PendingInviteConsumer locale={locale} />
       <TranslationProgressBar />
       <DashboardSidebar session={session} resolvedRoles={resolvedRoles} planLabel={planLabel} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden pb-16 md:pb-0">

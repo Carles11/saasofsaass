@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AcceptInviteForm } from "./AcceptInviteForm";
+import { RememberInvite } from "@/3-features/team-management/ui/RememberInvite";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +53,7 @@ export default async function InvitePage({
     return (
       <Shell>
         <CardHeader>
-          <CardTitle>{tr("title", "Team invitation")}</CardTitle>
+          <CardTitle>{tr("invalid-title", "Team invitation")}</CardTitle>
           <CardDescription>{message}</CardDescription>
         </CardHeader>
       </Shell>
@@ -108,6 +109,7 @@ export default async function InvitePage({
             <Button asChild variant="outline" className="w-full">
               <Link href={`/${locale}/auth/sign-in`}>{tr("sign-in", "Sign in")}</Link>
             </Button>
+            <RememberInvite token={token} />
           </div>
         ) : matches ? (
           <AcceptInviteForm
@@ -133,6 +135,7 @@ export default async function InvitePage({
                 {tr("switch-account", "Sign in with a different account")}
               </Link>
             </Button>
+            <RememberInvite token={token} />
           </div>
         )}
       </CardContent>
