@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PLAN_LABELS, type PlanId } from "@/5-shared/lib/billing/plans";
+import { getLimit, isUnlimited, PLAN_LABELS, type PlanId } from "@/5-shared/lib/billing/plans";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 
 interface WorkspaceInfoSectionProps {
@@ -9,6 +9,8 @@ interface WorkspaceInfoSectionProps {
     id: string;
     plan: string;
     siteLimit: number;
+    addonSites: number;
+    aiBlocksUsed: number;
     currentSites: number;
     subscriptionStatus: string | null;
     stripeCustomerId: string | null;
@@ -54,6 +56,16 @@ export function WorkspaceInfoSection({ workspace, translations }: WorkspaceInfoS
     ? statusLabels[workspace.subscriptionStatus] ?? workspace.subscriptionStatus
     : null;
 
+  const aiLimit = getLimit(workspace.plan, "aiBlocksLifetime");
+  const aiLabel = isUnlimited(aiLimit)
+    ? `${workspace.aiBlocksUsed} / ∞`
+    : `${workspace.aiBlocksUsed} / ${aiLimit}`;
+
+  const effectiveSites = workspace.siteLimit + Math.max(0, workspace.addonSites);
+  const sitesDetail = workspace.addonSites > 0
+    ? `${workspace.currentSites} / ${effectiveSites} (${workspace.siteLimit} base + ${workspace.addonSites} add-on)`
+    : `${workspace.currentSites} / ${effectiveSites}`;
+
   return (
     <Card>
       <CardHeader>
@@ -67,9 +79,11 @@ export function WorkspaceInfoSection({ workspace, translations }: WorkspaceInfoS
           </div>
           <div>
             <p className="text-xs font-medium text-muted-foreground">Sites</p>
-            <p className="text-sm font-medium mt-0.5">
-              {sitesUsed.replace("{used}", String(workspace.currentSites)).replace("{limit}", String(workspace.siteLimit))}
-            </p>
+            <p className="text-sm font-medium mt-0.5">{sitesDetail}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">AI Translations</p>
+            <p className="text-sm font-medium mt-0.5">{aiLabel}</p>
           </div>
           {displayStatus && (
             <div>

@@ -6784,6 +6784,169 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     key: "preferences.palette-sunset",
     translations: t({ en: "Sunset" }),
   },
+
+  // ── Dashboard: Billing ────────────────────────────────────────────────────
+  {
+    namespace: "dashboard.billing",
+    key: "title",
+    translations: t({ en: "Billing" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "subtitle",
+    translations: t({ en: "Manage your subscription, invoices, and payment methods." }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "tab.plan",
+    translations: t({ en: "Plan & Usage" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "tab.invoices",
+    translations: t({ en: "Invoices" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "sign-in-required",
+    translations: t({ en: "Please sign in to manage billing." }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "plan.title",
+    translations: t({ en: "Current Plan" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "subscription.active",
+    translations: t({ en: "Active" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "subscription.past-due",
+    translations: t({ en: "Past Due" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "subscription.unpaid",
+    translations: t({ en: "Unpaid" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "subscription.canceled",
+    translations: t({ en: "Canceled" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "subscription.incomplete",
+    translations: t({ en: "Incomplete" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "manage-subscription",
+    translations: t({ en: "Manage Subscription" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "upgrade",
+    translations: t({ en: "Upgrade to {plan}" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "opening",
+    translations: t({ en: "Opening..." }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "usage.title",
+    translations: t({ en: "Usage" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "usage.sites",
+    translations: t({ en: "Published Sites" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "usage.ai-blocks",
+    translations: t({ en: "AI Translations" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.title",
+    translations: t({ en: "What's Included" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.sites",
+    translations: t({ en: "Published Sites" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.languages",
+    translations: t({ en: "Languages per Site" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.ai-blocks",
+    translations: t({ en: "AI Translation Blocks" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.custom-domains",
+    translations: t({ en: "Custom Domains" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.team-members",
+    translations: t({ en: "Team Members" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.priority-support",
+    translations: t({ en: "Priority Support" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "features.branding",
+    translations: t({ en: "White-Label" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "invoices.title",
+    translations: t({ en: "Invoices" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "invoices.empty-state",
+    translations: t({ en: "Your invoices will appear here once you have a paid subscription." }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "invoices.col-date",
+    translations: t({ en: "Date" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "invoices.col-description",
+    translations: t({ en: "Description" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "invoices.col-amount",
+    translations: t({ en: "Amount" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "invoices.col-status",
+    translations: t({ en: "Status" }),
+  },
+  {
+    namespace: "dashboard.billing",
+    key: "invoices.col-receipt",
+    translations: t({ en: "Receipt" }),
+  },
+
   {
     namespace: "marketing.footer",
     key: "production",

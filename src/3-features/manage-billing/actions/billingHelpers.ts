@@ -6,6 +6,8 @@ export interface WorkspaceInfo {
   id: string;
   plan: string;
   siteLimit: number;
+  addonSites: number;
+  aiBlocksUsed: number;
   subscriptionStatus: string | null;
   stripeCustomerId: string | null;
 }
@@ -18,6 +20,8 @@ export async function getWorkspaceByProfileId(
       id: workspaces.id,
       plan: workspaces.plan,
       siteLimit: workspaces.siteLimit,
+      addonSites: workspaces.addonSites,
+      aiBlocksUsed: workspaces.aiBlocksUsed,
       subscriptionStatus: workspaces.subscriptionStatus,
       stripeCustomerId: workspaces.stripeCustomerId,
     })
