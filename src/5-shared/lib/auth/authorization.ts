@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { db } from "@/5-shared/lib/db"
 import { profiles, workspaceMemberships, membershipSites } from "@/5-shared/lib/db/schema/auth"
 import { tenants, workspaces } from "@/5-shared/lib/db/schema"
@@ -8,24 +9,78 @@ import { TENANT_ROLE_RANK } from "@/5-shared/config/permissions/tenantRole"
 
 export type { TenantRole }
 
-/** Get the current user's profile from the DB, or null if not authenticated. */
-export async function getCurrentProfile(session?: AuthSession) {
-  const s = session ?? (await authServer.getSession()).data
-  if (!s?.user?.email) return null
+// One session fetch per request render.
+export const getSession = cache(async () => (await authServer.getSession()).data)
 
-  const [profile] = await db
+// ── Typed errors ─────────────────────────────────────────────────────
+
+export class UnauthenticatedError extends Error {
+  constructor() {
+    super("Unauthenticated")
+    this.name = "UnauthenticatedError"
+  }
+}
+
+export class ForbiddenError extends Error {
+  constructor(message = "Forbidden") {
+    super(message)
+    this.name = "ForbiddenError"
+  }
+}
+
+// ── Profile resolution ───────────────────────────────────────────────
+
+/**
+ * Match the live session to a local profile row.
+ *
+ * Prefers the stable `authUserId` (Neon Auth user id). Falls back to email
+ * for not-yet-linked rows (seed, invite stubs, pre-migration). When matched
+ * by email the `authUserId` is backfilled so future lookups are stable.
+ */
+export async function findProfileForSession(s: AuthSession) {
+  if (!s?.user) return null
+
+  const authId: string | undefined = (s.user as { id?: string }).id
+  const email: string | undefined = (s.user as { email?: string }).email
+
+  if (authId) {
+    const [byId] = await db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.authUserId, authId))
+      .limit(1)
+    if (byId) return byId
+  }
+
+  if (!email) return null
+
+  const [byEmail] = await db
     .select()
     .from(profiles)
-    .where(eq(profiles.email, s.user.email))
+    .where(eq(profiles.email, email))
     .limit(1)
 
-  return profile ?? null
+  if (byEmail && authId && byEmail.authUserId !== authId) {
+    await db
+      .update(profiles)
+      .set({ authUserId: authId, updatedAt: new Date() })
+      .where(eq(profiles.id, byEmail.id))
+    return { ...byEmail, authUserId: authId } as typeof profiles.$inferSelect
+  }
+
+  return byEmail ?? null
 }
+
+/** Get the current user's profile from the DB, or null if not authenticated. */
+export const getCurrentProfile = cache(async (session?: AuthSession) => {
+  const s = session ?? (await getSession())
+  return findProfileForSession(s)
+})
 
 /** Require an authenticated user. Throws if not logged in. */
 export async function requireProfile(session?: AuthSession) {
   const profile = await getCurrentProfile(session)
-  if (!profile) throw new Error("Unauthorized")
+  if (!profile) throw new UnauthenticatedError()
   return profile
 }
 
@@ -38,6 +93,8 @@ async function loadProfile(profileId: string) {
     .limit(1)
   return p ?? null
 }
+
+// ── Tenant role resolution ───────────────────────────────────────────
 
 /**
  * Resolve the caller's effective role on a specific tenant.
@@ -106,6 +163,8 @@ export async function getTenantRole(
   return link ? (membership.role as TenantRole) : null
 }
 
+// ── Assertions ───────────────────────────────────────────────────────
+
 /**
  * Assert the caller has at least the given role on a tenant.
  * Super admins bypass this check entirely.
@@ -116,13 +175,13 @@ export async function assertTenantRole(
   profileId?: string,
 ): Promise<void> {
   const profile = profileId ? await loadProfile(profileId) : await requireProfile()
-  if (!profile) throw new Error("Unauthorized")
+  if (!profile) throw new ForbiddenError()
   if (profile.role === "super_admin") return
 
   const role = await getTenantRole(tenantId, profile.id)
-  if (!role) throw new Error("You are not a member of this tenant")
+  if (!role) throw new ForbiddenError("You are not a member of this tenant")
   if (TENANT_ROLE_RANK[role] < TENANT_ROLE_RANK[minimumRole]) {
-    throw new Error("You do not have permission to perform this action")
+    throw new ForbiddenError("You do not have permission to perform this action")
   }
 }
 
@@ -152,7 +211,7 @@ export async function assertWorkspaceOwner(
   profileId?: string,
 ): Promise<void> {
   const profile = profileId ? await loadProfile(profileId) : await requireProfile()
-  if (!profile) throw new Error("Unauthorized")
+  if (!profile) throw new ForbiddenError()
   if (profile.role === "super_admin") return
 
   const [ws] = await db
@@ -162,6 +221,14 @@ export async function assertWorkspaceOwner(
     .limit(1)
 
   if (!ws || ws.ownerProfileId !== profile.id) {
-    throw new Error("Only the workspace owner can perform this action")
+    throw new ForbiddenError("Only the workspace owner can perform this action")
+  }
+}
+
+/** Assert the caller is the platform super-admin. Guards all /admin data + actions. */
+export async function assertSuperAdmin(): Promise<void> {
+  const profile = await requireProfile()
+  if (profile.role !== "super_admin") {
+    throw new ForbiddenError("Super-admin only")
   }
 }

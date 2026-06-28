@@ -10,8 +10,7 @@ import {
 } from "@/5-shared/lib/db/schema/auth";
 import { and, eq, inArray, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { requireProfile } from "@/5-shared/lib/auth/authorization";
-import { authServer } from "@/5-shared/lib/auth/server";
+import { requireProfile, getSession } from "@/5-shared/lib/auth/authorization";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
 import { getPlanForWorkspace } from "@/5-shared/lib/billing/workspace";
 import { planAllowsTeam, getSeatLimit, isUnlimited } from "@/5-shared/lib/billing/plans";
@@ -217,7 +216,7 @@ export type AcceptResult =
  * authenticated session whose email matches the invitation.
  */
 export async function acceptInvitation(token: string): Promise<AcceptResult> {
-  const session = (await authServer.getSession()).data;
+  const session = await getSession();
   if (!session?.user?.email) return { ok: false, error: "not-authenticated" };
 
   const [inv] = await db

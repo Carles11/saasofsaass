@@ -1,4 +1,4 @@
-import { LayoutGrid, Globe, Users, CreditCard, User, Cog } from "lucide-react"
+import { LayoutGrid, Globe, Users, CreditCard, User, Cog, Shield } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Permission } from "../permissions/permissions"
 
@@ -52,5 +52,12 @@ export const SIDEBAR_TABS: SidebarTab[] = [
     icon: Cog,
     href: "/settings",
     permission: "viewSettings",
+  },
+  {
+    id: "admin",
+    label: "Admin",
+    icon: Shield,
+    href: "/admin",
+    permission: "accessAdminPanel",
   },
 ]

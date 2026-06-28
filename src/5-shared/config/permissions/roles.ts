@@ -1,22 +1,16 @@
 import { db } from "@/5-shared/lib/db"
-import { profiles, workspaceMemberships, membershipSites } from "@/5-shared/lib/db/schema/auth"
+import { workspaceMemberships, membershipSites } from "@/5-shared/lib/db/schema/auth"
 import { workspaces } from "@/5-shared/lib/db/schema"
 import { eq } from "drizzle-orm"
-import { authServer, type AuthSession } from "@/5-shared/lib/auth/server"
+import type { AuthSession } from "@/5-shared/lib/auth/server"
+import { findProfileForSession, getSession } from "@/5-shared/lib/auth/authorization"
 import type { ResolvedRoles, TenantRole } from "./types"
 
 export async function resolveRoles(
   session?: AuthSession,
 ): Promise<ResolvedRoles | null> {
-  const s = session ?? (await authServer.getSession()).data
-  if (!s?.user?.email) return null
-
-  const [profile] = await db
-    .select()
-    .from(profiles)
-    .where(eq(profiles.email, s.user.email))
-    .limit(1)
-
+  const s = session ?? (await getSession())
+  const profile = s ? await findProfileForSession(s) : null
   if (!profile) return null
 
   const isSuperAdmin = profile.role === "super_admin"

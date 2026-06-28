@@ -2,6 +2,7 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { appAuthUrl } from "@/5-shared/lib/auth/auth-urls";
+import { redirectIfAuthenticated } from "@/5-shared/lib/auth/auth-guards";
 import { AuthViewClient } from "../_components/AuthViewClient";
 
 export default async function SignInPage() {
@@ -12,6 +13,9 @@ export default async function SignInPage() {
   if (!host.startsWith(appDomain)) {
     redirect(appAuthUrl("sign-in", locale));
   }
+
+  // Already signed in → no reason to see sign-in; send to the dashboard.
+  await redirectIfAuthenticated(locale);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

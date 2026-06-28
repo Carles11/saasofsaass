@@ -4,7 +4,7 @@ import { MobileBottomNav } from "@/2-widgets/dashboard/ui/sidebar/MobileBottomNa
 import { TranslationProgressBar } from "@/3-features/translations/ui/translationProgressBar";
 import { ThemeToggle } from "@/5-shared/theme/ThemeToggle";
 import { PaletteSwitcher } from "@/5-shared/theme/PaletteSwitcher";
-import { authServer } from "@/5-shared/lib/auth/server";
+import { getSession } from "@/5-shared/lib/auth/authorization";
 import { syncProfile } from "@/5-shared/lib/auth/sync-profile";
 import { getOwnWorkspaceForDashboard } from "@/5-shared/lib/billing/workspace";
 import { resolveRoles } from "@/5-shared/config/permissions/roles";
@@ -28,8 +28,7 @@ export default async function DashboardLayout({
   let session = null;
 
   try {
-    const sessionResult = await authServer.getSession();
-    session = sessionResult.data;
+    session = await getSession();
   } catch (error) {
     console.error("Auth session fallback in layout:", error);
     redirect(`/${locale}/auth/sign-in`);

@@ -1,4 +1,4 @@
-import { authServer } from "@/5-shared/lib/auth/server";
+import { getSession } from "@/5-shared/lib/auth/authorization";
 import { getInvitationForDisplay } from "@/3-features/team-management/queries/teamQueries";
 import { getPlatformTranslations } from "@/5-shared/lib/db/platform-translations";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
@@ -60,7 +60,7 @@ export default async function InvitePage({
     );
   }
 
-  const session = (await authServer.getSession()).data;
+  const session = await getSession();
   const signedInEmail = session?.user?.email?.toLowerCase() ?? null;
   const matches = signedInEmail !== null && signedInEmail === inv.email.toLowerCase();
 
