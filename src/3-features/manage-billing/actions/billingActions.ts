@@ -1,17 +1,102 @@
 "use server";
 
-import { requireProfile } from "@/5-shared/lib/auth/authorization";
+import {
+  assertWorkspaceOwner,
+  requireProfile,
+} from "@/5-shared/lib/auth/authorization";
+import {
+  getPlan,
+  getSiteLimit,
+  getStripePriceId,
+  type Cadence,
+} from "@/5-shared/lib/billing/plans";
+import { getStripe } from "@/5-shared/lib/billing/stripe";
 import { db } from "@/5-shared/lib/db";
 import { workspaces } from "@/5-shared/lib/db/schema";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
-import { getStripe } from "@/5-shared/lib/billing/stripe";
-import { getPlan, getStripePriceId, getSiteLimit, type Cadence } from "@/5-shared/lib/billing/plans";
 
 function getBaseUrl(): string {
   const host = process.env.NEXT_PUBLIC_APP_DOMAIN || "app.localhost";
   const port = process.env.NEXT_PUBLIC_DEV_PORT;
   return `https://${host}${port ? `:${port}` : ""}`;
+}
+
+// ============================================================================
+// INVOICES — read-only list sourced live from Stripe (no local invoice table;
+// Stripe is the source of truth). Normalized to a small display-safe shape so
+// the UI never touches the Stripe SDK types directly.
+// ============================================================================
+
+export type InvoiceStatus =
+  | "paid"
+  | "open"
+  | "void"
+  | "uncollectible"
+  | "draft";
+
+export interface WorkspaceInvoice {
+  id: string;
+  /** Unix seconds. Falls back to invoice creation time if not yet finalized. */
+  date: number;
+  /** Human-readable line-item summary, e.g. "Pro plan — monthly". */
+  description: string;
+  /** Smallest currency unit (cents), matching Stripe's `amount_paid`/`amount_due`. */
+  amount: number;
+  currency: string;
+  status: InvoiceStatus;
+  /** Stripe-hosted invoice page — null only for draft invoices with no URL yet. */
+  hostedInvoiceUrl: string | null;
+  /** Direct PDF download — null only for draft invoices with no URL yet. */
+  invoicePdf: string | null;
+}
+
+function normalizeInvoice(inv: Stripe.Invoice): WorkspaceInvoice {
+  const description =
+    inv.lines.data[0]?.description ||
+    inv.description ||
+    `Invoice ${inv.number ?? inv.id}`;
+
+  return {
+    id: inv.id ?? "",
+    date: inv.status_transitions?.finalized_at ?? inv.created,
+    description,
+    amount: inv.status === "paid" ? inv.amount_paid : inv.amount_due,
+    currency: inv.currency,
+    status: (inv.status ?? "draft") as InvoiceStatus,
+    hostedInvoiceUrl: inv.hosted_invoice_url ?? null,
+    invoicePdf: inv.invoice_pdf ?? null,
+  };
+}
+
+/**
+ * List a workspace's Stripe invoices (most recent first).
+ *
+ * Read-only — Stripe is the source of truth, there is no local invoices table.
+ * Returns an empty list for workspaces that have never had a Stripe customer
+ * (e.g. still on Free, never started checkout) rather than erroring.
+ */
+export async function listWorkspaceInvoices(
+  workspaceId: string,
+  limit = 20,
+): Promise<WorkspaceInvoice[]> {
+  await assertWorkspaceOwner(workspaceId);
+
+  const [ws] = await db
+    .select({ stripeCustomerId: workspaces.stripeCustomerId })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  if (!ws?.stripeCustomerId) return [];
+
+  const stripe = getStripe();
+  const result = await stripe.invoices.list({
+    customer: ws.stripeCustomerId,
+    limit,
+  });
+
+  return result.data.map(normalizeInvoice);
 }
 
 async function getOrCreateCustomer(workspaceId: string): Promise<string> {
@@ -42,7 +127,11 @@ async function getOrCreateCustomer(workspaceId: string): Promise<string> {
  *
  * If the workspace already has an active subscription, redirects to Billing Portal instead.
  */
-export async function createCheckoutSession(workspaceId: string, plan: string, cadence: Cadence = "monthly") {
+export async function createCheckoutSession(
+  workspaceId: string,
+  plan: string,
+  cadence: Cadence = "monthly",
+) {
   const profile = await requireProfile();
 
   // Validate plan
@@ -164,19 +253,26 @@ export async function stripeWebhook(rawBody: string, signature: string) {
       const plan = session.metadata?.plan;
 
       if (!workspaceId || !plan) {
-        console.log(`[stripe-webhook] checkout.session.completed — missing metadata, skipping`);
+        console.log(
+          `[stripe-webhook] checkout.session.completed — missing metadata, skipping`,
+        );
         break;
       }
 
       const subscriptionId = session.subscription as string | null;
       if (!subscriptionId) {
-        console.log(`[stripe-webhook] checkout.session.completed — no subscription, skipping`);
+        console.log(
+          `[stripe-webhook] checkout.session.completed — no subscription, skipping`,
+        );
         break;
       }
 
       // Retrieve subscription to check status — don't upgrade if SCA is still pending
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      if (subscription.status !== "active" && subscription.status !== "trialing") {
+      if (
+        subscription.status !== "active" &&
+        subscription.status !== "trialing"
+      ) {
         console.log(
           `[stripe-webhook] checkout.session.completed — sub status is "${subscription.status}", deferring to subscription.updated`,
         );
@@ -213,7 +309,9 @@ export async function stripeWebhook(rawBody: string, signature: string) {
         .limit(1);
 
       if (!wsByCustomer) {
-        console.log(`[stripe-webhook] subscription.created — no workspace for customer ${customerId}, skipping`);
+        console.log(
+          `[stripe-webhook] subscription.created — no workspace for customer ${customerId}, skipping`,
+        );
         break;
       }
 
@@ -248,13 +346,19 @@ export async function stripeWebhook(rawBody: string, signature: string) {
         .limit(1);
 
       if (!wsBySub) {
-        console.log(`[stripe-webhook] subscription.updated — no workspace for sub ${subscription.id}, skipping`);
+        console.log(
+          `[stripe-webhook] subscription.updated — no workspace for sub ${subscription.id}, skipping`,
+        );
         break;
       }
 
       const status = subscription.status;
 
-      if (status === "canceled" || status === "unpaid" || status === "incomplete_expired") {
+      if (
+        status === "canceled" ||
+        status === "unpaid" ||
+        status === "incomplete_expired"
+      ) {
         await db
           .update(workspaces)
           .set({
