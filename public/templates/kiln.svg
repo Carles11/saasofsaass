@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Kiln template preview">
+  <defs>
+    <linearGradient id="kiln-img" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="#fef7ed"/>
+  <rect x="0" y="0" width="400" height="32" rx="0" fill="#ffffff" stroke="#fed7aa"/>
+  <text x="16" y="22" font-family="ui-monospace, monospace" font-size="11" font-weight="700" fill="#7c2d12">KILN ·</text>
+  <text x="65" y="22" font-family="ui-monospace, monospace" font-size="9" fill="#9a3412">est. 2017</text>
+  <rect x="290" y="14" width="20" height="5" fill="#9a3412"/>
+  <rect x="316" y="14" width="20" height="5" fill="#9a3412"/>
+  <rect x="342" y="14" width="20" height="5" fill="#9a3412"/>
+  <rect x="368" y="14" width="20" height="5" fill="#9a3412"/>
+  <rect x="20" y="60" width="360" height="220" rx="20" fill="url(#kiln-img)"/>
+  <text x="200" y="170" font-family="ui-monospace, monospace" font-size="22" font-weight="700" fill="#fef7ed" text-anchor="middle">wood / fire / clay</text>
+  <text x="200" y="196" font-family="ui-monospace, monospace" font-size="10" fill="#fed7aa" text-anchor="middle">a kitchen built around heat</text>
+  <rect x="160" y="220" width="80" height="22" rx="11" fill="#fef7ed"/>
+  <text x="200" y="234" font-family="ui-monospace, monospace" font-size="9" fill="#7c2d12" text-anchor="middle">book a table</text>
+</svg>

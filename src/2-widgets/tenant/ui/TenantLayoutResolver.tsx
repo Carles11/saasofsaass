@@ -1,8 +1,8 @@
-import { TEMPLATES, TenantTemplateId } from "@/5-shared/config/templates";
+import { getTemplate, TenantTemplateId } from "@/5-shared/config/templates";
 import React from "react";
 
 interface TenantLayoutResolverProps {
-  templateId: TenantTemplateId;
+  templateId: TenantTemplateId | string;
   children: React.ReactNode;
   /** CSS var reference for heading font, e.g. "var(--font-playfair-display)" */
   titleFont?: string;
@@ -11,10 +11,14 @@ interface TenantLayoutResolverProps {
 }
 
 /**
- * Bentley Hybrid Layout Resolver
- * Applies the correct theme and container classes for the selected template.
- * Accepts optional titleFont/bodyFont to override the template's default --font-heading
- * and font-family via inline styles (which win over class rules).
+ * Bentley Hybrid Layout Resolver.
+ *
+ * Applies the template's design tokens as inline CSS custom properties on the
+ * wrapper, so descendants inherit --radius / --section-gap / --tracking /
+ * --font-heading without needing per-template CSS rules in globals.css.
+ *
+ * Per-tenant titleFont/bodyFont overrides win over the template's defaults
+ * (inline style beats class rules in CSS specificity).
  */
 export default function TenantLayoutResolver({
   templateId,
@@ -22,14 +26,23 @@ export default function TenantLayoutResolver({
   titleFont,
   bodyFont,
 }: TenantLayoutResolverProps) {
-  const template = TEMPLATES[templateId] || TEMPLATES.default;
-  const inlineStyle: Record<string, string> = {};
+  const template = getTemplate(templateId);
+
+  const inlineStyle: Record<string, string> = {
+    "--radius": template.tokens.radius,
+    "--section-gap": template.tokens.sectionGap,
+    "--tracking": template.tokens.tracking,
+    "--font-heading": template.tokens.fontHeadingFamily,
+    fontFamily: "var(--font-heading)",
+  };
+
   if (titleFont) inlineStyle["--font-heading"] = titleFont;
   if (bodyFont) {
     inlineStyle["--font-body"] = bodyFont;
-    // Override the template's Tailwind font utility so inherited body text uses the chosen font
-    inlineStyle["fontFamily"] = bodyFont;
+    // Override the template's font-family so inherited body text uses the chosen font
+    inlineStyle.fontFamily = bodyFont;
   }
+
   return (
     <div className={template.themeClass} style={inlineStyle as React.CSSProperties}>
       <main className={template.containerClass + " bentley-container"}>{children}</main>

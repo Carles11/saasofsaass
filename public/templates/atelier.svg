@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Atelier template preview">
+  <defs>
+    <linearGradient id="atelier-img" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c2410c"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="#fef7ed"/>
+  <rect x="0" y="0" width="400" height="56" fill="#ffffff"/>
+  <text x="200" y="28" font-family="Georgia, serif" font-size="14" font-weight="700" fill="#431407" text-anchor="middle">Atelier</text>
+  <rect x="140" y="38" width="32" height="5" fill="#9a3412"/>
+  <rect x="180" y="38" width="32" height="5" fill="#9a3412"/>
+  <rect x="220" y="38" width="32" height="5" fill="#9a3412"/>
+  <rect x="20" y="80" width="360" height="200" fill="url(#atelier-img)"/>
+  <text x="200" y="180" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#fefce8" text-anchor="middle" letter-spacing="2">Craft &amp; Care</text>
+  <text x="200" y="208" font-family="Georgia, serif" font-size="10" fill="#fed7aa" text-anchor="middle">handcrafted since 2019</text>
+  <rect x="170" y="226" width="60" height="22" fill="#fed7aa"/>
+</svg>

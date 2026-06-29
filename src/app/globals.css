@@ -289,28 +289,12 @@
 }
 
 @layer base {
-  /* Bentley Hybrid Template Themes */
-  .theme-bentley-default {
-    --radius: 0.75rem;
-    --font-heading: "Inter", ui-sans-serif, system-ui, sans-serif;
-    --section-gap: 3rem;
-    --tracking: 0em;
-    font-family: var(--font-heading);
-  }
-  .theme-bentley-modern {
-    --radius: 0rem;
-    --font-heading: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
-    --section-gap: 0rem;
-    --tracking: -0.05em;
-    font-family: var(--font-heading);
-  }
-  .theme-bentley-classic {
-    --radius: 2.5rem;
-    --font-heading: "Georgia", ui-serif, serif;
-    --section-gap: 5rem;
-    --tracking: 0.04em;
-    font-family: var(--font-heading);
-  }
+  /* Bentley Hybrid Template tokens are now applied as inline CSS custom
+   * properties on the tenant layout wrapper (see TenantLayoutResolver) so
+   * each template's --radius / --section-gap / --tracking / --font-heading
+   * are driven from src/5-shared/config/templates.ts (single source of truth).
+   * The previous .theme-bentley-{default,modern,classic} class rules have
+   * been removed in favor of TS-driven inline styles. */
 
   /* Bentley container utility */
   .bentley-container {

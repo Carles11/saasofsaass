@@ -3,7 +3,7 @@
 import TenantLayoutResolver from "@/2-widgets/tenant/ui/TenantLayoutResolver";
 import { updateTenantLocales } from "@/3-features/manage-site-blocks/actions/blockActions";
 import { generatePreviewToken } from "@/3-features/manage-site-blocks/actions/generatePreviewToken";
-import { TemplatePicker } from "@/3-features/manage-site-blocks/ui/TemplatePicker";
+import { TEMPLATES, resolveTemplateId } from "@/5-shared/config/templates";
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
 import { canManageStructure } from "@/5-shared/config/permissions";
 import type { Block, Tenant, TenantDomain, TenantEntity, TenantTranslation } from "@/5-shared/lib/db/schema";
@@ -16,11 +16,14 @@ import { BlockList } from "./BlockList";
 import { SharePreviewButton } from "./SharePreviewButton";
 import { CustomDomainSection } from "./CustomDomainSection";
 import { SubdomainSection } from "./SubdomainSection";
+import { TemplateGalleryDialog } from "./TemplateGalleryDialog";
 import { TypographySection } from "./TypographySection";
 import { PaletteSection } from "./PaletteSection";
 import { LogoSection } from "./LogoSection";
 import { SeoSection } from "./SeoSection";
 import { SiteCollaborators } from "./SiteCollaborators";
+import Image from "next/image";
+import { AlertTriangle } from "lucide-react";
 import type {
   SiteCollaborator,
   TeamPerson,
@@ -76,9 +79,12 @@ export function SiteBuilder({
   const [isSaving, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<string>("blocks");
   const [settingsTab, setSettingsTab] = useState<string>("appearance");
+  const resolvedActiveTemplateId = resolveTemplateId(tenant.templateId);
+  const isTemplateRetired = tenant.templateId !== resolvedActiveTemplateId;
   const [previewTemplateId, setPreviewTemplateId] = useState<
     import("@/5-shared/config/templates").TenantTemplateId
-  >(tenant.templateId as import("@/5-shared/config/templates").TenantTemplateId);
+  >(resolvedActiveTemplateId);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   // Preview token state
   const [isPreviewing, startPreviewTransition] = useTransition();
@@ -186,9 +192,72 @@ export function SiteBuilder({
             <TabsContent value="appearance">
               <div className="mb-8">
                 <h3 className="font-semibold mb-2">{siteTemplate}</h3>
-                <TemplatePicker
+
+                {isTemplateRetired && (
+                  <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/30">
+                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                    <p className="text-amber-800 dark:text-amber-200">
+                      {resolveTranslation(
+                        translations,
+                        "settings.template.retired-banner",
+                        "Your previously selected template is no longer available. Showing the default — pick a new one.",
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-3">
+                  <div className="relative w-32 aspect-[4/3] shrink-0 overflow-hidden rounded-lg bg-muted">
+                    <Image
+                      src={TEMPLATES[resolvedActiveTemplateId].meta.screenshotPath}
+                      alt={resolveTranslation(
+                        translations,
+                        `settings.template.${resolvedActiveTemplateId}.label`,
+                        resolvedActiveTemplateId,
+                      )}
+                      fill
+                      sizes="128px"
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-card-foreground">
+                      {resolveTranslation(
+                        translations,
+                        `settings.template.${resolvedActiveTemplateId}.label`,
+                        resolvedActiveTemplateId,
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {resolveTranslation(
+                        translations,
+                        `settings.template.${resolvedActiveTemplateId}.tagline`,
+                        "",
+                      )}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setGalleryOpen(true)}
+                    className="px-3 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                  >
+                    {resolveTranslation(
+                      translations,
+                      "settings.template.change",
+                      "Change template",
+                    )}
+                  </button>
+                </div>
+
+                <TemplateGalleryDialog
+                  open={galleryOpen}
+                  onOpenChange={setGalleryOpen}
+                  currentTemplateId={resolvedActiveTemplateId}
                   previewTemplateId={previewTemplateId}
                   setPreviewTemplateId={setPreviewTemplateId}
+                  plan={plan}
+                  translations={translations}
                 />
               </div>
               <TypographySection

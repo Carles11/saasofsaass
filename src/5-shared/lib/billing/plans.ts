@@ -31,6 +31,8 @@ export interface PlanFeatures {
    * Free sites are never indexed (domain-reputation hygiene); paid plans are
    * indexed by default and may opt out via the per-site `seoEnabled` flag. */
   searchIndexing: boolean;
+  /** Whether the plan can pick premium templates from the template gallery. */
+  premiumTemplates: boolean;
   prioritySupport: boolean;
   /** Max days a share-preview link can be valid. null = feature unavailable.
    * Always a finite number when present — preview links never live forever, so
@@ -64,6 +66,7 @@ export const PLANS = {
       customDomains: false,
       branding: "full",
       searchIndexing: false,
+      premiumTemplates: false,
       prioritySupport: false,
       previewLinkMaxDays: null,
     },
@@ -87,6 +90,7 @@ export const PLANS = {
       customDomains: true,
       branding: "minimal",
       searchIndexing: true,
+      premiumTemplates: true,
       prioritySupport: false,
       previewLinkMaxDays: 7,
     },
@@ -110,6 +114,7 @@ export const PLANS = {
       customDomains: true,
       branding: "none",
       searchIndexing: true,
+      premiumTemplates: true,
       prioritySupport: true,
       previewLinkMaxDays: 180,
     },
