@@ -16,7 +16,7 @@ import { BlockList } from "./BlockList";
 import { SharePreviewButton } from "./SharePreviewButton";
 import { CustomDomainSection } from "./CustomDomainSection";
 import { SubdomainSection } from "./SubdomainSection";
-import { TemplateGalleryDialog } from "./TemplateGalleryDialog";
+import { TemplateGallerySheet } from "./TemplateGallerySheet";
 import { TypographySection } from "./TypographySection";
 import { PaletteSection } from "./PaletteSection";
 import { LogoSection } from "./LogoSection";
@@ -250,7 +250,7 @@ export function SiteBuilder({
                   </button>
                 </div>
 
-                <TemplateGalleryDialog
+                <TemplateGallerySheet
                   open={galleryOpen}
                   onOpenChange={setGalleryOpen}
                   currentTemplateId={resolvedActiveTemplateId}

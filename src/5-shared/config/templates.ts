@@ -68,7 +68,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   default: {
     meta: {
       id: "default",
-      screenshotPath: "/templates/default.svg",
+      screenshotPath: "/templates/default.webp",
       accentColor: "oklch(0.55 0.18 250)",
     },
     gating: { isPremium: false },
@@ -93,7 +93,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   modern: {
     meta: {
       id: "modern",
-      screenshotPath: "/templates/modern.svg",
+      screenshotPath: "/templates/modern.webp",
       accentColor: "oklch(0.55 0.2 25)",
     },
     gating: { isPremium: false },
@@ -119,7 +119,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   classic: {
     meta: {
       id: "classic",
-      screenshotPath: "/templates/classic.svg",
+      screenshotPath: "/templates/classic.webp",
       accentColor: "oklch(0.45 0.15 145)",
     },
     gating: { isPremium: false },
@@ -146,7 +146,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   monoline: {
     meta: {
       id: "monoline",
-      screenshotPath: "/templates/monoline.svg",
+      screenshotPath: "/templates/monoline.webp",
       accentColor: "oklch(0.55 0.18 250)",
     },
     gating: { isPremium: false },
@@ -172,7 +172,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   canyon: {
     meta: {
       id: "canyon",
-      screenshotPath: "/templates/canyon.svg",
+      screenshotPath: "/templates/canyon.webp",
       accentColor: "oklch(0.55 0.15 80)",
     },
     gating: { isPremium: false },
@@ -200,7 +200,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   atelier: {
     meta: {
       id: "atelier",
-      screenshotPath: "/templates/atelier.svg",
+      screenshotPath: "/templates/atelier.webp",
       accentColor: "oklch(0.4 0.12 30)",
     },
     gating: { isPremium: true },
@@ -225,7 +225,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   harbor: {
     meta: {
       id: "harbor",
-      screenshotPath: "/templates/harbor.svg",
+      screenshotPath: "/templates/harbor.webp",
       accentColor: "oklch(0.5 0.15 230)",
     },
     gating: { isPremium: true },
@@ -251,7 +251,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   garden: {
     meta: {
       id: "garden",
-      screenshotPath: "/templates/garden.svg",
+      screenshotPath: "/templates/garden.webp",
       accentColor: "oklch(0.55 0.12 145)",
     },
     gating: { isPremium: true },
@@ -276,7 +276,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   journal: {
     meta: {
       id: "journal",
-      screenshotPath: "/templates/journal.svg",
+      screenshotPath: "/templates/journal.webp",
       accentColor: "oklch(0.45 0.18 25)",
     },
     gating: { isPremium: true },
@@ -301,7 +301,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   loft: {
     meta: {
       id: "loft",
-      screenshotPath: "/templates/loft.svg",
+      screenshotPath: "/templates/loft.webp",
       accentColor: "oklch(0.3 0.04 250)",
     },
     gating: { isPremium: true },
@@ -327,7 +327,7 @@ export const TEMPLATES: Record<TenantTemplateId, TemplateDefinition> = {
   kiln: {
     meta: {
       id: "kiln",
-      screenshotPath: "/templates/kiln.svg",
+      screenshotPath: "/templates/kiln.webp",
       accentColor: "oklch(0.55 0.15 50)",
     },
     gating: { isPremium: true },

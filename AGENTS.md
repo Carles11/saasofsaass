@@ -35,16 +35,16 @@ src/
   2-widgets/
     dashboard/
       CreateTenantDialog/  → "Create Site" dialog (name, slug)
-      SiteBuilder/         → Block management UI + CollectionManager + BlockEditSheet + BlockList
+      SiteBuilder/         → Block management UI + CollectionManager + BlockEditSheet + BlockList + TemplateGallerySheet (+ FullscreenPickerSheet shell shared with BlockList)
       TeamManager/         → Workspace-wide team management (invitations, roles, seat caps)
       ui/sidebar/          → DashboardSidebar (collapsible, user info, nav)
     tenant/
-      BlockRenderer/       → Renders blocks by type (Hero, Navbar, BlogFeed, etc.)
-      header/              → TenantHeader (multi-layout: centered, sticky, minimal)
+      BlockRenderer/       → Renders blocks by type; HeroBlock dispatches to hero variants in blocks/HeroBlock/variants/
+      header/              → TenantHeader dispatches to header variants in header/variants/ (StickyMinimal, CenteredSerif, StickyBlur, FloatingPill)
   3-features/
     manage-tenants/        → createTenant server action
     manage-entities/       → Entity CRUD (create, publish, update translations)
-    manage-site-blocks/    → Block CRUD + TemplatePicker
+    manage-site-blocks/    → Block CRUD + updateTenantTemplate (premium-gated)
     translations/          → AI translation + progress bar
   4-entities/
     block/                 → getBlocksByTenantId, etc.

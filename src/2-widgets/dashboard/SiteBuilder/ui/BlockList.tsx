@@ -12,13 +12,8 @@ import { canManageStructure } from "@/5-shared/config/permissions";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
 import { Button } from "@/components/tenant/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { SheetClose } from "@/components/ui/sheet";
+import { FullscreenPickerSheet } from "./FullscreenPickerSheet";
 import {
   DndContext,
   DragOverlay,
@@ -34,10 +29,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import {
-  GripVertical,
-  XIcon,
-} from "lucide-react";
+import { GripVertical } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BlockCard } from "./BlockCard";
 import { BLOCK_CATALOG, BLOCK_ORDER, type BlockCategory } from "@/2-widgets/tenant/BlockRenderer/config/blockCatalog";
@@ -291,34 +283,18 @@ export function BlockList({
 
         {/* ── Add Block Sheet ─────────────────────────────────────────── */}
         {canManageStructure(userRole) && (
-          <Sheet onOpenChange={(open) => { if (!open) clearSelection(); }}>
-            <SheetTrigger asChild>
+          <FullscreenPickerSheet
+            onOpenChange={(open) => {
+              if (!open) clearSelection();
+            }}
+            trigger={
               <Button tenantVariant="outline" className="mt-2">
                 {addBlockLabel}
               </Button>
-            </SheetTrigger>
-            <SheetContent
-              side="bottom"
-              className="min-h-[100dvh] max-h-[100dvh] overflow-hidden p-0 flex flex-col"
-              showCloseButton={false}
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-2 shrink-0">
-                <SheetTitle className="text-xl font-bold text-foreground">
-                  {addDialogTitle}
-                </SheetTitle>
-                <SheetClose asChild>
-                  <button
-                    type="button"
-                    className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
-                  >
-                    <XIcon className="h-5 w-5" />
-                  </button>
-                </SheetClose>
-              </div>
-
-              {/* Category pills */}
-              <div className="flex gap-2 px-6 pb-4 shrink-0 overflow-x-auto">
+            }
+            title={addDialogTitle}
+            toolbar={
+              <div className="flex gap-2 overflow-x-auto">
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
@@ -335,69 +311,64 @@ export function BlockList({
                   </button>
                 ))}
               </div>
-
-              {/* Block grid */}
-              <div className="flex-1 overflow-y-auto px-6 pb-4">
-                {category === "all" ? (
-                  categories.filter((c) => c.id !== "all").map((cat) => {
-                    const catItems = pickerItems.filter(
-                      (i) => CATEGORY_MAP[i.kind] === cat.id,
-                    );
-                    if (catItems.length === 0) return null;
-                    return (
-                      <div key={cat.id} className="mb-6">
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                          {cat.label}
-                        </h3>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                          {catItems.map((item) => (
-                            <PickerCard
-                              key={item.kind}
-                              item={item}
-                              isSelected={selectedKinds.has(item.kind)}
-                              onToggle={() => toggleKind(item.kind)}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {filteredItems.map((item) => (
-                      <PickerCard
-                        key={item.kind}
-                        item={item}
-                        isSelected={selectedKinds.has(item.kind)}
-                        onToggle={() => toggleKind(item.kind)}
-                      />
-                    ))}
+            }
+            footer={
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm text-muted-foreground hidden sm:block">
+                  {selectHint}
+                </p>
+                <p className="text-sm text-muted-foreground sm:hidden">
+                  {mobileHint}
+                </p>
+                <SheetClose asChild>
+                  <Button
+                    tenantVariant="default"
+                    disabled={selectedKinds.size === 0}
+                    onClick={handleBatchAdd}
+                  >
+                    {batchAddLabel}
+                  </Button>
+                </SheetClose>
+              </div>
+            }
+          >
+            {category === "all" ? (
+              categories.filter((c) => c.id !== "all").map((cat) => {
+                const catItems = pickerItems.filter(
+                  (i) => CATEGORY_MAP[i.kind] === cat.id,
+                );
+                if (catItems.length === 0) return null;
+                return (
+                  <div key={cat.id} className="mb-6">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                      {cat.label}
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {catItems.map((item) => (
+                        <PickerCard
+                          key={item.kind}
+                          item={item}
+                          isSelected={selectedKinds.has(item.kind)}
+                          onToggle={() => toggleKind(item.kind)}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
+                );
+              })
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {filteredItems.map((item) => (
+                  <PickerCard
+                    key={item.kind}
+                    item={item}
+                    isSelected={selectedKinds.has(item.kind)}
+                    onToggle={() => toggleKind(item.kind)}
+                  />
+                ))}
               </div>
-
-              {/* Bottom bar */}
-              <div className="shrink-0 border-t border-border bg-popover px-6 py-4">
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-sm text-muted-foreground hidden sm:block">
-                    {selectHint}
-                  </p>
-                  <p className="text-sm text-muted-foreground sm:hidden">
-                    {mobileHint}
-                  </p>
-                  <SheetClose asChild>
-                    <Button
-                      tenantVariant="default"
-                      disabled={selectedKinds.size === 0}
-                      onClick={handleBatchAdd}
-                    >
-                      {batchAddLabel}
-                    </Button>
-                  </SheetClose>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+            )}
+          </FullscreenPickerSheet>
         )}
       </DndContext>
 
