@@ -1,2 +1,3 @@
+import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
 
-export type SupportedLocaleType = 'en' | 'es' | 'ca' | 'fr' | 'de' | 'it' | 'eu' | 'ga';
+export type SupportedLocaleType = (typeof SUPPORTED_LOCALES)[number];

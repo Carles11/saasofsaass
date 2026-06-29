@@ -1,6 +1,13 @@
-import { SupportedLocaleType } from "@/5-shared/types";
-
-export const SUPPORTED_LOCALES: SupportedLocaleType[] = ['en', 'es', 'ca', 'fr', 'de', 'it', 'eu', 'ga'];
+export const SUPPORTED_LOCALES = [
+  "en",
+  "es",
+  "ca",
+  "fr",
+  "de",
+  "it",
+  "eu",
+  "ga",
+] as const;
 
 export const LOCALE_LABELS: Record<string, string> = {
   en: "English",

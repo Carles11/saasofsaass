@@ -1,15 +1,14 @@
 "use server";
 
+import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
 import { requireProfile } from "@/5-shared/lib/auth/authorization";
+import { ensureWorkspace } from "@/5-shared/lib/billing/workspace";
 import { db } from "@/5-shared/lib/db";
-import { tenants, blocks } from "@/5-shared/lib/db/schema";
+import { blocks, tenants } from "@/5-shared/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { ensureWorkspace } from "@/5-shared/lib/billing/workspace";
-import { SLUG_REGEX } from "./shared";
 import type { CreateTenantInput } from "./shared";
-
-const ALLOWED_LOCALES = ["en", "es", "ca", "fr", "de", "it", "eu", "ga"] as const;
+import { SLUG_REGEX } from "./shared";
 
 function parseFormData(form: FormData): CreateTenantInput {
   const name = form.get("name")?.toString().trim() ?? "";
@@ -28,7 +27,12 @@ function validate(input: CreateTenantInput): Record<string, string> {
     errors.slug =
       "Slug must be 3-63 characters, only lowercase letters, numbers, and hyphens. Must start and end with a letter or number.";
   }
-  if (input.defaultLocale && !ALLOWED_LOCALES.includes(input.defaultLocale as typeof ALLOWED_LOCALES[number])) {
+  if (
+    input.defaultLocale &&
+    !SUPPORTED_LOCALES.includes(
+      input.defaultLocale as (typeof SUPPORTED_LOCALES)[number],
+    )
+  ) {
     errors.defaultLocale = "Invalid default locale.";
   }
 
@@ -81,8 +85,22 @@ export async function createTenant(raw: FormData | CreateTenantInput) {
 
   // Auto-create hero and footer blocks (always present, cannot be removed)
   await db.insert(blocks).values([
-    { tenantId: tenant.id, type: "hero", order: 0, isVisible: true, config: {}, translations: {} },
-    { tenantId: tenant.id, type: "footer", order: 1, isVisible: true, config: {}, translations: {} },
+    {
+      tenantId: tenant.id,
+      type: "hero",
+      order: 0,
+      isVisible: true,
+      config: {},
+      translations: {},
+    },
+    {
+      tenantId: tenant.id,
+      type: "footer",
+      order: 1,
+      isVisible: true,
+      config: {},
+      translations: {},
+    },
   ]);
 
   revalidatePath("/", "layout");
