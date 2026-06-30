@@ -48,7 +48,7 @@ export async function PricingPage({ ccOverride }: { ccOverride?: string }) {
   const pageSubtitle = resolveTranslation(
     t,
     "page.subtitle",
-    "Start free and launch as many draft sites as you like. Pay only when you publish and grow — get found on Google, add custom domains, and manage clients at scale.",
+    "Start free and launch as many draft sites as you like. Pay only when you publish and grow — get found on Google and manage clients at scale. Custom domains included on all plans.",
   );
 
   return (

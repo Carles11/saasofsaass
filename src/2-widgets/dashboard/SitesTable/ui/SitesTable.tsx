@@ -24,9 +24,11 @@ import {
 } from "@/components/ui";
 import {
   parsePublishCapError,
+  type PublishCapInfo,
+} from "@/5-shared/lib/tenants/publish-cap";
+import {
   publishTenant,
   unpublishTenant,
-  type PublishCapInfo,
 } from "@/3-features/manage-tenants/actions/publishTenant";
 import { EXTRA_SITE } from "@/5-shared/lib/billing/plans";
 import { PublishCapDialog } from "@/2-widgets/dashboard/Billing/ui/PublishCapDialog";

@@ -63,7 +63,7 @@ export const PLANS = {
       aiBlocksLifetime: 2,
     },
     features: {
-      customDomains: false,
+      customDomains: true,
       branding: "full",
       searchIndexing: false,
       premiumTemplates: false,

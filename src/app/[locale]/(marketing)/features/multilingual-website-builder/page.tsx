@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
     "Multilingual Website Builder — 8 Languages, AI-Translated";
   const description =
     t["meta.description"] ??
-    "Build and manage client websites in 8 languages. AI translates entire sites, hreflang is automatic, and there are no per-language fees. One dashboard for every site.";
+    "Build and manage client websites in 8 languages. AI translates entire sites, hreflang is automatic. Free sites get 2 languages; paid plans get all 8. One dashboard for every site.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";

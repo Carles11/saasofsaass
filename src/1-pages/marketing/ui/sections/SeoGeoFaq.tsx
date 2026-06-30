@@ -67,7 +67,7 @@ export function SeoGeoFaq({ translations }: SeoGeoFaqProps) {
       a: resolveTranslation(
         translations,
         "faq.q4.a",
-        "Yes. Pro and Enterprise plans support custom domains per tenant. When a verified custom domain is connected, all canonical URLs, sitemap entries, and structured data references point to that domain instead of the subdomain. This prevents duplicate content between the subdomain and the custom domain.",
+        "Yes. All plans support custom domains per tenant. When a verified custom domain is connected, all canonical URLs, sitemap entries, and structured data references point to that domain instead of the subdomain. This prevents duplicate content between the subdomain and the custom domain.",
       ),
     },
     {

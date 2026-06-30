@@ -57,6 +57,11 @@ function generateEntityPlaceholder(kind: string, slug: string): Record<string, s
         title,
         description: `We are proud to announce that we have been recognized with ${title}.`,
       };
+    case "sponsor":
+      return {
+        title,
+        description: `We are grateful for the support of ${title}.`,
+      };
     default:
       return { title };
   }

@@ -11,7 +11,9 @@ export type BlockKind =
   | "cta-banner-image"
   | "map"
   | "footer"
-  | "testimonials";
+  | "testimonials"
+  | "donations"
+  | "sponsors";
 
 // Shared type for image-gallery blocks
 export interface GalleryImage {

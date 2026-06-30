@@ -19,7 +19,7 @@ export async function PricingSection({ translations, locale, currency }: Pricing
   const subtitle = resolveTranslation(
     translations,
     "subtitle",
-    "Start free. Publish more sites and unlock custom domains as your client list grows.",
+    "Start free. Publish more sites and add custom domains as your client list grows.",
   );
 
   const tiers = buildPricingTiers(

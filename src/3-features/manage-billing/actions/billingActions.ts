@@ -13,6 +13,7 @@ import {
   isExtraSitePriceId,
   type Cadence,
 } from "@/5-shared/lib/billing/plans";
+import { AddExtraSiteError } from "@/5-shared/lib/billing/errors";
 import { getStripe } from "@/5-shared/lib/billing/stripe";
 import { db } from "@/5-shared/lib/db";
 import { workspaces } from "@/5-shared/lib/db/schema";
@@ -230,23 +231,6 @@ export async function createBillingPortalSession(workspaceId: string) {
 // the source of truth for quantity and the webhook reconciles).
 // ============================================================================
 
-/** Typed error code consumers can branch on (translation-independent). */
-export type AddExtraSiteErrorCode =
-  | "NOT_PRO_PLAN"
-  | "NO_ACTIVE_SUBSCRIPTION"
-  | "SOFT_CAP_REACHED"
-  | "UNKNOWN_CADENCE";
-
-export class AddExtraSiteError extends Error {
-  constructor(
-    public code: AddExtraSiteErrorCode,
-    message: string,
-  ) {
-    super(message);
-    this.name = "AddExtraSiteError";
-  }
-}
-
 /**
  * Add one published-site slot to a Pro workspace by incrementing the
  * extra-site line item on its active Stripe subscription.
@@ -254,8 +238,9 @@ export class AddExtraSiteError extends Error {
  * - Pro only (Free upgrades to Pro first; Enterprise is already unlimited).
  * - Cadence mirrors the base subscription item.
  * - Soft-capped at EXTRA_SITE.softCap; beyond that we recommend Enterprise.
- * - `addonSites` in the DB is reconciled by the webhook (`subscription.updated`),
- *   not written here, so Stripe stays the source of truth.
+ * - Optimistically writes `addonSites + 1` to the DB after Stripe confirms,
+ *   so the caller can immediately retry publish without waiting for the
+ *   webhook. The webhook (`subscription.updated`) reconciles the final value.
  */
 export async function addExtraSite(workspaceId: string) {
   const profile = await requireProfile();
@@ -332,8 +317,13 @@ export async function addExtraSite(workspaceId: string) {
     });
   }
 
-  // Webhook will reconcile `workspaces.addonSites`. Return the expected new
-  // count so the caller can give immediate feedback (the webhook may lag).
+  // Optimistically update the DB so publish retry works immediately.
+  // The webhook (`subscription.updated`) reconciles the final value.
+  await db
+    .update(workspaces)
+    .set({ addonSites: (ws.addonSites ?? 0) + 1 })
+    .where(eq(workspaces.id, workspaceId));
+
   return {
     ok: true as const,
     expectedAddonSites: (ws.addonSites ?? 0) + 1,

@@ -1,6 +1,6 @@
 {
-  "id": "88f4ef83-650b-4bb1-b246-fefafb8f0ab0",
-  "prevId": "351ba09b-b089-4f97-aaa6-857c0da8012f",
+  "id": "0d005318-e7d7-47e7-a6eb-3b4e0d6b073e",
+  "prevId": "88f4ef83-650b-4bb1-b246-fefafb8f0ab0",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1366,6 +1366,154 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "public.donations": {
+      "name": "donations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "block_id": {
+          "name": "block_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "paypal_url": {
+          "name": "paypal_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_account_iban": {
+          "name": "bank_account_iban",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_account_swift": {
+          "name": "bank_account_swift",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_account_holder": {
+          "name": "bank_account_holder",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bank_name": {
+          "name": "bank_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bizum_phone": {
+          "name": "bizum_phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "venmo_username": {
+          "name": "venmo_username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "giftlist_url": {
+          "name": "giftlist_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "honeymoon_fund_url": {
+          "name": "honeymoon_fund_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "other_method_url": {
+          "name": "other_method_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "other_method_desc": {
+          "name": "other_method_desc",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "donations_tenant_block_idx": {
+          "name": "donations_tenant_block_idx",
+          "columns": [
+            "tenant_id",
+            "block_id"
+          ],
+          "isUnique": true,
+          "concurrent": false,
+          "using": "btree",
+          "nullsNotDistinct": false
+        }
+      },
+      "foreignKeys": {
+        "donations_tenant_id_tenants_id_fk": {
+          "name": "donations_tenant_id_tenants_id_fk",
+          "tableFrom": "donations",
+          "tableTo": "tenants",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "donations_block_id_blocks_id_fk": {
+          "name": "donations_block_id_blocks_id_fk",
+          "tableFrom": "donations",
+          "tableTo": "blocks",
+          "columnsFrom": [
+            "block_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     }
   },
   "enums": {},

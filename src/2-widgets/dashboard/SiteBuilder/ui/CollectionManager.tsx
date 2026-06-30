@@ -77,6 +77,7 @@ export function CollectionManager({
     if (blockType === "podcast-feed") return ["podcast_episode"];
     if (blockType === "awards") return ["award_item"];
     if (blockType === "testimonials") return ["testimonial"];
+    if (blockType === "sponsors") return ["sponsor"];
     return ["blog_post", "podcast_episode", "award_item"];
   }, [blockType]);
 
@@ -225,34 +226,34 @@ export function CollectionManager({
               <button
                 type="button"
                 onClick={() => setEditor({ entity, kind: entity.kind as EntityKind })}
-                className="flex flex-1 flex-col gap-1.5 min-w-0 text-left cursor-pointer"
+                className="flex flex-1 items-center justify-between gap-2 min-w-0 text-left cursor-pointer"
               >
-                <span className="text-sm font-medium text-card-foreground truncate max-w-80">
-                  {displayTitle}
-                </span>
-                <div className="flex items-center gap-2">
-                  <Badge variant={entity.status === "published" ? "default" : "secondary"} className="text-xs">
-                    {resolveTranslation(translations, `status.${entity.status}`, entity.status)}
-                  </Badge>
-                  {translationStatus && (
-                    <Badge
-                      variant={translationStatus === "translated" ? "outline" : "secondary"}
-                      className="text-xs"
-                    >
-                      {resolveTranslation(translations, `status.${translationStatus}`, translationStatus)}
+                <div className="flex flex-col gap-1.5 min-w-0">
+                  <span className="text-sm font-medium text-card-foreground truncate max-w-80">
+                    {displayTitle}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={entity.status === "published" ? "default" : "secondary"} className="text-xs">
+                      {resolveTranslation(translations, `status.${entity.status}`, entity.status)}
                     </Badge>
-                  )}
+                    {translationStatus && (
+                      <Badge
+                        variant={translationStatus === "translated" ? "outline" : "secondary"}
+                        className="text-xs"
+                      >
+                        {resolveTranslation(translations, `status.${translationStatus}`, translationStatus)}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
+                <span className="hidden sm:inline text-xs font-medium text-muted-foreground shrink-0">{editLabel}</span>
               </button>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="hidden sm:inline text-xs font-medium text-muted-foreground">{editLabel}</span>
-                <EntityRowActions
-                  entity={entity}
-                  tenantId={tenant.id}
-                  translations={translations}
-                  onChanged={refresh}
-                />
-              </div>
+              <EntityRowActions
+                entity={entity}
+                tenantId={tenant.id}
+                translations={translations}
+                onChanged={refresh}
+              />
             </div>
           );
         })}

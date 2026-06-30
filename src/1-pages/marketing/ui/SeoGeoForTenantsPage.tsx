@@ -206,7 +206,7 @@ export async function SeoGeoForTenantsPage() {
                     ["indexing", "Search indexing", "Noindex (domain hygiene)", "Indexed on Google & Bing"],
                     ["structured", "Structured data (JSON-LD)", "Not emitted", "Organization, WebSite, Article, Podcast"],
                     ["sitemap", "Sitemap inclusion", "Excluded", "Included in auto sitemap"],
-                    ["canonical", "Canonical URLs", "Subdomain only", "Custom domain or subdomain"],
+                    ["canonical", "Canonical URLs", "Subdomain or custom domain", "Custom domain or subdomain"],
                     ["hreflang", "Hreflang tags", "Per-locale hreflang active", "Per-locale hreflang active"],
                     ["metadata", "Per-locale metadata", "Rendered but noindex", "Indexed with OG/Twitter tags"],
                   ] as const).map(([key, fallbackFeature, fallbackFree, fallbackPaid]) => (

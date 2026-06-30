@@ -12,6 +12,8 @@ import { RichContentBlock } from "../blocks/RichContentBlock/ui/RichContentBlock
 import { MapBlock } from "../blocks/MapBlock/ui/MapBlock";
 import { FooterBlock } from "../blocks/FooterBlock/ui/FooterBlock";
 import { TestimonialsBlock } from "../blocks/TestimonialsBlock/ui/TestimonialsBlock";
+import { DonationsBlock } from "../blocks/DonationsBlock/ui/DonationsBlock";
+import { SponsorsBlock } from "../blocks/SponsorsBlock/ui/SponsorsBlock";
 import type { BlockComponent, BlockProps, BlockRegistry, BlockRegistryEntry } from "./types";
 import { BLOCK_CATALOG } from "./blockCatalog";
 import type { BlockKind } from "@/5-shared/types/tenants/blocks";
@@ -39,6 +41,8 @@ const COMPONENTS: Record<BlockKind, BlockComponent> = {
   map: MapBlock,
   footer: FooterBlock,
   testimonials: TestimonialsBlock,
+  donations: DonationsBlock,
+  sponsors: SponsorsBlock,
 };
 
 function buildEntry(kind: BlockKind, component: BlockComponent): BlockRegistryEntry {
@@ -66,4 +70,6 @@ export const blockRegistry: BlockRegistry = {
   map: buildEntry("map", MapBlock),
   footer: buildEntry("footer", FooterBlock),
   testimonials: buildEntry("testimonials", TestimonialsBlock),
+  donations: buildEntry("donations", DonationsBlock),
+  sponsors: buildEntry("sponsors", SponsorsBlock),
 };

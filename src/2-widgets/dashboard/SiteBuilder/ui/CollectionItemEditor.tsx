@@ -21,6 +21,13 @@ import type { EntityKind } from "@/5-shared/types/tenants/entities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/5-shared/lib/utils";
 import { Check, ImagePlus, Sparkles, X } from "lucide-react";
@@ -61,6 +68,11 @@ function fieldsForKind(kind: EntityKind): FieldDef[] {
         title,
         { key: "quote", labelKey: "label.quote", labelFallback: "Quote", type: "textarea" },
       ];
+    case "sponsor":
+      return [
+        { key: "title", labelKey: "label.name", labelFallback: "Name", type: "input" },
+        { key: "description", labelKey: "label.description", labelFallback: "Description", type: "textarea" },
+      ];
     default:
       return [title];
   }
@@ -95,12 +107,15 @@ export function CollectionItemEditor({
   const fields = fieldsForKind(kind);
   const isTestimonial = kind === "testimonial";
   const isPodcast = kind === "podcast_episode";
-  const hasImage = kind === "blog_post" || kind === "award_item" || kind === "podcast_episode";
+  const isSponsor = kind === "sponsor";
+  const hasImage = kind === "blog_post" || kind === "award_item" || kind === "podcast_episode" || kind === "sponsor";
 
   const [activeLocale, setActiveLocale] = useState(defaultLocale);
   const [buffers, setBuffers] = useState<Buffers>({});
   const [rating, setRating] = useState<number>(0);
   const [mediaUrl, setMediaUrl] = useState<string>("");
+  const [sponsorType, setSponsorType] = useState<string>("sponsor");
+  const [sponsorUrl, setSponsorUrl] = useState<string>("");
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -130,9 +145,14 @@ export function CollectionItemEditor({
             Object.values(next[l] ?? {}).some((v) => typeof v === "string" && v.trim()),
           );
           setActiveLocale(withContent ?? defaultLocale);
-          const meta = (entity.metadata ?? {}) as { rating?: number; url?: string };
+          const meta = (entity.metadata ?? {}) as { rating?: number; url?: string; type?: string };
           setRating(meta.rating ?? 0);
           setMediaUrl(meta.url ?? "");
+          if (isSponsor) {
+            const sm = entity.metadata as { type?: string; url?: string } | null;
+            setSponsorType(sm?.type ?? "sponsor");
+            setSponsorUrl(sm?.url ?? "");
+          }
         })
         .finally(() => setLoading(false));
     } else {
@@ -141,6 +161,10 @@ export function CollectionItemEditor({
       setBuffers(next);
       setRating(0);
       setMediaUrl("");
+      if (isSponsor) {
+        setSponsorType("sponsor");
+        setSponsorUrl("");
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, entity?.id]);
@@ -158,6 +182,10 @@ export function CollectionItemEditor({
     const m: Record<string, unknown> = { ...((entity?.metadata as Record<string, unknown>) ?? {}) };
     if (isTestimonial) m.rating = rating > 0 ? rating : undefined;
     if (isPodcast) m.url = mediaUrl.trim() || undefined;
+    if (isSponsor) {
+      m.type = sponsorType || "sponsor";
+      m.url = sponsorUrl.trim() || undefined;
+    }
     return m;
   };
   const metadata = buildMetadata();
@@ -202,7 +230,7 @@ export function CollectionItemEditor({
               await updateEntityTranslation(entityId, tenant.id, loc, buffers[loc]);
             }
           }
-          if (isTestimonial || isPodcast) {
+          if (isTestimonial || isPodcast || isSponsor) {
             await updateEntityMetadata(entityId, tenant.id, buildMetadata() ?? {});
           }
         }
@@ -288,6 +316,7 @@ export function CollectionItemEditor({
     podcast_episode: "podcast episode",
     award_item: "award",
     testimonial: "testimonial",
+    sponsor: "sponsor",
   };
   const kindLabel = t(`kind.${kind}`, KIND_FALLBACK[kind] ?? "item");
   const titleLabel = entity
@@ -462,6 +491,37 @@ export function CollectionItemEditor({
                   onChange={(e) => setMediaUrl(e.target.value)}
                 />
               </div>
+            )}
+
+            {isSponsor && activeLocale === defaultLocale && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="f-sponsor-type">{t("label.sponsor-type", "Type")}</Label>
+                  <Select value={sponsorType} onValueChange={setSponsorType}>
+                    <SelectTrigger id="f-sponsor-type" className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sponsor">{t("sponsor.type.sponsor", "Sponsor")}</SelectItem>
+                      <SelectItem value="collaborator">{t("sponsor.type.collaborator", "Collaborator")}</SelectItem>
+                      <SelectItem value="partner">{t("sponsor.type.partner", "Partner")}</SelectItem>
+                      <SelectItem value="media">{t("sponsor.type.media", "Media Partner")}</SelectItem>
+                      <SelectItem value="supporter">{t("sponsor.type.supporter", "Supporter")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="f-sponsor-url">{t("label.sponsor-url", "Website URL")}</Label>
+                  <Input
+                    id="f-sponsor-url"
+                    type="url"
+                    inputMode="url"
+                    placeholder="https://..."
+                    value={sponsorUrl}
+                    onChange={(e) => setSponsorUrl(e.target.value)}
+                  />
+                </div>
+              </>
             )}
           </div>
         )}

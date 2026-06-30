@@ -13,6 +13,7 @@ const SECTION_BY_KIND: Record<string, string> = {
   blog_post: "blog",
   award_item: "awards",
   podcast_episode: "podcast",
+  sponsor: "sponsors",
 };
 
 // POST /api/entity-image/upload  — form: { file, tenantId, entityId }

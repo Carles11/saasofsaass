@@ -8,6 +8,8 @@ import {
   ArrowRightCircle,
   Copyright,
   FileText,
+  Gift,
+  Handshake,
   Images,
   ImagePlus,
   Mail,
@@ -210,6 +212,32 @@ export const BLOCK_CATALOG: Record<BlockKind, BlockMeta> = {
     description:
       "Customer/client testimonials with quotes, ratings, and author info",
   },
+  donations: {
+    icon: Gift,
+    category: "interactive",
+    includeInNav: false,
+    navLabel: "Donations",
+    defaultConfig: {},
+    fields: [
+      { key: "heading", label: "Section Heading", inputType: "input" },
+    ],
+    name: "Donations",
+    description:
+      "Let visitors contribute via PayPal, bank transfer, Bizum, Venmo, and more",
+  },
+  sponsors: {
+    icon: Handshake,
+    category: "content",
+    includeInNav: false,
+    navLabel: "Sponsors",
+    defaultConfig: {},
+    fields: [
+      { key: "heading", label: "Section Heading", inputType: "input" },
+    ],
+    name: "Sponsors & Collaborators",
+    description:
+      "Showcase sponsors, collaborators, and partners with logos and links",
+  },
 };
 
 export const BLOCK_ORDER: BlockKind[] = [
@@ -218,6 +246,7 @@ export const BLOCK_ORDER: BlockKind[] = [
   "podcast-feed",
   "awards",
   "testimonials",
+  "sponsors",
   "contact",
   "cta-banner",
   "text-content",
@@ -225,5 +254,6 @@ export const BLOCK_ORDER: BlockKind[] = [
   "cta-banner-image",
   "image-gallery",
   "map",
+  "donations",
   "footer",
 ];

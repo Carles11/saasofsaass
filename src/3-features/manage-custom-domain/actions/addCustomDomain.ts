@@ -22,7 +22,6 @@ import {
   addDomainToVercelProject,
   getVercelDomainStatus,
 } from "@/5-shared/lib/vercel/vercel-domains";
-import { planAllowsCustomDomains } from "@/5-shared/lib/billing/plans";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -38,28 +37,7 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
   const apex = toApexDomain(domainInput);
   const www = toWwwDomain(apex);
 
-  // ── 2. Check plan ─────────────────────────────────────────────────────────
-  const [tenant] = await db
-    .select({ workspaceId: tenants.workspaceId })
-    .from(tenants)
-    .where(eq(tenants.id, tenantId))
-    .limit(1);
-
-  if (!tenant) throw new Error("Tenant not found");
-
-  const [ws] = await db
-    .select({ plan: workspaces.plan })
-    .from(workspaces)
-    .where(eq(workspaces.id, tenant.workspaceId!))
-    .limit(1);
-
-  if (!ws || !planAllowsCustomDomains(ws.plan)) {
-    throw new Error(
-      "Custom domains are available on the Pro plan. Please upgrade.",
-    );
-  }
-
-  // ── 3. Enforce one domain per tenant ──────────────────────────────────────
+  // ── 2. Enforce one domain per tenant ────────────────────────────────────── ──────────────────────────────────────
   const existingDomains = await db
     .select()
     .from(tenantDomains)

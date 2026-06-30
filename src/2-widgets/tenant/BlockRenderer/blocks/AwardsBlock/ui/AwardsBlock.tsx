@@ -27,7 +27,7 @@ export async function AwardsBlock({ block, config, locale, blockId, t }: BlockPr
         href={`/${locale}/awards/${entity.slug}`}
         className="flex h-full flex-col overflow-hidden rounded-[var(--radius)] border border-border bg-card transition-shadow hover:shadow-md"
       >
-        <div className="relative w-full aspect-[16/10] bg-muted">
+        <div className="relative w-full h-48 shrink-0 bg-muted">
           {entity.coverImageUrl ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}

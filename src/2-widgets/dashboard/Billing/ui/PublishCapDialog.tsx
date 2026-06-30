@@ -113,7 +113,7 @@ export function PublishCapDialog({
         )
     : t(
         "publish-cap.description-free",
-        "Upgrade to Pro to publish more sites and unlock custom domains, search indexing, and team collaboration.",
+        "Upgrade to Pro to publish more sites and unlock search indexing and team collaboration.",
       );
 
   return (

@@ -37,7 +37,9 @@ import { useState, useTransition } from "react";
 import { BlockEditForm } from "./BlockEditForm";
 import { BlockEditorHeader } from "./BlockEditorHeader";
 import { BlockExpandedArea } from "./BlockExpandedArea";
+import { BlockTranslatableFields } from "./BlockTranslatableFields";
 import { CollectionManager } from "./CollectionManager";
+import { DonationsForm } from "./DonationsForm";
 import { GalleryManager } from "./GalleryManager";
 
 type EntityRow = {
@@ -77,6 +79,7 @@ export function BlockCard({
     "awards",
     "image-gallery",
     "testimonials",
+    "sponsors",
   ].includes(block.type);
 
   // ── Completeness: do all enabled languages have the required content? ──
@@ -392,17 +395,40 @@ export function BlockCard({
                   onImagesChange={() => {}}
                 />
               </div>
-            ) : isCollectionBlock ? (
-              <div className="p-3 sm:p-4">
-                <CollectionManager
-                  tenant={tenant}
+            ) : block.type === "donations" ? (
+              <>
+                <BlockTranslatableFields
+                  block={block}
                   activeLocale={activeLocale}
-                  initialEntities={initialEntities}
-                  blockType={block.type}
-                  blockId={block.id}
-                  blockConfig={blockConfig}
-                  translations={translations}
+                  locales={tenant.locales as string[]}
+                  defaultLocale={tenant.defaultLocale}
                 />
+                <DonationsForm
+                  blockId={block.id}
+                  tenantId={tenantId}
+                  translations={translations}
+                  onSuccess={() => setIsExpanded(false)}
+                />
+              </>
+            ) : isCollectionBlock ? (
+              <div className="flex flex-col">
+                <BlockTranslatableFields
+                  block={block}
+                  activeLocale={activeLocale}
+                  locales={tenant.locales as string[]}
+                  defaultLocale={tenant.defaultLocale}
+                />
+                <div className="p-3 sm:p-4">
+                  <CollectionManager
+                    tenant={tenant}
+                    activeLocale={activeLocale}
+                    initialEntities={initialEntities}
+                    blockType={block.type}
+                    blockId={block.id}
+                    blockConfig={blockConfig}
+                    translations={translations}
+                  />
+                </div>
               </div>
             ) : (
               <BlockEditForm

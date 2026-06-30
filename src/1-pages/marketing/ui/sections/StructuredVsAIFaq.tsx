@@ -81,7 +81,7 @@ export function StructuredVsAIFaq({ translations }: StructuredVsAIFaqProps) {
       a: resolveTranslation(
         translations,
         "faq.q5.a",
-        "Select any of our 8 supported languages and AI translates your entire site automatically. The multilingual structure, including hreflang tags and locale-specific URLs, is built into the platform. You don't need to configure anything.",
+        "Select any of our 8 supported languages and AI translates your entire site automatically. Free sites get 2 of the 8 languages; paid plans unlock all 8. The multilingual structure, including hreflang tags and locale-specific URLs, is built into the platform. You don't need to configure anything.",
       ),
     },
     {

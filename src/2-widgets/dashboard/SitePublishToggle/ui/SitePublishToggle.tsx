@@ -5,9 +5,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {
   parsePublishCapError,
+  type PublishCapInfo,
+} from "@/5-shared/lib/tenants/publish-cap";
+import {
   publishTenant,
   unpublishTenant,
-  type PublishCapInfo,
 } from "@/3-features/manage-tenants/actions/publishTenant";
 import { EXTRA_SITE } from "@/5-shared/lib/billing/plans";
 import { Button } from "@/components/ui/button";

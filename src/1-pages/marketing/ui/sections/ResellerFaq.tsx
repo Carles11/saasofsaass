@@ -65,7 +65,7 @@ export function ResellerFaq({ translations }: ResellerFaqProps) {
       a: resolveTranslation(
         translations,
         "faq.q3.a",
-        "Most resellers start on Pro, which includes three published sites and lets you add more for a small fee per site. Once you are managing around ten or more client sites, Enterprise — with unlimited sites — becomes the cheaper option.",
+        "Most resellers start on Pro, which includes three published sites and lets you add more for a small fee per site. But even the Free plan includes a custom domain and 2 languages per site, so you can start earning with zero upfront cost. Once you are managing around ten or more client sites, Enterprise — with unlimited sites — becomes the cheaper option.",
       ),
     },
     {
@@ -81,7 +81,7 @@ export function ResellerFaq({ translations }: ResellerFaqProps) {
       a: resolveTranslation(
         translations,
         "faq.q5.a",
-        "Yes. On paid plans every site can run on its own custom domain, so each client gets a professional, branded web address rather than a shared subdomain.",
+        "Yes. Every site can run on its own custom domain, so each client gets a professional, branded web address rather than a shared subdomain.",
       ),
     },
     {
@@ -89,7 +89,7 @@ export function ResellerFaq({ translations }: ResellerFaqProps) {
       a: resolveTranslation(
         translations,
         "faq.q6.a",
-        "Multilingual publishing is included on paid plans — add as many languages as a site needs with no per-language fee. It is one of the easiest things to upsell to clients who serve an international audience.",
+        "Multilingual is included on every plan. Free sites get 2 of the 8 languages; Pro and Enterprise get all 8, with no per-language fee. It is one of the easiest things to upsell to clients who serve an international audience.",
       ),
     },
   ];

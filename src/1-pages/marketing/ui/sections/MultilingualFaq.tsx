@@ -65,7 +65,7 @@ export function MultilingualFaq({ translations }: MultilingualFaqProps) {
       a: resolveTranslation(
         translations,
         "faq.q3.a",
-        "English, Spanish, Catalan, Basque, Galician, French, Italian, and German — each with locale-specific URLs and native rendering. More languages are added over time, and every site you build can use any of them.",
+        "English, Spanish, Catalan, Basque, Galician, French, Italian, and German — each with locale-specific URLs and native rendering. More languages are added over time. Free sites can use any 2 of the 8; paid plans unlock all 8 languages.",
       ),
     },
     {
@@ -73,7 +73,7 @@ export function MultilingualFaq({ translations }: MultilingualFaqProps) {
       a: resolveTranslation(
         translations,
         "faq.q4.a",
-        "Not on paid plans. Unlike builders that charge a monthly fee per language, multilingual publishing is included — add as many languages as a site needs without a per-locale surcharge.",
+        "No — multilingual is included on every plan. Free sites get 2 of the 8 languages; Pro and Enterprise get all 8, with no per-language fee ever.",
       ),
     },
     {

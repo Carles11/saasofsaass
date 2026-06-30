@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
     t["meta.title"] ?? "Pricing — SoSS Engine | Plans for professionals & agencies";
   const description =
     t["meta.description"] ??
-    "Transparent pricing for the SoSS website factory. Start free with unlimited drafts; upgrade to publish more sites, get found on Google, connect custom domains, and manage clients at scale.";
+    "Transparent pricing for the SoSS website factory. Start free with unlimited drafts; upgrade to publish more sites, get found on Google, and manage clients at scale. Custom domains included on all plans.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";

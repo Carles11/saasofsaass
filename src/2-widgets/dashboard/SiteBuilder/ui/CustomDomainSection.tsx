@@ -29,8 +29,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { hasFeature, getNextPlan, type PlanId } from "@/5-shared/lib/billing/plans";
-import { useUpgradeModal } from "@/2-widgets/dashboard/UpgradeModal";
+
 import { CheckCircle2, ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { DnsInstructionsModal } from "./DnsInstructionsModal";
@@ -58,26 +57,7 @@ export function CustomDomainSection({
   const [verifying, setVerifying] = useState<string | null>(null);
   const [dnsModalOpen, setDnsModalOpen] = useState(false);
 
-  const { showUpgrade } = useUpgradeModal();
-  const canUseCustomDomains = hasFeature(plan, "customDomains");
   const currentDomain = domainRows[0] ?? null;
-
-  function openUpgrade() {
-    showUpgrade({
-      requiredPlan: (getNextPlan(plan) ?? "pro") as PlanId,
-      title: t("settings.domain.upgrade-title", "Connect your own domain"),
-      description: t(
-        "settings.domain.upgrade-desc",
-        "Use your own custom domain instead of a saasofsaass.com subdomain.",
-      ),
-      benefits: [
-        t("settings.domain.benefit-1", "Your brand on your own domain"),
-        t("settings.domain.benefit-2", "Automatic SSL certificate"),
-        t("settings.domain.benefit-3", "Stronger SEO and visitor trust"),
-      ],
-      canUpgrade: true,
-    });
-  }
 
   const t = (key: string, fallback: string) =>
     resolveTranslation(translations, key, fallback);
@@ -85,7 +65,7 @@ export function CustomDomainSection({
   const title = t("settings.domain.title", "Custom Domain");
   const description = t(
     "settings.domain.description",
-    "Connect your own domain to this site. Available on the Pro plan.",
+    "Connect your own domain to this site.",
   );
   const addPlaceholder = t("settings.domain.input-placeholder", "example.com");
   const addButton = t("settings.domain.add-button", "Add Domain");
@@ -146,10 +126,6 @@ export function CustomDomainSection({
   const cancelLabel = t("cancel", "Cancel");
 
   async function handleAdd() {
-    if (!canUseCustomDomains) {
-      openUpgrade();
-      return;
-    }
     if (!domainInput.trim()) return;
     setAdding(true);
     setError(null);
@@ -417,7 +393,6 @@ export function CustomDomainSection({
         <CardContent className="space-y-4">
           {renderDomainPanel()}
 
-          {/* Add domain input — shown for all plans; free routes to the upgrade modal */}
           {!currentDomain && (
             <div className="flex items-end gap-2">
               <div className="flex-1">
@@ -425,12 +400,12 @@ export function CustomDomainSection({
                   placeholder={addPlaceholder}
                   value={domainInput}
                   onChange={(e) => setDomainInput(e.target.value)}
-                  disabled={adding || !canUseCustomDomains}
+                  disabled={adding}
                 />
               </div>
               <Button
-                onClick={canUseCustomDomains ? handleAdd : openUpgrade}
-                disabled={adding || (canUseCustomDomains && !domainInput.trim())}
+                onClick={handleAdd}
+                disabled={adding || !domainInput.trim()}
               >
                 {adding ? addingLabel : addButton}
               </Button>

@@ -15,3 +15,5 @@ export {
   reorderGalleryImages,
   saveGalleryCaptions,
 } from './actions/galleryActions'
+export { getDonations, saveDonations } from './actions/donationsActions'
+export type { DonationFields } from './actions/donationsActions'

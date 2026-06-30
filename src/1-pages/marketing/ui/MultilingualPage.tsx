@@ -105,7 +105,7 @@ export async function MultilingualPage() {
     ["languages", "Multilingual publishing", "Built in, AI-translated", "Paid add-on, per language"],
     ["translation", "Translation work", "AI does it for you", "You write every language by hand"],
     ["seo", "Per-language SEO", "Automatic hreflang & URLs", "Manual configuration"],
-    ["cost", "Cost to add a language", "€0 — included on paid plans", "Monthly fee per locale"],
+    ["cost", "Cost to add a language", "€0 — Free gets 2, paid gets all 8", "Monthly fee per locale"],
     ["sites", "Managing client sites", "All sites, one dashboard", "One subscription per site"],
   ];
 

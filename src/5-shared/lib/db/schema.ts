@@ -187,6 +187,32 @@ export const transactions = pgTable("transactions", {
 });
 
 // ============================================
+// DONATIONS — Single-row-per-tenant payment methods
+// ============================================
+export const donations = pgTable("donations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tenantId: uuid("tenant_id")
+    .notNull()
+    .references(() => tenants.id, { onDelete: "cascade" }),
+  blockId: uuid("block_id").references(() => blocks.id, { onDelete: "set null" }),
+  paypalUrl: text("paypal_url"),
+  bankAccountIban: text("bank_account_iban"),
+  bankAccountSwift: text("bank_account_swift"),
+  bankAccountHolder: text("bank_account_holder"),
+  bankName: text("bank_name"),
+  bizumPhone: text("bizum_phone"),
+  venmoUsername: text("venmo_username"),
+  giftlistUrl: text("giftlist_url"),
+  honeymoonFundUrl: text("honeymoon_fund_url"),
+  otherMethodUrl: text("other_method_url"),
+  otherMethodDesc: text("other_method_desc"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("donations_tenant_block_idx").on(t.tenantId, t.blockId),
+]);
+
+// ============================================
 // PLATFORM TRANSLATIONS (your UI strings)
 // ============================================
 export const platformTranslations = pgTable("platform_translations", {
@@ -230,4 +256,6 @@ export type TenantDomain = typeof tenantDomains.$inferSelect;
 export type NewTenantDomain = typeof tenantDomains.$inferInsert;
 export type TenantDomainLog = typeof tenantDomainLogs.$inferSelect;
 export type NewTenantDomainLog = typeof tenantDomainLogs.$inferInsert;
+export type Donation = typeof donations.$inferSelect;
+export type NewDonation = typeof donations.$inferInsert;
 export type { Profile, NewProfile, WorkspaceMembership, NewWorkspaceMembership, MembershipSite, NewMembershipSite, WorkspaceInvitation, NewWorkspaceInvitation } from "./schema/auth";
