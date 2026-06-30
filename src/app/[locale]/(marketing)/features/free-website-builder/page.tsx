@@ -1,4 +1,4 @@
-import { MultilingualPage } from "@/1-pages/marketing/ui/MultilingualPage";
+import { FreeWebsiteBuilderPage } from "@/1-pages/marketing/ui/FreeWebsiteBuilderPage";
 import { routing } from "@/5-shared/lib/i18n/routing";
 import { getLocale } from "next-intl/server";
 import { getPlatformTranslations } from "@/5-shared/lib/db/platform-translations";
@@ -6,17 +6,16 @@ import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  const t = await getPlatformTranslations("marketing.multilingual", locale);
+  const t = await getPlatformTranslations("marketing.free-builder", locale);
   const title =
-    t["meta.title"] ??
-    "Multilingual Website Builder — 8 Languages, AI-Translated";
+    t["meta.title"] ?? "Truly Free Website Builder — Custom Domain Included";
   const description =
     t["meta.description"] ??
-    "Build client websites in 8 languages. AI translates entire sites and hreflang is automatic. Free gets 2 languages; paid plans unlock all 8.";
+    "Build a full website free — your own custom domain and multiple languages included, no credit card, no ads. The domain other builders charge for is free here.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";
-  const path = `/features/multilingual-website-builder`;
+  const path = "/features/free-website-builder";
 
   return {
     title,
@@ -32,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: `${baseUrl}/${locale}${path}`,
       siteName: "SoSS Engine",
-      locale: locale,
+      locale,
       type: "website",
     },
     twitter: {
@@ -44,5 +43,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function Page() {
-  return <MultilingualPage />;
+  return <FreeWebsiteBuilderPage />;
 }

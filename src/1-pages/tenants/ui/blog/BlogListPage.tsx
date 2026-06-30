@@ -1,4 +1,4 @@
-import { getTenantByDomain } from '@/4-entities/tenant'
+import { getTenantByDomain, getTenantSeoBase } from '@/4-entities/tenant'
 import { getPublishedEntities } from '@/4-entities/entity'
 import { BlogList } from '@/2-widgets/tenant/BlogList'
 import { getPlatformTranslations, resolveTranslation } from '@/5-shared/lib/db/platform-translations'
@@ -14,7 +14,7 @@ export async function generateBlogListMetadata(
   const tenant = await getTenantByDomain({ tenant: tenantKey, domain, isSubdomain })
   if (!tenant) return {}
 
-  const baseUrl = `https://${domain}`
+  const { baseUrl, indexable } = await getTenantSeoBase(tenant, domain)
   const description = `Read the latest articles from ${tenant.name}`
 
   return {
@@ -40,8 +40,8 @@ export async function generateBlogListMetadata(
       description,
     },
     robots: {
-      index: tenant.seoEnabled !== false,
-      follow: tenant.seoEnabled !== false,
+      index: indexable,
+      follow: indexable,
     },
   }
 }
@@ -51,38 +51,41 @@ export async function BlogListPage({ context }: { context: PageContextTypes }) {
   const tenant = await getTenantByDomain({ tenant: tenantKey, domain, isSubdomain })
   if (!tenant) notFound()
 
-  const [items, navT] = await Promise.all([
+  const [items, navT, { baseUrl, indexable }] = await Promise.all([
     getPublishedEntities('blog_post', tenant.id, locale as SupportedLocaleType, { limit: 50 }),
     getPlatformTranslations('tenant.nav', locale),
+    getTenantSeoBase(tenant, domain),
   ])
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'CollectionPage',
-            name: `Blog | ${tenant.name}`,
-            description: `Read the latest articles from ${tenant.name}`,
-            url: `https://${domain}/${locale}/blog`,
-            mainEntity: {
-              '@type': 'ItemList',
-              itemListElement: items.slice(0, 10).map(({ entity, translation }, i) => ({
-                '@type': 'ListItem',
-                position: i + 1,
-                url: `https://${domain}/${locale}/blog/${entity.slug}`,
-                item: {
-                  '@type': 'BlogPosting',
-                  headline: (translation?.payload as BlogPostPayload | null)?.title ?? entity.slug ?? entity.id,
-                  ...(entity.publishedAt ? { datePublished: entity.publishedAt.toISOString?.() } : {}),
-                },
-              })),
-            },
-          }),
-        }}
-      />
+      {indexable && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'CollectionPage',
+              name: `Blog | ${tenant.name}`,
+              description: `Read the latest articles from ${tenant.name}`,
+              url: `${baseUrl}/${locale}/blog`,
+              mainEntity: {
+                '@type': 'ItemList',
+                itemListElement: items.slice(0, 10).map(({ entity, translation }, i) => ({
+                  '@type': 'ListItem',
+                  position: i + 1,
+                  url: `${baseUrl}/${locale}/blog/${entity.slug}`,
+                  item: {
+                    '@type': 'BlogPosting',
+                    headline: (translation?.payload as BlogPostPayload | null)?.title ?? entity.slug ?? entity.id,
+                    ...(entity.publishedAt ? { datePublished: entity.publishedAt.toISOString?.() } : {}),
+                  },
+                })),
+              },
+            }),
+          }}
+        />
+      )}
       <BlogList
         items={items}
         locale={locale as SupportedLocaleType}

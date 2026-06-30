@@ -40,6 +40,30 @@ export function FooterSection({ translations, locale }: FooterSectionProps) {
     {
       label: resolveTranslation(
         translations,
+        "feature-free-builder",
+        "Free Website Builder",
+      ),
+      href: `${langPrefix}/features/free-website-builder`,
+    },
+    {
+      label: resolveTranslation(
+        translations,
+        "feature-multilingual",
+        "Multilingual Website Builder",
+      ),
+      href: `${langPrefix}/features/multilingual-website-builder`,
+    },
+    {
+      label: resolveTranslation(
+        translations,
+        "feature-reseller",
+        "Resell Websites",
+      ),
+      href: `${langPrefix}/features/earn-by-reselling-websites`,
+    },
+    {
+      label: resolveTranslation(
+        translations,
         "feature-structured",
         "Structured vs AI Websites",
       ),

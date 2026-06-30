@@ -1,6 +1,7 @@
 import { MarketingHeader } from "./sections/MarketingHeader";
 import { FooterSection } from "./sections/FooterSection";
 import { SeoGeoFaq } from "./sections/SeoGeoFaq";
+import { MarketingJsonLd } from "./sections/MarketingJsonLd";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
 import { getLocale } from "next-intl/server";
@@ -22,14 +23,6 @@ export async function SeoGeoForTenantsPage() {
     : "http://localhost:3000";
   const path = "/features/seo-geo-for-tenants";
 
-  const orgSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "SoSS Engine",
-    url: baseUrl,
-    description: "Multi-tenant website builder with built-in SEO and GEO optimization for every client site.",
-  };
-
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -46,10 +39,7 @@ export async function SeoGeoForTenantsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
-      />
+      <MarketingJsonLd locale={locale} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

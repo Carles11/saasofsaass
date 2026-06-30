@@ -13,8 +13,15 @@ import { UpgradeModalProvider } from "@/2-widgets/dashboard/UpgradeModal";
 import { PendingInviteConsumer } from "@/3-features/team-management/ui/PendingInviteConsumer";
 import { PLANS } from "@/5-shared/lib/billing/plans";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+// The dashboard is auth-gated, but make it explicit: never index any dashboard
+// route (account, billing, site-builder, team, etc.).
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function DashboardLayout({
   children,

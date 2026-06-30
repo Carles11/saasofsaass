@@ -1,6 +1,8 @@
 export { getTenantByDomain } from './api/getTenantByDomain'
 export { getTenantById } from './api/getTenantById'
 export { getVerifiedCustomDomain } from './api/getVerifiedCustomDomain'
+export { getTenantSeoBase } from './api/getTenantSeoBase'
+export type { TenantSeoBase } from './api/getTenantSeoBase'
 export { getAccessibleSites } from './api/getAccessibleSites'
 export type { AccessibleSite, AccessibleSiteRole } from './api/getAccessibleSites'
 export type { Tenant, NewTenant } from '@/5-shared/lib/db/schema'

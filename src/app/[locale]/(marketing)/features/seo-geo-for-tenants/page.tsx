@@ -9,10 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getPlatformTranslations("marketing.seo-geo", locale);
   const title =
     t["meta.title"] ??
-    "SEO & GEO for Tenant Sites — SoSS Engine";
+    "SEO & GEO Website Builder — Rank on Google & AI Search";
   const description =
     t["meta.description"] ??
-    "Every tenant site ships with per-locale metadata, hreflang, canonical URLs, auto sitemap, and JSON-LD structured data. Free = noindex, Pro/Enterprise = indexed + cited by Google and AI answer engines.";
+    "Every site ships with per-locale metadata, hreflang, canonical URLs, sitemaps, and JSON-LD — built to rank on Google and get cited by AI answer engines.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";

@@ -9,10 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getPlatformTranslations("marketing.structured-vs-ai", locale);
   const title =
     t["meta.title"] ??
-    "Stop Prompting. Start Publishing. — Structured Website Builder vs AI";
+    "Structured Website Builder vs AI Site Generators";
   const description =
     t["meta.description"] ??
-    "Most AI website builders generate pages. You still need to figure out what those pages should be. SaaS of SaaS starts with proven structures and uses AI for content, translation, and localization.";
+    "AI builders generate pages — you still decide what they should be. SoSS starts from proven website structures, then uses AI for content and translation.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";

@@ -1,4 +1,4 @@
-import { getTenantByDomain } from '@/4-entities/tenant'
+import { getTenantByDomain, getTenantSeoBase } from '@/4-entities/tenant'
 import { getEntityBySlug } from '@/4-entities/entity'
 import { PodcastDetail } from '@/2-widgets/tenant/PodcastList'
 import { getPlatformTranslations, resolveTranslation } from '@/5-shared/lib/db/platform-translations'
@@ -33,7 +33,7 @@ export async function generatePodcastDetailMetadata({
   const meta = entity.metadata as PodcastEntity['metadata'] | null
   const title = payload?.title ?? entity.slug ?? entity.id
   const description = payload?.description ?? `Listen to ${title} on ${tenant.name}`
-  const baseUrl = `https://${domain}`
+  const { baseUrl, indexable } = await getTenantSeoBase(tenant, domain)
 
   return {
     title: `${title} | Podcast | ${tenant.name}`,
@@ -62,8 +62,8 @@ export async function generatePodcastDetailMetadata({
       ...(entity.coverImageUrl ? { images: [entity.coverImageUrl] } : {}),
     },
     robots: {
-      index: tenant.seoEnabled !== false,
-      follow: tenant.seoEnabled !== false,
+      index: indexable,
+      follow: indexable,
     },
     other: {
       'article:published_time': entity.publishedAt?.toISOString?.() ?? '',
@@ -85,32 +85,37 @@ export async function PodcastDetailPage({ context, slug }: PodcastDetailParams) 
   if (!row) notFound()
 
   const meta = row.entity.metadata as PodcastEntity['metadata'] | null
-  const navT = await getPlatformTranslations('tenant.nav', locale)
+  const [navT, { baseUrl, indexable }] = await Promise.all([
+    getPlatformTranslations('tenant.nav', locale),
+    getTenantSeoBase(tenant, domain),
+  ])
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'PodcastEpisode',
-            name: (row.translation?.payload as PodcastEpisodePayload | null)?.title ?? row.entity.slug,
-            description: (row.translation?.payload as PodcastEpisodePayload | null)?.description ?? '',
-            image: row.entity.coverImageUrl,
-            timeRequired: meta?.durationSeconds ? `PT${meta.durationSeconds}S` : undefined,
-            datePublished: row.entity.publishedAt?.toISOString?.() ?? undefined,
-            associatedMedia: meta?.spotifyUrl
-              ? { '@type': 'MediaObject', contentUrl: meta.spotifyUrl }
-              : undefined,
-            partOfSeries: {
-              '@type': 'PodcastSeries',
-              name: `${tenant.name} Podcast`,
-              url: `https://${domain}/${locale}/podcast`,
-            },
-          }),
-        }}
-      />
+      {indexable && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'PodcastEpisode',
+              name: (row.translation?.payload as PodcastEpisodePayload | null)?.title ?? row.entity.slug,
+              description: (row.translation?.payload as PodcastEpisodePayload | null)?.description ?? '',
+              image: row.entity.coverImageUrl,
+              timeRequired: meta?.durationSeconds ? `PT${meta.durationSeconds}S` : undefined,
+              datePublished: row.entity.publishedAt?.toISOString?.() ?? undefined,
+              associatedMedia: meta?.spotifyUrl
+                ? { '@type': 'MediaObject', contentUrl: meta.spotifyUrl }
+                : undefined,
+              partOfSeries: {
+                '@type': 'PodcastSeries',
+                name: `${tenant.name} Podcast`,
+                url: `${baseUrl}/${locale}/podcast`,
+              },
+            }),
+          }}
+        />
+      )}
       <PodcastDetail
         data={row}
         locale={locale as SupportedLocaleType}

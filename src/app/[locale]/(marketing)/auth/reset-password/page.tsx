@@ -4,6 +4,11 @@ import { headers } from "next/headers";
 import { appAuthUrl } from "@/5-shared/lib/auth/auth-urls";
 import { AuthViewClient } from "../_components/AuthViewClient";
 
+// Auth pages should never appear in search results.
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function ResetPasswordPage() {
   const locale = await getLocale();
   const host = (await headers()).get("host") ?? "";

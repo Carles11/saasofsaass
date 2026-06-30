@@ -7,10 +7,10 @@ import { getLocale } from "next-intl/server";
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getPlatformTranslations("marketing.meta", locale);
-  const title = t["title"] ?? "SoSS Engine — Website Factory for Professionals";
+  const title = t["title"] ?? "Free Multilingual Website Builder & Reseller Platform";
   const description =
     t["description"] ??
-    "Create unlimited professional websites for your clients. No coding needed. You manage the structure, you or your clients edit the content.";
+    "Build unlimited multilingual websites for your clients — free, with a custom domain on every plan. No code. Use them yourself or resell them as a service.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";

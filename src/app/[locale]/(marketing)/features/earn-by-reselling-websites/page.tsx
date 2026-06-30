@@ -9,10 +9,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = await getPlatformTranslations("marketing.reseller-value", locale);
   const title =
     t["meta.title"] ??
-    "Earn by Reselling Websites — Recurring Revenue for Agencies";
+    "Resell Websites — Recurring Revenue for Agencies";
   const description =
     t["meta.description"] ??
-    "Build a client website once, charge a monthly fee to manage it, and keep the difference. Custom domains on all plans, 2 languages on free. See how much you could earn reselling websites.";
+    "Build a client website once, charge a monthly fee, and keep the margin. Start clients free with a custom domain. See how much you could earn reselling.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";

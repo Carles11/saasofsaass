@@ -1,6 +1,7 @@
 import { MarketingHeader } from "./sections/MarketingHeader";
 import { FooterSection } from "./sections/FooterSection";
 import { StructuredVsAIFaq } from "./sections/StructuredVsAIFaq";
+import { MarketingJsonLd } from "./sections/MarketingJsonLd";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
 import { getLocale } from "next-intl/server";
@@ -25,16 +26,6 @@ export async function StructuredVsAIPage() {
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";
 
-  const orgSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "SoSS Engine",
-    url: process.env.NEXT_PUBLIC_ROOT_DOMAIN
-      ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
-      : "http://localhost:3000",
-    description: "Structured website builder for professionals.",
-  };
-
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -51,10 +42,7 @@ export async function StructuredVsAIPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
-      />
+      <MarketingJsonLd locale={locale} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

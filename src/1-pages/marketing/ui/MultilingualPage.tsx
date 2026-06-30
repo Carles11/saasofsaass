@@ -1,6 +1,7 @@
 import { MarketingHeader } from "./sections/MarketingHeader";
 import { FooterSection } from "./sections/FooterSection";
 import { MultilingualFaq } from "./sections/MultilingualFaq";
+import { MarketingJsonLd } from "./sections/MarketingJsonLd";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
 import { getLocale } from "next-intl/server";
@@ -33,14 +34,6 @@ export async function MultilingualPage() {
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";
   const path = "/features/multilingual-website-builder";
-
-  const orgSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "SoSS Engine",
-    url: baseUrl,
-    description: "Multilingual, multi-site website builder for professionals and agencies.",
-  };
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -111,7 +104,7 @@ export async function MultilingualPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
+      <MarketingJsonLd locale={locale} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <MarketingHeader translations={translations["marketing.header"]} />

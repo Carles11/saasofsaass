@@ -3,7 +3,6 @@ import { tenantEntities, tenantTranslations } from '@/5-shared/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { SupportedLocaleType } from '@/5-shared/types'
 import type {
-  EntityKind,
   EntityWithTranslation,
   BlogPostEntity,
   BlogPostPayload,
@@ -28,7 +27,7 @@ export interface GetPublishedEntitiesOptions {
   limit?: number
 }
 
-export async function getPublishedEntities<K extends EntityKind>(
+export async function getPublishedEntities<K extends keyof PublishedEntityRowByKind>(
   kind: K,
   tenantId: string,
   locale: SupportedLocaleType,

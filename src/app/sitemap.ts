@@ -54,7 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .innerJoin(tenants, eq(tenantEntities.tenantId, tenants.id))
     .where(
       and(
-        inArray(tenantEntities.kind, ["blog_post", "podcast_episode"]),
+        inArray(tenantEntities.kind, ["blog_post", "podcast_episode", "award_item"]),
         eq(tenantEntities.status, "published"),
         eq(tenants.status, "published"),
       ),
@@ -62,14 +62,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const entries: MetadataRoute.Sitemap = [];
 
-  // Marketing pages — one entry per locale
+  // Marketing pages — every public route, one entry per locale. Homepage first
+  // (priority 1), then pricing + feature pages, then legal.
+  const marketingPaths: { path: string; priority: number }[] = [
+    { path: "", priority: 1 },
+    { path: "/pricing", priority: 0.9 },
+    { path: "/features/free-website-builder", priority: 0.9 },
+    { path: "/features/multilingual-website-builder", priority: 0.8 },
+    { path: "/features/earn-by-reselling-websites", priority: 0.8 },
+    { path: "/features/seo-geo-for-tenants", priority: 0.8 },
+    { path: "/features/structured-websites-vs-ai-generated-websites", priority: 0.8 },
+    { path: "/terms-of-service", priority: 0.3 },
+    { path: "/privacy-policy", priority: 0.3 },
+    { path: "/cookie-policy", priority: 0.3 },
+  ];
   for (const locale of SUPPORTED_LOCALES) {
-    entries.push({
-      url: `${rootUrl}/${locale}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    });
+    for (const { path, priority } of marketingPaths) {
+      entries.push({
+        url: `${rootUrl}/${locale}${path}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority,
+      });
+    }
   }
 
   // Tenant sites — each locale on its own subdomain
@@ -101,6 +116,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "weekly",
         priority: 0.7,
       });
+
+      // Awards list
+      entries.push({
+        url: `${tenantUrl}/${locale}/awards`,
+        lastModified: tenant.updatedAt ?? new Date(),
+        changeFrequency: "weekly",
+        priority: 0.7,
+      });
     }
   }
 
@@ -111,7 +134,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const locales = (tenant.locales ?? [tenant.defaultLocale]) as string[];
     const tenantUrl = `https://${hostForSlug.get(entity.tenantSlug)}`;
-    const path = entity.kind === "blog_post" ? "blog" : "podcast";
+    const path =
+      entity.kind === "blog_post"
+        ? "blog"
+        : entity.kind === "award_item"
+          ? "awards"
+          : "podcast";
 
     for (const locale of locales) {
       entries.push({

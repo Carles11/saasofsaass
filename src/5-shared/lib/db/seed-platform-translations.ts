@@ -279,7 +279,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "title.line1",
     translations: t({
-      en: "Add websites to your",
+      en: "The truly free,",
       es: "Crea sitios web",
       ca: "Crea llocs web",
       fr: "Créez des sites web",
@@ -293,7 +293,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "title.line2",
     translations: t({
-      en: "professional services.",
+      en: "multilingual website builder.",
       es: "profesionales",
       ca: "professionals",
       fr: "professionnels",
@@ -307,7 +307,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "title.accent",
     translations: t({
-      en: "Your clients will love it.",
+      en: "Build once. Resell forever.",
       es: "Para Cualquiera.",
       ca: "Per a Qualsevol.",
       fr: "Pour Tous.",
@@ -321,7 +321,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.hero",
     key: "subtitle",
     translations: t({
-      en: "Offer branded, multilingual websites to every client you work with — without hiring a developer or learning to code. You set it up once. They update it forever.",
+      en: "SoSS is the truly free website builder: build unlimited professional, multilingual websites for your clients — each with its own custom domain on every plan, including Free. No code. Set up the structure once, let clients edit the content forever, or resell sites as a managed service.",
       es: "Tú gestionas la estructura, tus clientes editan el contenido. Lanza sitios multi-inquilino ilimitados — sin necesidad de programar.",
       ca: "Tu gestiones l'estructura, els teus clients editen el contingut. Llança llocs multi-inquilí il·limitats — sense necessitat de programar.",
       fr: "Vous gérez la structure, vos clients modifient le contenu. Lancez des sites multi-locataires illimités — sans codage.",
@@ -1139,7 +1139,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.pricing",
     key: "meta.title",
     translations: t({
-      en: "Pricing — SoSS Engine | Plans for professionals & agencies",
+      en: "SoSS Pricing — Free Website Builder & Reseller Plans",
       es: "Precios — SoSS Engine | Planes para profesionales y agencias",
       ca: "Preus — SoSS Engine | Plans per a professionals i agències",
       fr: "Tarifs — SoSS Engine | Forfaits pour professionnels et agences",
@@ -1153,7 +1153,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.pricing",
     key: "meta.description",
     translations: t({
-      en: "Transparent pricing for the SoSS website factory. Start free with unlimited drafts; upgrade to publish more sites, get found on Google, and manage clients at scale. Custom domains included on all plans.",
+      en: "Compare SoSS plans. Start free with a custom domain and unlimited drafts; upgrade to publish more sites, rank on Google, and manage clients at scale.",
       es: "Precios transparentes para la fábrica de webs SoSS. Empieza gratis con borradores ilimitados; mejora tu plan para publicar más sitios, aparecer en Google y gestionar clientes a escala. Dominios personalizados incluidos en todos los planes.",
       ca: "Preus transparents per a la fàbrica de webs SoSS. Comença gratis amb esborranys il·limitats; millora el pla per publicar més llocs, aparèixer a Google i gestionar clients a escala. Dominis personalitzats inclosos en tots els plans.",
       fr: "Tarifs transparents pour l'usine à sites SoSS. Commencez gratuitement avec des brouillons illimités ; passez à un forfait supérieur pour publier plus de sites, être trouvé sur Google et gérer vos clients à grande échelle. Domaines personnalisés inclus dans tous les forfaits.",
@@ -1994,7 +1994,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.meta",
     key: "title",
     translations: t({
-      en: "SoSS Engine — Website Factory for Professionals",
+      en: "Free Multilingual Website Builder & Reseller Platform",
       es: "SoSS Engine — Fábrica de Sitios Web Multi-Inquilino",
       ca: "SoSS Engine — Fàbrica de Llocs Web Multi-Inquilí",
       fr: "SoSS Engine — Usine de Sites Web Multi-Locataire",
@@ -2008,7 +2008,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.meta",
     key: "description",
     translations: t({
-      en: "Create unlimited professional websites for your clients. Custom domains on all plans, 2 languages included on free, AI translation, one dashboard. No coding needed.",
+      en: "Build unlimited multilingual websites for your clients — free, with a custom domain on every plan. No code. Use them yourself or resell them as a service.",
       es: "Crea sitios web profesionales ilimitados para tus clientes. Dominios personalizados en todos los planes, 2 idiomas incluidos en el plan gratis, traducción con IA, un solo panel. Sin necesidad de programar.",
       ca: "Crea llocs web professionals il·limitats per als teus clients. Dominis personalitzats en tots els plans, 2 idiomes inclosos al pla gratuït, traducció amb IA, un sol tauler. Sense necessitat de programar.",
       fr: "Créez des sites web professionnels illimités pour vos clients. Domaines personnalisés sur tous les forfaits, 2 langues incluses dans le forfait gratuit, traduction IA, un seul tableau de bord. Sans codage.",
@@ -5998,7 +5998,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.structured-vs-ai",
     key: "meta.title",
     translations: t({
-          en: "Stop Prompting. Start Publishing. — Structured Website Builder vs AI",
+          en: "Structured Website Builder vs AI Site Generators",
           es: "Deja de pedir prompts. Empieza a publicar. — Constructor de sitios web estructurados vs IA",
           ca: "Deixa de fer prompts. Comença a publicar. — Creador de llocs web estructurats vs IA",
           fr: "Arrêtez de Prompter. Commencez à Publier. — Créateur de site web structuré vs IA",
@@ -6012,7 +6012,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.structured-vs-ai",
     key: "meta.description",
     translations: t({
-          en: "Most AI website builders generate pages. You still need to figure out what those pages should be. SaaS of SaaS starts with proven structures and uses AI for content, translation, and localization.",
+          en: "AI builders generate pages — you still decide what they should be. SoSS starts from proven website structures, then uses AI for content and translation.",
           es: "La mayoría de los constructores de sitios web con IA generan páginas. Todavía tienes que averiguar cuáles deberían ser esas páginas. SaaS of SaaS comienza con estructuras probadas y utiliza IA para el contenido, la traducción y la localización.",
           ca: "La majoria de creadors de llocs web amb IA generen pàgines. Encara has d'esbrinar quines haurien de ser aquestes pàgines. SaaS of SaaS comença amb estructures provades i utilitza la IA per al contingut, la traducció i la localització.",
           fr: "La plupart des créateurs de sites web basés sur l'IA génèrent des pages. Il vous reste à déterminer ce que ces pages devraient être. SaaS of SaaS commence par des structures éprouvées et utilise l'IA pour le contenu, la traduction et la localisation.",
@@ -10825,7 +10825,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.seo-geo",
     key: "meta.title",
     translations: t({
-      en: "SEO & GEO for Tenant Sites — SoSS Engine",
+      en: "SEO & GEO Website Builder — Rank on Google & AI Search",
       es: "SEO y GEO para sitios de inquilinos — SoSS Engine",
       ca: "SEO i GEO per a llocs d'inquilins — SoSS Engine",
       fr: "SEO et GEO pour les sites locataires — SoSS Engine",
@@ -10839,7 +10839,7 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
     namespace: "marketing.seo-geo",
     key: "meta.description",
     translations: t({
-      en: "Every tenant site ships with per-locale metadata, hreflang, canonical URLs, auto sitemap, and JSON-LD structured data. Custom domains on all plans. Free = noindex, Pro/Enterprise = indexed + cited by Google and AI answer engines.",
+      en: "Every site ships with per-locale metadata, hreflang, canonical URLs, sitemaps, and JSON-LD — built to rank on Google and get cited by AI answer engines.",
       es: "Cada sitio de inquilino incluye metadatos por idioma, hreflang, URL canónicas, mapa del sitio automático y datos estructurados JSON-LD. Dominios personalizados en todos los planes. Gratis = noindex, Pro/Enterprise = indexado + citado por Google y motores de respuesta IA.",
       ca: "Cada lloc d'inquilí inclou metadades per idioma, hreflang, URL canòniques, mapa del lloc automàtic i dades estructurades JSON-LD. Dominis personalitzats en tots els plans. Gratis = noindex, Pro/Enterprise = indexat + citat per Google i motors de resposta IA.",
       fr: "Chaque site locataire inclut des métadonnées par langue, hreflang, des URL canoniques, un plan de site automatique et des données structurées JSON-LD. Domaines personnalisés sur tous les forfaits. Gratuit = noindex, Pro/Enterprise = indexé + cité par Google et les moteurs de réponse IA.",
@@ -12566,6 +12566,338 @@ const SEEDS: { namespace: string; key: string; translations: TranslationMap }[] 
       it: "La maggior parte dei rivenditori inizia con Pro, che include tre siti pubblicati e consente di aggiungerne altri con un piccolo costo per sito. Ma anche il piano Gratuito include un dominio personalizzato e 2 lingue per sito, così puoi iniziare a guadagnare senza costi iniziali. Una volta che gestisci circa dieci o più siti clienti, Enterprise — con siti illimitati — diventa l'opzione più economica.",
       eu: "Berresle gehienak Pro-rekin hasten dira, hiru gune argitaratu barne hartzen dituena eta gune bakoitzeko kuota txiki baten truke gehiago gehitzeko aukera ematen duena. Baina Doako planak ere domeinu pertsonalizatua eta 2 hizkuntza ditu gune bakoitzeko, beraz, dirua irabazten has zaitezke hasierako kosturik gabe. Hamar bezero-gune edo gehiago kudeatzen ari zarenean, Enterprise — gune mugagabeekin — aukera merkeagoa bihurtzen da.",
       ga: "A maioría dos revendedores comezan con Pro, que inclúe tres sitios publicados e permíteche engadir máis por unha pequena taxa por sitio. Pero incluso o plan De balde inclúe un dominio personalizado e 2 idiomas por sitio, así que podes comezar a gañar sen custo inicial. Unha vez que xestiones uns dez ou máis sitios de clientes, Enterprise —con sitios ilimitados— convértese na opción máis económica.",
+    }),
+  },
+
+  // ── Footer: Feature links ─────────────────────────────────────────────────
+  {
+    namespace: "marketing.footer",
+    key: "feature-free-builder",
+    translations: t({
+      en: "Free Website Builder",
+      es: "Creador de sitios web gratuito",
+      ca: "Creador de llocs web gratuït",
+      fr: "Créateur de site web gratuit",
+      de: "Kostenloser Website-Baukasten",
+      it: "Creatore di siti web gratuito",
+      eu: "Webgune-sortzaile doakoa",
+      ga: "Creador de sitios web gratuíto",
+    }),
+  },
+  {
+    namespace: "marketing.footer",
+    key: "feature-multilingual",
+    translations: t({
+      en: "Multilingual Website Builder",
+      es: "Creador de sitios web multilingüe",
+      ca: "Creador de llocs web multilingüe",
+      fr: "Créateur de site web multilingue",
+      de: "Mehrsprachiger Website-Baukasten",
+      it: "Creatore di siti web multilingue",
+      eu: "Webgune-sortzaile eleaniztuna",
+      ga: "Creador de sitios web multilingüe",
+    }),
+  },
+  {
+    namespace: "marketing.footer",
+    key: "feature-reseller",
+    translations: t({
+      en: "Resell Websites",
+      es: "Revender sitios web",
+      ca: "Revendre llocs web",
+      fr: "Revendre des sites web",
+      de: "Websites weiterverkaufen",
+      it: "Rivendere siti web",
+      eu: "Webguneak birsaltzea",
+      ga: "Revender sitios web",
+    }),
+  },
+  // ── Marketing: Free Website Builder ────────────────────────────────────────
+  {
+    namespace: "marketing.free-builder",
+    key: "meta.title",
+    translations: t({
+      en: "Truly Free Website Builder — Custom Domain Included",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "meta.description",
+    translations: t({
+      en: "Build a full website free — your own custom domain and multiple languages included, no credit card, no ads. The domain other builders charge for is free here.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "hero.badge",
+    translations: t({
+      en: "Truly free — custom domain included",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "hero.title.line1",
+    translations: t({
+      en: "The only truly free",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "hero.title.line2",
+    translations: t({
+      en: "website builder.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "hero.subtitle",
+    translations: t({
+      en: "Build a complete, professional website — with your own custom domain and multiple languages — for free. No credit card, no time limit, no forced ads. The custom domain that other builders charge for is included on our free plan.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "hero.cta.primary",
+    translations: t({
+      en: "Start Building Free",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "hero.cta.secondary",
+    translations: t({
+      en: "Compare Plans",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "why.badge",
+    translations: t({
+      en: "What free really means",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "why.title",
+    translations: t({
+      en: "A full website, not a teaser",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "pillar.domain.title",
+    translations: t({
+      en: "Your own custom domain, free",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "pillar.domain.body",
+    translations: t({
+      en: "Connect a domain you own to a free site — no upgrade required. Most website builders lock custom domains behind a paid plan; SoSS does not. Your free site lives at your brand, not a builder's subdomain.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "pillar.nocard.title",
+    translations: t({
+      en: "No credit card, no time limit",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "pillar.nocard.body",
+    translations: t({
+      en: "Free means free — not a trial. Build and publish a complete, professional website without entering a card. Stay on the free plan for as long as you like; upgrade only when you want search indexing or more published sites.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "pillar.fair.title",
+    translations: t({
+      en: "The only honest limit: search indexing",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "pillar.fair.body",
+    translations: t({
+      en: "Free sites get the full builder, custom domain and multilingual content — the one thing reserved for paid plans is being indexed by search engines, which protects platform domain reputation. Everything a single-site owner needs is genuinely free.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.badge",
+    translations: t({
+      en: "Free plan vs typical free tiers",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.title",
+    translations: t({
+      en: "What you usually have to pay for",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.header.capability",
+    translations: t({
+      en: "Capability",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.header.soss",
+    translations: t({
+      en: "SoSS Free",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.header.others",
+    translations: t({
+      en: "Typical free tier",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.custom-domain",
+    translations: t({
+      en: "Custom domain on the free plan",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.multilingual",
+    translations: t({
+      en: "Multiple languages included free",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.no-ads",
+    translations: t({
+      en: "No forced platform ads on your site",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.unlimited",
+    translations: t({
+      en: "Unlimited draft sites to build",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "compare.full-features",
+    translations: t({
+      en: "Full block library, no feature lock",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.badge",
+    translations: t({
+      en: "FAQ",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.title",
+    translations: t({
+      en: "Questions about the free website builder",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q1.q",
+    translations: t({
+      en: "Is SoSS really free, or is it a trial?",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q1.a",
+    translations: t({
+      en: "It is genuinely free, with no time limit and no credit card required. You can build a complete, professional website — connect your own custom domain, add multiple languages, and use the full block library — without ever paying. Paid plans add search-engine indexing and more published sites, but the free plan is a real product, not a countdown to a paywall.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q2.q",
+    translations: t({
+      en: "Can I use my own domain on the free plan?",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q2.a",
+    translations: t({
+      en: "Yes. Custom domains are included on every plan, including Free — connect a domain you already own from your dashboard. This is unusual: most website builders (Wix, Squarespace, Carrd) require a paid plan to remove their subdomain and use your own domain.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q3.q",
+    translations: t({
+      en: "What's the catch with the free plan?",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q3.a",
+    translations: t({
+      en: "There is one real limitation: free sites are not indexed by search engines (they carry a noindex tag). This protects the reputation of the platform's shared infrastructure. Everything else — custom domain, multilingual content, the full block library, unlimited drafts — is included. Upgrade to a paid plan when you want Google and AI search engines to find your site.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q4.q",
+    translations: t({
+      en: "Who is the free website builder best for?",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q4.a",
+    translations: t({
+      en: "Anyone who needs one polished website at their own domain — freelancers, small businesses, portfolios, local services and side projects. Website resellers also use the free plan to set up client sites at no cost, then upgrade only the sites that need to be found in search.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q5.q",
+    translations: t({
+      en: "Can I upgrade later without rebuilding?",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "faq.q5.a",
+    translations: t({
+      en: "Yes. Upgrading is instant and keeps everything you built. The moment you upgrade, the site becomes indexable, joins the sitemap, and starts emitting structured data — no content needs to be recreated. Downgrading simply marks the site noindex again.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "cta.title",
+    translations: t({
+      en: "Build your free website today.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "cta.subtitle",
+    translations: t({
+      en: "Your own domain, multiple languages, the full builder — at no cost. Upgrade only when you want to be found on Google and AI search engines.",
+    }),
+  },
+  {
+    namespace: "marketing.free-builder",
+    key: "cta.primary",
+    translations: t({
+      en: "Start Building Free",
     }),
   },
 ];

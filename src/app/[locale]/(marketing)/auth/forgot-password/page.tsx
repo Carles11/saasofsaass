@@ -5,6 +5,11 @@ import { appAuthUrl } from "@/5-shared/lib/auth/auth-urls";
 import { redirectIfAuthenticated } from "@/5-shared/lib/auth/auth-guards";
 import { AuthViewClient } from "../_components/AuthViewClient";
 
+// Auth pages should never appear in search results.
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function ForgotPasswordPage() {
   const locale = await getLocale();
   const host = (await headers()).get("host") ?? "";

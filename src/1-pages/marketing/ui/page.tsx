@@ -8,6 +8,7 @@ import { TestimonialsSection } from "./sections/TestimonialsSection";
 import { FaqSection } from "./sections/FaqSection";
 import { CtaSection } from "./sections/CtaSection";
 import { FooterSection } from "./sections/FooterSection";
+import { MarketingJsonLd } from "./sections/MarketingJsonLd";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
 import { getLocale } from "next-intl/server";
 import { detectCountry } from "@/5-shared/lib/geo/detect";
@@ -35,6 +36,7 @@ export async function MarketingPage({ ccOverride }: { ccOverride?: string }) {
 
   return (
     <div className="min-h-screen bg-background">
+      <MarketingJsonLd locale={locale} />
       <MarketingHeader translations={translations["marketing.header"]} />
       <main>
         <HeroSection translations={translations["marketing.hero"]} locale={locale} />

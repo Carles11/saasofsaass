@@ -8,10 +8,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const t = await getPlatformTranslations("marketing.pricing", locale);
   const title =
-    t["meta.title"] ?? "Pricing — SoSS Engine | Plans for professionals & agencies";
+    t["meta.title"] ?? "SoSS Pricing — Free Website Builder & Reseller Plans";
   const description =
     t["meta.description"] ??
-    "Transparent pricing for the SoSS website factory. Start free with unlimited drafts; upgrade to publish more sites, get found on Google, and manage clients at scale. Custom domains included on all plans.";
+    "Compare SoSS plans. Start free with a custom domain and unlimited drafts; upgrade to publish more sites, rank on Google, and manage clients at scale.";
   const baseUrl = process.env.NEXT_PUBLIC_ROOT_DOMAIN
     ? `https://${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
     : "http://localhost:3000";

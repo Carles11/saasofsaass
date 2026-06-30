@@ -2,10 +2,9 @@ import { db } from '@/5-shared/lib/db'
 import { tenantEntities, tenantTranslations } from '@/5-shared/lib/db/schema'
 import { eq, and } from 'drizzle-orm'
 import { SupportedLocaleType } from '@/5-shared/types'
-import type { EntityKind } from '@/5-shared/types/tenants/entities'
 import type { PublishedEntityRowByKind } from './getPublishedEntities'
 
-export async function getEntityBySlug<K extends EntityKind>(
+export async function getEntityBySlug<K extends keyof PublishedEntityRowByKind>(
   kind: K,
   tenantId: string,
   slug: string,

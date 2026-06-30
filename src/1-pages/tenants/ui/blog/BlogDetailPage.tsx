@@ -1,4 +1,4 @@
-import { getTenantByDomain } from '@/4-entities/tenant'
+import { getTenantByDomain, getTenantSeoBase } from '@/4-entities/tenant'
 import { getEntityBySlug } from '@/4-entities/entity'
 import { BlogDetail } from '@/2-widgets/tenant/BlogList'
 import type { PageContextTypes, SupportedLocaleType } from '@/5-shared/types'
@@ -32,7 +32,7 @@ export async function generateBlogDetailMetadata({
   const meta = entity.metadata as BlogPostEntity['metadata'] | null
   const title = payload?.title ?? entity.slug ?? entity.id
   const description = payload?.excerpt ?? `Read ${title} on ${tenant.name}`
-  const baseUrl = `https://${domain}`
+  const { baseUrl, indexable } = await getTenantSeoBase(tenant, domain)
 
   return {
     title: `${title} | Blog | ${tenant.name}`,
@@ -61,8 +61,8 @@ export async function generateBlogDetailMetadata({
       ...(entity.coverImageUrl ? { images: [entity.coverImageUrl] } : {}),
     },
     robots: {
-      index: tenant.seoEnabled !== false,
-      follow: tenant.seoEnabled !== false,
+      index: indexable,
+      follow: indexable,
     },
     other: {
       'article:published_time': entity.publishedAt?.toISOString?.() ?? '',
@@ -85,36 +85,40 @@ export async function BlogDetailPage({ context, slug }: BlogDetailParams) {
   )
   if (!row) notFound()
 
+  const { baseUrl, indexable } = await getTenantSeoBase(tenant, domain)
+
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'Article',
-            headline: (row.translation?.payload as BlogPostPayload | null)?.title ?? row.entity.slug,
-            description: (row.translation?.payload as BlogPostPayload | null)?.excerpt ?? '',
-            image: row.entity.coverImageUrl,
-            author: {
-              '@type': 'Person',
-              name: (row.entity.metadata as BlogPostEntity['metadata'] | null)?.author ?? tenant.name,
-            },
-            datePublished: row.entity.publishedAt?.toISOString?.() ?? undefined,
-            dateModified: row.entity.updatedAt?.toISOString?.() ?? undefined,
-            publisher: {
-              '@type': 'Organization',
-              name: tenant.name,
-              url: `https://${domain}`,
-            },
-            mainEntityOfPage: {
-              '@type': 'WebPage',
-              '@id': `https://${domain}/${locale}/blog/${slug}`,
-            },
-            articleBody: (row.translation?.payload as BlogPostPayload | null)?.body ?? '',
-          }),
-        }}
-      />
+      {indexable && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Article',
+              headline: (row.translation?.payload as BlogPostPayload | null)?.title ?? row.entity.slug,
+              description: (row.translation?.payload as BlogPostPayload | null)?.excerpt ?? '',
+              image: row.entity.coverImageUrl,
+              author: {
+                '@type': 'Person',
+                name: (row.entity.metadata as BlogPostEntity['metadata'] | null)?.author ?? tenant.name,
+              },
+              datePublished: row.entity.publishedAt?.toISOString?.() ?? undefined,
+              dateModified: row.entity.updatedAt?.toISOString?.() ?? undefined,
+              publisher: {
+                '@type': 'Organization',
+                name: tenant.name,
+                url: baseUrl,
+              },
+              mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': `${baseUrl}/${locale}/blog/${slug}`,
+              },
+              articleBody: (row.translation?.payload as BlogPostPayload | null)?.body ?? '',
+            }),
+          }}
+        />
+      )}
       <BlogDetail data={row} locale={locale as SupportedLocaleType} tenant={tenant} />
     </>
   )

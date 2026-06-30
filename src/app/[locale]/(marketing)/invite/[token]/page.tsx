@@ -16,6 +16,11 @@ import { RememberInvite } from "@/3-features/team-management/ui/RememberInvite";
 
 export const dynamic = "force-dynamic";
 
+// Never index invitation pages — the URL contains a private token.
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 function fill(template: string, vars: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? "");
 }

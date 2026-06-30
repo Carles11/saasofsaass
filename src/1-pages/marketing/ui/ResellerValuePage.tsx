@@ -2,6 +2,7 @@ import { MarketingHeader } from "./sections/MarketingHeader";
 import { FooterSection } from "./sections/FooterSection";
 import { ResellerFaq } from "./sections/ResellerFaq";
 import { ResellerCalculator } from "./sections/ResellerCalculator";
+import { MarketingJsonLd } from "./sections/MarketingJsonLd";
 import { resolveTranslation } from "@/5-shared/lib/translations/resolve";
 import { getPlatformTranslationsByNamespaces } from "@/5-shared/lib/db/platform-translations";
 import { getStripePrices } from "@/5-shared/lib/billing/prices";
@@ -39,13 +40,6 @@ export async function ResellerValuePage() {
     : "http://localhost:3000";
   const path = "/features/earn-by-reselling-websites";
 
-  const orgSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "SoSS Engine",
-    url: baseUrl,
-    description: "Multilingual, multi-site website builder for professionals and agencies.",
-  };
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -74,7 +68,7 @@ export async function ResellerValuePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
+      <MarketingJsonLd locale={locale} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <MarketingHeader translations={translations["marketing.header"]} />
 
@@ -88,7 +82,7 @@ export async function ResellerValuePage() {
             </div>
 
             <h1 className="text-[2.75rem] font-extrabold tracking-tight text-foreground leading-[1.1] sm:text-6xl md:text-7xl">
-              {resolveTranslation(t, "hero.title.line1", "Build once.")}
+              {resolveTranslation(t, "hero.title.line1", "Resell websites.")}
               <br />
               <span className="text-primary">{resolveTranslation(t, "hero.title.line2", "Charge every month.")}</span>
             </h1>
@@ -97,7 +91,7 @@ export async function ResellerValuePage() {
               {resolveTranslation(
                 t,
                 "hero.subtitle",
-                "Build a professional, multilingual website for a client, charge them a monthly fee to manage it, and keep the difference. One plan covers several client sites — so your margin grows with every site you add.",
+                "Build a professional, multilingual website for a client, charge them a monthly fee to manage it, and keep the difference. Start every client free — custom domain included — and upgrade only the sites that need to be found on Google. One plan covers several client sites, so your margin grows with every site you add.",
               )}
             </p>
 
