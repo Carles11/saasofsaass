@@ -18,17 +18,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/5-shared/lib/utils";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 
 interface DashboardSidebarProps {
   session: AuthSession;
   resolvedRoles: ResolvedRoles;
   planLabel?: string | null;
+  translations?: TranslationDict;
 }
 
 export const DashboardSidebar = ({
   session,
   resolvedRoles,
   planLabel,
+  translations,
 }: DashboardSidebarProps) => {
   const isOpen = useStore((state) => state.isSidebarOpen);
   const toggle = useStore((state) => state.toggleSidebar);
@@ -117,7 +120,7 @@ export const DashboardSidebar = ({
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-sm cursor-pointer">
                     <LogOut className="h-4 w-4 mr-2" />
-                    Sign out
+                    {resolveTranslation(translations, "sign-out", "Sign out")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -149,22 +152,13 @@ export const DashboardSidebar = ({
                   animate={{ opacity: 1, x: 0 }}
                   className="text-sm font-medium"
                 >
-                  {tab.label}
+                  {resolveTranslation(translations, `nav.${tab.id}`, tab.label)}
                 </motion.span>
               )}
             </Link>
           );
         })}
       </nav>
-
-      {isOpen && (
-        <div className="p-3 rounded-lg border border-border">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium mb-1">
-            Active Engine
-          </p>
-          <p className="text-xs text-muted-foreground font-mono">v16.2.0-turbo</p>
-        </div>
-      )}
     </motion.aside>
   );
 };

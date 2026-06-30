@@ -29,53 +29,70 @@ export async function TestimonialsBlock({ block, locale, blockId, t }: BlockProp
   const emptyText = t.emptyState || "No testimonials to display yet.";
 
   return (
-    <section id={blockId} className="py-16 px-6">
-      {heading && (
-        <h2 className="text-xl font-bold mb-6 text-center">{heading}</h2>
-      )}
+    <section id={blockId} className="py-20 sm:py-28 px-6 bg-secondary/30">
+      <div className="max-w-6xl mx-auto">
+        {heading && (
+          <div className="flex flex-col items-center text-center mb-12">
+            <span aria-hidden className="block h-1 w-12 rounded-full bg-primary mb-6" />
+            <h2
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              {heading}
+            </h2>
+          </div>
+        )}
 
-      {rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm text-center">{emptyText}</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {rows.map(({ entity, translation }) => {
-            const payload = translation?.payload as { title?: string; quote?: string } | null;
-            const meta = entity.metadata as { authorRole?: string; rating?: number } | null;
-            const quote = payload?.quote;
-            const author = payload?.title ?? entity.slug ?? entity.id;
-            const role = meta?.authorRole;
-            const rating = meta?.rating;
+        {rows.length === 0 ? (
+          <p className="text-muted-foreground text-sm text-center">{emptyText}</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {rows.map(({ entity, translation }) => {
+              const payload = translation?.payload as { title?: string; quote?: string } | null;
+              const meta = entity.metadata as { authorRole?: string; rating?: number } | null;
+              const quote = payload?.quote;
+              const author = payload?.title ?? entity.slug ?? entity.id;
+              const role = meta?.authorRole;
+              const rating = meta?.rating;
+              const initial = author.trim().charAt(0).toUpperCase();
 
-            return (
-              <article
-                key={entity.id}
-                className="rounded-lg border border-border overflow-hidden hover:shadow-md transition-shadow bg-card p-5 flex flex-col gap-3"
-              >
-                {rating != null && rating > 0 && (
-                  <StarRating rating={Math.min(Math.max(Math.round(rating), 0), 5)} />
-                )}
+              return (
+                <article
+                  key={entity.id}
+                  className="flex flex-col gap-5 rounded-[var(--radius)] border border-border bg-card p-7 transition-shadow hover:shadow-md"
+                >
+                  {rating != null && rating > 0 && (
+                    <StarRating rating={Math.min(Math.max(Math.round(rating), 0), 5)} />
+                  )}
 
-                {quote && (
-                  <blockquote className="text-sm text-card-foreground leading-relaxed italic line-clamp-4">
-                    &ldquo;{quote}&rdquo;
-                  </blockquote>
-                )}
+                  {quote && (
+                    <blockquote
+                      className="text-lg leading-relaxed text-card-foreground"
+                      style={{ fontFamily: "var(--font-body)" }}
+                    >
+                      &ldquo;{quote}&rdquo;
+                    </blockquote>
+                  )}
 
-                <footer className="mt-auto pt-2 border-t border-border/50">
-                  <div className="flex flex-col">
-                    <cite className="not-italic font-semibold text-sm text-card-foreground">
-                      {author}
-                    </cite>
-                    {role && (
-                      <span className="text-xs text-muted-foreground">{role}</span>
-                    )}
-                  </div>
-                </footer>
-              </article>
-            );
-          })}
-        </div>
-      )}
+                  <footer className="mt-auto flex items-center gap-3 pt-2">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                      {initial}
+                    </span>
+                    <div className="flex flex-col">
+                      <cite className="not-italic font-semibold text-sm text-card-foreground">
+                        {author}
+                      </cite>
+                      {role && (
+                        <span className="text-xs text-muted-foreground">{role}</span>
+                      )}
+                    </div>
+                  </footer>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </section>
   );
 }

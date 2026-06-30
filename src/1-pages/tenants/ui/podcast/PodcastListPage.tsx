@@ -1,6 +1,7 @@
 import { getTenantByDomain } from '@/4-entities/tenant'
 import { getPublishedEntities } from '@/4-entities/entity'
 import { PodcastList } from '@/2-widgets/tenant/PodcastList'
+import { getPlatformTranslations, resolveTranslation } from '@/5-shared/lib/db/platform-translations'
 import type { PageContextTypes, SupportedLocaleType } from '@/5-shared/types'
 import type { PodcastEpisodePayload } from '@/5-shared/types/tenants/entities'
 import type { Metadata } from 'next'
@@ -50,12 +51,10 @@ export async function PodcastListPage({ context }: { context: PageContextTypes }
   const tenant = await getTenantByDomain({ tenant: tenantKey, domain, isSubdomain })
   if (!tenant) notFound()
 
-  const items = await getPublishedEntities(
-    'podcast_episode',
-    tenant.id,
-    locale as SupportedLocaleType,
-    { limit: 50 },
-  )
+  const [items, navT] = await Promise.all([
+    getPublishedEntities('podcast_episode', tenant.id, locale as SupportedLocaleType, { limit: 50 }),
+    getPlatformTranslations('tenant.nav', locale),
+  ])
 
   return (
     <>
@@ -84,7 +83,15 @@ export async function PodcastListPage({ context }: { context: PageContextTypes }
           }),
         }}
       />
-      <PodcastList items={items} locale={locale as SupportedLocaleType} tenant={tenant} />
+      <PodcastList
+        items={items}
+        locale={locale as SupportedLocaleType}
+        tenant={tenant}
+        heading={resolveTranslation(navT, 'podcast', 'Podcast')}
+        backLabel={resolveTranslation(navT, 'back', 'Back')}
+        emptyLabel={resolveTranslation(navT, 'empty', 'Nothing here yet.')}
+        listenLabel={resolveTranslation(navT, 'listen', 'Listen')}
+      />
     </>
   )
 }

@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# template thumbnail capture scratch output
+/.scratch-shots
+
 # next.js
 /.next/
 /out/

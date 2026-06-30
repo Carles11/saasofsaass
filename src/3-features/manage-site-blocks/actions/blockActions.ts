@@ -194,6 +194,28 @@ export async function deleteBlock(blockId: string, tenantId: string) {
 
 // ── Tenant language management ───────────────────────────────────────────────
 
+/** Set the tenant's default language. Must be one of the enabled locales. */
+export async function updateTenantDefaultLocale(tenantId: string, locale: string) {
+  await assertCanManageStructure(tenantId)
+
+  const [tenant] = await db
+    .select({ locales: tenants.locales })
+    .from(tenants)
+    .where(eq(tenants.id, tenantId))
+    .limit(1)
+  if (!tenant) throw new Error("Tenant not found")
+  if (!tenant.locales.includes(locale)) {
+    throw new Error("The default language must be one of the enabled languages.")
+  }
+
+  await db
+    .update(tenants)
+    .set({ defaultLocale: locale, updatedAt: new Date() })
+    .where(eq(tenants.id, tenantId))
+
+  revalidateSiteBuilder(tenantId)
+}
+
 export async function updateTenantLocales(
   tenantId: string,
   locales: string[],

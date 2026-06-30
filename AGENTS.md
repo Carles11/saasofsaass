@@ -18,7 +18,7 @@ This file defines the strict coding standards, architectural rules, and current 
 - **Theme:** Platform-wide dark/light via `ThemeProvider` (`next-themes`), semantic shadcn CSS vars
 - **Tenant Palettes:** Per-tenant site palette (`ocean` | `sunset` | `forest`), stored in `tenants.branding.palette`, applied as a CSS class on the tenant layout wrapper — independent from the platform-wide dark/light toggle
 - **Custom Domains:** Tenants can attach an external domain via the Vercel Domains API; tracked in `tenant_domains` (status: pending/pending_certificate/verified/error) with an audit trail in `tenant_domain_logs`. Routing resolves `TENANT_CUSTOM` hostnames through `tenant_domains` (status = verified), not through the unused `tenants.domain` column.
-- **Blocks (current):** `navbar`, `hero`, `blog-feed`, `podcast-feed`, `awards`, `contact`, `image-gallery` — see `src/5-shared/types/tenants/blocks.ts` for the live `BlockKind` union
+- **Blocks (current):** `hero`, `blog-feed`, `podcast-feed`, `awards`, `contact`, `cta-banner`, `cta-banner-image`, `text-content`, `rich-content`, `image-gallery`, `map`, `footer`, `testimonials` — see `src/5-shared/types/tenants/blocks.ts` for the live `BlockKind` union. Collection blocks (blog/podcast/awards/testimonials) edit items via the fullscreen `CollectionItemEditor`; awards/blog/podcast have `/{locale}/{kind}` archive + `/{slug}` detail routes. Rich text (Tiptap) via `RichTextEditor`/`RichTextRenderer`.
 
 ---
 

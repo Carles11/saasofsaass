@@ -41,3 +41,31 @@ export async function getEntityTranslations(
     locale: r.locale,
   }));
 }
+
+/** All locale rows for a single entity (used by the per-item editor's tabs). */
+export async function getEntityAllTranslations(
+  tenantId: string,
+  entityId: string,
+): Promise<EntityTranslationRow[]> {
+  const rows = await db
+    .select({
+      entityId: tenantTranslations.entityId,
+      payload: tenantTranslations.payload,
+      translationStatus: tenantTranslations.translationStatus,
+      locale: tenantTranslations.locale,
+    })
+    .from(tenantTranslations)
+    .where(
+      and(
+        eq(tenantTranslations.tenantId, tenantId),
+        eq(tenantTranslations.entityId, entityId),
+      ),
+    );
+
+  return rows.map((r) => ({
+    entityId: r.entityId,
+    payload: r.payload as Record<string, string>,
+    translationStatus: r.translationStatus,
+    locale: r.locale,
+  }));
+}

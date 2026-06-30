@@ -119,7 +119,7 @@
 
 /* ── Palette: Ocean ── */
 .theme-ocean {
-  --background: oklch(0.97 0.012 230);
+  --background: oklch(0.975 0.028 235);
   --foreground: oklch(0.18 0.025 250);
   --card: oklch(0.99 0.006 230);
   --card-foreground: oklch(0.18 0.025 250);
@@ -176,7 +176,7 @@
 
 /* ── Palette: Sunset ── */
 .theme-sunset {
-  --background: oklch(0.975 0.015 80);
+  --background: oklch(0.98 0.038 72);
   --foreground: oklch(0.18 0.025 30);
   --card: oklch(0.99 0.008 80);
   --card-foreground: oklch(0.18 0.025 30);
@@ -233,7 +233,7 @@
 
 /* ── Palette: Forest ── */
 .theme-forest {
-  --background: oklch(0.97 0.012 145);
+  --background: oklch(0.975 0.028 150);
   --foreground: oklch(0.15 0.025 145);
   --card: oklch(0.985 0.006 145);
   --card-foreground: oklch(0.15 0.025 145);

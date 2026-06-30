@@ -13,13 +13,18 @@ if (!API_KEY) throw new Error("GEMINI_API_KEY not set");
 const TARGET_LOCALES = ["es", "ca", "fr", "de", "it", "eu", "ga"];
 const ALL_LOCALES = ["en", ...TARGET_LOCALES];
 
-// Target namespaces and keys — Users & Teams feature (run after adding the
-// English-only keys to seed-platform-translations.ts).
 const TARGET_NAMESPACES = [
-  "invite",
-  "dashboard.team",
-  "dashboard.collaborators",
-  "dashboard.account",
+  "dashboard.site-builder",
+  "dashboard.billing",
+  "dashboard.blocks",
+  "dashboard.collection",
+  "dashboard.settings",
+  "dashboard.team-manager",
+  "dashboard.create-tenant",
+  "dashboard.block-edit",
+  "dashboard.page",
+  "marketing.testimonials",
+  "marketing.meta",
 ];
 const TARGET_FOOTER_KEYS = [];
 
@@ -142,7 +147,7 @@ function buildPrompt(locale, texts, namespace) {
   }[locale];
 
   const numbered = texts.map((t, i) => `${i + 1}. "${t}"`).join("\n");
-  return `Translate these ${texts.length} English strings to ${localeName} (${locale}). These are UI strings for a SaaS platform's "${namespace}" section (legal/cookie/privacy/structured-vs-AI website content). Keep any template variables like {count}, {list}, {year}, {name}, {used}, {limit}, {plan} unchanged. Keep HTML tags and special characters like \\u2019 unchanged. Return ONLY a valid JSON array of strings in the exact same order. No explanation, no markdown, no numbering.
+  return `Translate these ${texts.length} English strings to ${localeName} (${locale}). These are UI strings for a SaaS platform's "${namespace}" section (legal/cookie/privacy/structured-vs-AI website content). Keep any template variables like {count}, {list}, {year}, {name}, {used}, {limit}, {plan}, {kind}, {seconds}, {namespace}, {key} unchanged. Keep HTML tags and special characters like \\u2019 unchanged. Return ONLY a valid JSON array of strings in the exact same order. No explanation, no markdown, no numbering.
 
 ${numbered}`;
 }
@@ -195,7 +200,7 @@ function buildReplacementText(enText, translations) {
     const locale = TARGET_LOCALES[i];
     const translated = translations[i];
     // Escape backslashes and double quotes for JS string
-    const escaped = translated.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    const escaped = translated.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "");
     parts.push(`${locale}: "${escaped}"`);
   }
   return parts.join(",\n      ");
@@ -266,7 +271,7 @@ async function main() {
     translationLines.push(`      en: "${item.enText}",`);
     for (const locale of TARGET_LOCALES) {
       const translated = item.translations[locale];
-      const escaped = translated.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      const escaped = translated.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "");
       translationLines.push(`      ${locale}: "${escaped}",`);
     }
 

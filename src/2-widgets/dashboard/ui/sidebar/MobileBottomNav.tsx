@@ -6,12 +6,14 @@ import { SIDEBAR_TABS } from "@/5-shared/config/sidebar-tabs";
 import { can } from "@/5-shared/config/permissions";
 import type { ResolvedRoles } from "@/5-shared/config/permissions";
 import { cn } from "@/5-shared/lib/utils";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 
 interface MobileBottomNavProps {
   resolvedRoles: ResolvedRoles;
+  translations?: TranslationDict;
 }
 
-export function MobileBottomNav({ resolvedRoles }: MobileBottomNavProps) {
+export function MobileBottomNav({ resolvedRoles, translations }: MobileBottomNavProps) {
   const params = useParams();
   const pathname = usePathname();
   const locale = (params.locale as string) || "en";
@@ -39,7 +41,7 @@ export function MobileBottomNav({ resolvedRoles }: MobileBottomNavProps) {
               )}
             >
               <Icon className="h-5 w-5" />
-              <span>{tab.label}</span>
+              <span>{resolveTranslation(translations, `nav.${tab.id}`, tab.label)}</span>
             </Link>
           );
         })}

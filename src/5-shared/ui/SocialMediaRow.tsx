@@ -1,9 +1,13 @@
-function detectNetwork(url: string): "facebook" | "x" | "linkedin" | "tiktok" | "custom" {
+function detectNetwork(
+  url: string,
+): "facebook" | "x" | "linkedin" | "tiktok" | "instagram" | "youtube" | "custom" {
   const host = url.replace(/^https?:\/\//, "").replace(/^www\./, "").toLowerCase();
-  if (host.startsWith("facebook") || host.includes("facebook")) return "facebook";
+  if (host.includes("facebook") || host.startsWith("fb.")) return "facebook";
   if (host.startsWith("x.com") || host.startsWith("twitter")) return "x";
-  if (host.startsWith("linkedin") || host.includes("linkedin")) return "linkedin";
-  if (host.startsWith("tiktok") || host.includes("tiktok")) return "tiktok";
+  if (host.includes("linkedin")) return "linkedin";
+  if (host.includes("tiktok")) return "tiktok";
+  if (host.includes("instagram") || host.startsWith("instagr.am")) return "instagram";
+  if (host.includes("youtube") || host.startsWith("youtu.be")) return "youtube";
   return "custom";
 }
 
@@ -27,6 +31,19 @@ const ICONS: Record<string, React.ReactNode> = {
   tiktok: (
     <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M9 17a4 4 0 1 1 0-8v8Zm0 0V7m6 0v10a4 4 0 1 0 4-4" />
+    </svg>
+  ),
+  instagram: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  ),
+  youtube: (
+    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="2" y="5" width="20" height="14" rx="4" />
+      <path d="M10 9l5 3-5 3V9Z" fill="currentColor" stroke="none" />
     </svg>
   ),
   custom: (

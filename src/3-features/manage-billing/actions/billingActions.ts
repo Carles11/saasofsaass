@@ -5,9 +5,12 @@ import {
   requireProfile,
 } from "@/5-shared/lib/auth/authorization";
 import {
+  EXTRA_SITE,
+  getExtraSiteStripePriceId,
   getPlan,
   getSiteLimit,
   getStripePriceId,
+  isExtraSitePriceId,
   type Cadence,
 } from "@/5-shared/lib/billing/plans";
 import { getStripe } from "@/5-shared/lib/billing/stripe";
@@ -219,6 +222,145 @@ export async function createBillingPortalSession(workspaceId: string) {
   return { url: session.url };
 }
 
+// ============================================================================
+// EXTRA-SITE ADD-ON — Pro-plan workspaces can buy additional published-site
+// slots (€19/mo each, up to EXTRA_SITE.softCap). Modeled as a second line item
+// on the same subscription so cadence is inherited and Stripe handles proration.
+// Removal goes through the Billing Portal (no in-app "−" button — Stripe is
+// the source of truth for quantity and the webhook reconciles).
+// ============================================================================
+
+/** Typed error code consumers can branch on (translation-independent). */
+export type AddExtraSiteErrorCode =
+  | "NOT_PRO_PLAN"
+  | "NO_ACTIVE_SUBSCRIPTION"
+  | "SOFT_CAP_REACHED"
+  | "UNKNOWN_CADENCE";
+
+export class AddExtraSiteError extends Error {
+  constructor(
+    public code: AddExtraSiteErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = "AddExtraSiteError";
+  }
+}
+
+/**
+ * Add one published-site slot to a Pro workspace by incrementing the
+ * extra-site line item on its active Stripe subscription.
+ *
+ * - Pro only (Free upgrades to Pro first; Enterprise is already unlimited).
+ * - Cadence mirrors the base subscription item.
+ * - Soft-capped at EXTRA_SITE.softCap; beyond that we recommend Enterprise.
+ * - `addonSites` in the DB is reconciled by the webhook (`subscription.updated`),
+ *   not written here, so Stripe stays the source of truth.
+ */
+export async function addExtraSite(workspaceId: string) {
+  const profile = await requireProfile();
+
+  const [ws] = await db
+    .select()
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .limit(1);
+
+  if (!ws) throw new Error("Workspace not found");
+  if (ws.ownerProfileId !== profile.id) throw new Error("Not authorized");
+
+  if (ws.plan !== "pro") {
+    throw new AddExtraSiteError(
+      "NOT_PRO_PLAN",
+      "Extra-site add-ons are available on the Pro plan.",
+    );
+  }
+
+  if (!ws.stripeSubscriptionId || ws.subscriptionStatus !== "active") {
+    throw new AddExtraSiteError(
+      "NO_ACTIVE_SUBSCRIPTION",
+      "You need an active Pro subscription to add extra sites.",
+    );
+  }
+
+  if ((ws.addonSites ?? 0) >= EXTRA_SITE.softCap) {
+    throw new AddExtraSiteError(
+      "SOFT_CAP_REACHED",
+      `You've reached the ${EXTRA_SITE.softCap}-site add-on limit for Pro. Upgrade to Enterprise for unlimited sites.`,
+    );
+  }
+
+  const stripe = getStripe();
+  const subscription = await stripe.subscriptions.retrieve(
+    ws.stripeSubscriptionId,
+  );
+
+  // Detect cadence from the base plan item (the non-extra-site item).
+  const baseItem = subscription.items.data.find(
+    (item) => !isExtraSitePriceId(item.price.id),
+  );
+  const interval = baseItem?.price.recurring?.interval;
+  const cadence: Cadence | null =
+    interval === "month" ? "monthly" : interval === "year" ? "annual" : null;
+
+  if (!cadence) {
+    throw new AddExtraSiteError(
+      "UNKNOWN_CADENCE",
+      "Could not determine the subscription cadence.",
+    );
+  }
+
+  const extraPriceId = getExtraSiteStripePriceId(cadence);
+
+  // If an extra-site item already exists on the sub, increment its quantity.
+  // Otherwise create a new item. Either way, Stripe handles proration.
+  const existing = subscription.items.data.find(
+    (item) => item.price.id === extraPriceId,
+  );
+
+  if (existing) {
+    await stripe.subscriptionItems.update(existing.id, {
+      quantity: (existing.quantity ?? 0) + 1,
+      proration_behavior: "create_prorations",
+    });
+  } else {
+    await stripe.subscriptionItems.create({
+      subscription: subscription.id,
+      price: extraPriceId,
+      quantity: 1,
+      proration_behavior: "create_prorations",
+    });
+  }
+
+  // Webhook will reconcile `workspaces.addonSites`. Return the expected new
+  // count so the caller can give immediate feedback (the webhook may lag).
+  return {
+    ok: true as const,
+    expectedAddonSites: (ws.addonSites ?? 0) + 1,
+    cadence,
+  };
+}
+
+/**
+ * Add an extra site to the currently signed-in user's own workspace.
+ *
+ * Used by surfaces (e.g. the publish-cap dialog opened from SitesTable) that
+ * don't have a workspace id in scope. Resolves the caller's owned workspace
+ * from the session and delegates to addExtraSite.
+ */
+export async function addExtraSiteForCurrentUser() {
+  const profile = await requireProfile();
+
+  const [ws] = await db
+    .select({ id: workspaces.id })
+    .from(workspaces)
+    .where(eq(workspaces.ownerProfileId, profile.id))
+    .limit(1);
+
+  if (!ws) throw new Error("No workspace found for current user");
+  return addExtraSite(ws.id);
+}
+
 /**
  * Stripe webhook handler.
  *
@@ -286,6 +428,7 @@ export async function stripeWebhook(rawBody: string, signature: string) {
           stripeCustomerId: session.customer as string,
           plan,
           siteLimit: getSiteLimit(plan),
+          addonSites: deriveAddonSitesFromSubscription(subscription),
           subscriptionStatus: subscription.status,
         })
         .where(eq(workspaces.id, workspaceId));
@@ -324,6 +467,7 @@ export async function stripeWebhook(rawBody: string, signature: string) {
           stripeSubscriptionId: subscription.id,
           plan,
           siteLimit: getSiteLimit(plan),
+          addonSites: deriveAddonSitesFromSubscription(subscription),
           subscriptionStatus: status,
         })
         .where(eq(workspaces.id, wsByCustomer.id));
@@ -364,6 +508,7 @@ export async function stripeWebhook(rawBody: string, signature: string) {
           .set({
             plan: "free",
             siteLimit: getSiteLimit("free"),
+            addonSites: 0,
             subscriptionStatus: null,
           })
           .where(eq(workspaces.id, wsBySub.id));
@@ -379,6 +524,7 @@ export async function stripeWebhook(rawBody: string, signature: string) {
           .set({
             plan,
             siteLimit: getSiteLimit(plan),
+            addonSites: deriveAddonSitesFromSubscription(subscription),
             subscriptionStatus: status,
           })
           .where(eq(workspaces.id, wsBySub.id));
@@ -399,6 +545,7 @@ export async function stripeWebhook(rawBody: string, signature: string) {
         .set({
           plan: "free",
           siteLimit: getSiteLimit("free"),
+          addonSites: 0,
           stripeSubscriptionId: null,
           subscriptionStatus: null,
         })
@@ -416,6 +563,19 @@ export async function stripeWebhook(rawBody: string, signature: string) {
   }
 
   return { received: true };
+}
+
+/**
+ * Read the current extra-site quantity from a Stripe subscription's items.
+ * Returns 0 when no extra-site line item is present.
+ */
+function deriveAddonSitesFromSubscription(
+  subscription: Stripe.Subscription,
+): number {
+  const item = subscription.items?.data.find((i) =>
+    isExtraSitePriceId(i.price.id),
+  );
+  return item?.quantity ?? 0;
 }
 
 /**

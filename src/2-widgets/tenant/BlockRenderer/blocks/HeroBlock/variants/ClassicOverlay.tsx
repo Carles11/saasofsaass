@@ -32,15 +32,15 @@ export function ClassicOverlay(props: BlockProps) {
             />
           </>
         ) : (
-          <div className="w-full h-full bg-[url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-30 rounded-xl" />
+          <div className="w-full h-full rounded-xl bg-linear-to-br from-secondary via-muted to-primary/20" aria-hidden />
         )}
         {/* Faded overlay */}
         <div className="absolute inset-0 bg-linear-to-b from-muted/60 to-muted/80" />
       </div>
-      <div className="relative z-10 flex flex-col items-center justify-center w-full h-full">
+      <div className="relative z-10 flex flex-col items-center justify-center text-center w-full h-full gap-5">
         {t.title && (
           <h1
-            className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl text-foreground drop-shadow"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] max-w-3xl text-foreground drop-shadow"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {t.title}
@@ -48,7 +48,7 @@ export function ClassicOverlay(props: BlockProps) {
         )}
         {t.subtitle && (
           <p
-            className="text-lg text-muted-foreground max-w-2xl drop-shadow mt-2"
+            className="text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed drop-shadow"
             style={{ fontFamily: "var(--font-body)" }}
           >
             {t.subtitle}
@@ -58,7 +58,7 @@ export function ClassicOverlay(props: BlockProps) {
           <Button
             asChild
             tenantVariant="primary"
-            className={`mt-6 px-6 py-3 text-white text-base font-medium ${radiusClass} border border-border`}
+            className={`mt-2 px-7 py-3.5 text-white text-base font-medium shadow-sm hover:shadow-lg transition-shadow ${radiusClass} border border-border`}
           >
             <a href={safeCtaUrl}>{t.ctaLabel}</a>
           </Button>

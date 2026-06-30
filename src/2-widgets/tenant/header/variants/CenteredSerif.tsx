@@ -14,7 +14,7 @@ export function CenteredSerif({
 }: HeaderVariantProps) {
   return (
     <header
-      className="w-full bg-background border-b border-border py-6 px-4 flex flex-col items-center gap-4"
+      className="w-full bg-background/80 supports-backdrop-filter:bg-background/65 backdrop-blur-md border-b border-border py-6 px-4 flex flex-col items-center gap-4 sticky top-0 z-50"
       style={{ fontFamily: "var(--font-heading)" }}
     >
       <Link href={logoHref} aria-label="Home" className="no-underline">

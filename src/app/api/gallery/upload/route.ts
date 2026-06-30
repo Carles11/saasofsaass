@@ -1,21 +1,19 @@
 import { galleryImageI18n, galleryImages } from "@/4-entities/gallery/model/image";
 import { getTenantFromRequest } from "@/5-shared/api/tenant-context";
+import { assertCanEditContent } from "@/5-shared/lib/auth/authorization";
 import { uploadToS3 } from "@/5-shared/lib/aws/s3";
 
 import { generateImageDescriptionWithGemini } from "@/5-shared/lib/ai/generateImageDescriptionWithGemini";
 import { getCloudFrontUrl } from "@/5-shared/lib/aws/cloudfront";
 import { db } from "@/5-shared/lib/db";
+import { tenants } from "@/5-shared/lib/db/schema";
 import { generateSeoImageName } from "@/5-shared/lib/utils";
+import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
 // POST /api/gallery/upload
 export async function POST(req: NextRequest) {
-  // Resolve tenant from request (host header)
-  const { tenant } = await getTenantFromRequest(req);
-  if (!tenant) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const tenantId = tenant.id;
-
   const form = await req.formData();
 
   const file = form.get("file") as File;
@@ -23,10 +21,33 @@ export async function POST(req: NextRequest) {
   let alt = form.get("alt") as string | null;
   let caption = form.get("caption") as string | null;
   const blockId = form.get("blockId") as string;
+  const explicitTenantId = form.get("tenantId") as string | null;
 
   if (!file || !lang || !blockId) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
+
+  // Prefer explicit tenantId + dashboard authorization (host-based resolution is
+  // unreliable from app.localhost); fall back to host resolution otherwise.
+  let tenant: { id: string; name: string } | null = null;
+  if (explicitTenantId) {
+    try {
+      await assertCanEditContent(explicitTenantId);
+    } catch {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    const [t] = await db
+      .select({ id: tenants.id, name: tenants.name })
+      .from(tenants)
+      .where(eq(tenants.id, explicitTenantId))
+      .limit(1);
+    tenant = t ?? null;
+  } else {
+    const resolved = await getTenantFromRequest(req);
+    tenant = resolved.tenant ? { id: resolved.tenant.id, name: resolved.tenant.name } : null;
+  }
+  if (!tenant) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const tenantId = tenant.id;
 
   // Read file buffer
   const fileBuffer = Buffer.from(await file.arrayBuffer());

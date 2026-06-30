@@ -123,6 +123,43 @@ export const PLANS = {
 
 export type PlanId = keyof typeof PLANS;
 
+/**
+ * Extra-site add-on — sold to Pro workspaces that need more than 3 published
+ * sites. Modeled as a second line item on the same Stripe subscription with
+ * `quantity = addonSites`, so it inherits the base sub's cadence and proration.
+ *
+ * `softCap` is the maximum number of add-on sites we let a Pro workspace buy
+ * before recommending Enterprise. Math: Pro €79 + n × €19 stays cheaper than
+ * Enterprise €199 only while n ≤ 6 (same break-even on annual). At 6 add-ons a
+ * Pro workspace gets 9 sites for €193/mo; at 7 it would be €212/mo > €199.
+ */
+export const EXTRA_SITE = {
+  stripePriceIds: {
+    monthly: process.env.STRIPE_PRICE_ID_EXTRA_SITE_MONTHLY ?? null,
+    annual: process.env.STRIPE_PRICE_ID_EXTRA_SITE_ANNUAL ?? null,
+  },
+  fallbackPrice: { monthly: 19, annual: 190 },
+  softCap: 6,
+} as const;
+
+export function getExtraSiteStripePriceId(cadence: Cadence): string {
+  const id = EXTRA_SITE.stripePriceIds[cadence];
+  if (!id)
+    throw new Error(
+      `Missing Stripe price ID for extra-site add-on (${cadence})`,
+    );
+  return id;
+}
+
+/** True when a Stripe price ID matches either extra-site SKU. */
+export function isExtraSitePriceId(priceId: string | null | undefined): boolean {
+  if (!priceId) return false;
+  return (
+    priceId === EXTRA_SITE.stripePriceIds.monthly ||
+    priceId === EXTRA_SITE.stripePriceIds.annual
+  );
+}
+
 export const PLAN_ORDER: PlanId[] = ["free", "pro", "enterprise"];
 
 export const PLAN_LABELS: Record<PlanId, string> = {

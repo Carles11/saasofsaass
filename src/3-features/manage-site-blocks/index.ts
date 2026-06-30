@@ -6,4 +6,12 @@ export {
   reorderBlocks,
   addBlock,
   deleteBlock,
+  updateTenantLocales,
+  updateTenantDefaultLocale,
 } from './actions/blockActions'
+export {
+  getGalleryImages,
+  deleteGalleryImage,
+  reorderGalleryImages,
+  saveGalleryCaptions,
+} from './actions/galleryActions'

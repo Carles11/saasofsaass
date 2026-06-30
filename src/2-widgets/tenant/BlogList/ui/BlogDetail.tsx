@@ -1,6 +1,9 @@
 import type { SupportedLocaleType } from '@/5-shared/types'
 import type { Tenant } from '@/5-shared/lib/db/schema'
 import type { EntityWithTranslation, BlogPostEntity, BlogPostPayload } from '@/5-shared/types/tenants/entities'
+import { RichTextRenderer } from '@/5-shared/ui/RichTextRenderer'
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
 
 type BlogPostRow = EntityWithTranslation<BlogPostEntity, BlogPostPayload>
 
@@ -24,6 +27,14 @@ export function BlogDetail({ data, locale }: BlogDetailProps) {
   return (
     <article className="py-16 px-6">
       <div className="max-w-3xl mx-auto">
+        <Link
+          href={`/${locale}/blog`}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Link>
+
         {entity.coverImageUrl && (
           <div className="relative w-full aspect-[2/1] mb-8 overflow-hidden rounded-xs">
             <img
@@ -53,13 +64,15 @@ export function BlogDetail({ data, locale }: BlogDetailProps) {
         </div>
 
         {payload.body && (
-          <div
-            className="prose prose-sm sm:prose-base max-w-none text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-8 [&_h2]:mb-4 [&_p]:leading-relaxed [&_p]:mb-4"
-          >
-            {payload.body.split('\n').map((paragraph, i) => (
-              paragraph.trim() ? <p key={i}>{paragraph}</p> : null
-            ))}
-          </div>
+          /<[a-z][\s\S]*>/i.test(payload.body) ? (
+            <RichTextRenderer html={payload.body} />
+          ) : (
+            <div className="max-w-none leading-relaxed text-foreground [&_p]:mb-4">
+              {payload.body.split('\n').map((paragraph, i) =>
+                paragraph.trim() ? <p key={i}>{paragraph}</p> : null,
+              )}
+            </div>
+          )
         )}
       </div>
     </article>

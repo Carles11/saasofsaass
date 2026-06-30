@@ -20,9 +20,11 @@ interface AutoTranslateButtonProps {
   defaultLocale?: string
   onTranslate?: (isTranslating: boolean) => void
   translations?: TranslationDict
+  /** Override the button label (e.g. "Translate all" for collection blocks). */
+  label?: string
 }
 
-export function AutoTranslateButton({ tenantId, blockId, defaultLocale, onTranslate, translations }: AutoTranslateButtonProps) {
+export function AutoTranslateButton({ tenantId, blockId, defaultLocale, onTranslate, translations, label }: AutoTranslateButtonProps) {
   const [isPending, startTransition] = useTransition();
   const [showGenerateDialog, setShowGenerateDialog] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -138,7 +140,7 @@ export function AutoTranslateButton({ tenantId, blockId, defaultLocale, onTransl
             {t("settings.auto-translate.translating", "Translating…")}
           </>
         ) : (
-          t("settings.auto-translate.button-label", "✨ Auto-Translate")
+          label ?? t("settings.auto-translate.button-label", "✨ Auto-Translate")
         )}
       </Button>
 

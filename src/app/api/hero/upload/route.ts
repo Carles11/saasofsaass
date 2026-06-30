@@ -1,28 +1,52 @@
 import { heroImageI18n, heroImages } from "@/4-entities/hero/model/image";
 import { getTenantFromRequest } from "@/5-shared/api/tenant-context";
+import { assertCanEditContent } from "@/5-shared/lib/auth/authorization";
 import { generateImageDescriptionWithGemini } from "@/5-shared/lib/ai/generateImageDescriptionWithGemini";
 import { getCloudFrontUrl } from "@/5-shared/lib/aws/cloudfront";
 import { uploadToS3 } from "@/5-shared/lib/aws/s3";
 import { db } from "@/5-shared/lib/db";
+import { tenants } from "@/5-shared/lib/db/schema";
 import { generateSeoImageName } from "@/5-shared/lib/utils";
+import { eq } from "drizzle-orm";
 import { sql } from "drizzle-orm/sql/sql";
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
 // POST /api/hero/upload
 export async function POST(req: NextRequest) {
-  // Resolve tenant from request (host header)
-  const { tenant } = await getTenantFromRequest(req);
-  if (!tenant) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const tenantId = tenant.id;
-
   const form = await req.formData();
   const file = form.get("file") as File;
   let alt = form.get("alt") as string | null;
+  const explicitTenantId = form.get("tenantId") as string | null;
+  const section = (form.get("section") as string | null) || "hero";
 
   if (!file) {
     return NextResponse.json({ error: "Missing file" }, { status: 400 });
   }
+
+  // Prefer explicit tenantId + dashboard authorization (host resolution is
+  // unreliable from app.localhost); fall back to host-based resolution.
+  let tenant: { id: string; name: string; locales: string[]; defaultLocale: string } | null = null;
+  if (explicitTenantId) {
+    try {
+      await assertCanEditContent(explicitTenantId);
+    } catch {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    const [t] = await db
+      .select({ id: tenants.id, name: tenants.name, locales: tenants.locales, defaultLocale: tenants.defaultLocale })
+      .from(tenants)
+      .where(eq(tenants.id, explicitTenantId))
+      .limit(1);
+    tenant = t ?? null;
+  } else {
+    const resolved = await getTenantFromRequest(req);
+    tenant = resolved.tenant
+      ? { id: resolved.tenant.id, name: resolved.tenant.name, locales: resolved.tenant.locales, defaultLocale: resolved.tenant.defaultLocale }
+      : null;
+  }
+  if (!tenant) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const tenantId = tenant.id;
 
   // Read file buffer
   const fileBuffer = Buffer.from(await file.arrayBuffer());
@@ -66,10 +90,10 @@ export async function POST(req: NextRequest) {
     ext: "webp",
   });
 
-  // Upload processed image to S3 (section: 'hero')
+  // Upload processed image to S3 (section folder, e.g. 'hero' or 'cta-banner')
   const s3Key = await uploadToS3({
     tenantId,
-    section: "hero",
+    section,
     filename,
     body: processedBuffer,
     contentType: "image/webp",

@@ -8,6 +8,38 @@ import { revalidatePath } from "next/cache";
 import { tenantCache } from "@/5-shared/lib/next/tenant-cache";
 import { getEffectiveSiteLimit, isUnlimited, PLAN_LABELS, type PlanId } from "@/5-shared/lib/billing/plans";
 
+/**
+ * Sentinel prefix encoded into the thrown Error message so the client can
+ * detect the cap-reached path reliably (server-action throws don't preserve
+ * class identity across the network boundary — only `.message` survives).
+ * Format: `PUBLISH_CAP_REACHED:{plan}:{limit}:{addonSites}: {human message}`.
+ */
+const PUBLISH_CAP_SENTINEL = "PUBLISH_CAP_REACHED";
+
+export interface PublishCapInfo {
+  plan: string;
+  limit: number;
+  addonSites: number;
+  message: string;
+}
+
+/** Parse a thrown error to detect & extract publish-cap info. Returns null
+ * when the error is something else. Safe to call from client components. */
+export function parsePublishCapError(err: unknown): PublishCapInfo | null {
+  const message = err instanceof Error ? err.message : String(err);
+  if (!message.startsWith(`${PUBLISH_CAP_SENTINEL}:`)) return null;
+  const [, plan, limitStr, addonStr, ...rest] = message.split(":");
+  const limit = Number(limitStr);
+  const addonSites = Number(addonStr);
+  if (!plan || Number.isNaN(limit) || Number.isNaN(addonSites)) return null;
+  return {
+    plan,
+    limit,
+    addonSites,
+    message: rest.join(":").trim(),
+  };
+}
+
 async function getTenantWithWorkspace(tenantId: string) {
   const [row] = await db
     .select({
@@ -58,8 +90,9 @@ export async function publishTenant(tenantId: string) {
 
     if (Number(count) >= limit) {
       const planLabel = PLAN_LABELS[t.plan as PlanId] ?? t.plan;
+      const human = `Your ${planLabel} plan allows ${limit} published site${limit === 1 ? "" : "s"}. Unpublish another site or upgrade to publish more.`;
       throw new Error(
-        `Your ${planLabel} plan allows ${limit} published site${limit === 1 ? "" : "s"}. Unpublish another site or upgrade to publish more.`,
+        `${PUBLISH_CAP_SENTINEL}:${t.plan}:${limit}:${t.addonSites ?? 0}: ${human}`,
       );
     }
   }

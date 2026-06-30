@@ -13,6 +13,8 @@ export interface BlogPostMeta {
 }
 
 export interface PodcastEpisodeMeta {
+  /** Primary media URL (YouTube, Vimeo, Spotify, direct audio, …). */
+  url?: string
   youtubeId?: string
   durationSeconds?: number
   spotifyUrl?: string
@@ -36,13 +38,11 @@ export interface BlogPostPayload {
   title: string
   excerpt?: string
   body?: string
-  localizedSlug?: string
 }
 
 export interface PodcastEpisodePayload {
   title: string
   description?: string
-  localizedSlug?: string
 }
 
 export interface AwardItemPayload {

@@ -10,9 +10,11 @@ export function toast({
   status?: "info" | "success" | "error";
 }) {
   sonnerToast[status](title, {
+    // Deterministic id collapses duplicate toasts fired in quick succession
+    // (e.g. a handler re-invoked under React Strict Mode in dev) into one.
+    id: `${status}:${title}`,
     description,
     duration: 4000,
     position: "top-right",
-    // ariaLive is not a valid property for sonner toasts
   });
 }

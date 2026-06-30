@@ -1,3 +1,4 @@
+import { Mail, MapPin, Phone } from "lucide-react";
 import type { BlockProps } from "../../../config/types";
 
 interface ContactConfig {
@@ -11,58 +12,89 @@ export function ContactBlock({ config, t, blockId }: BlockProps) {
   const hasDetails = email || phone || address;
 
   return (
-    <section id={blockId} className="py-16 px-6">
-      <div className="max-w-4xl mx-auto">
-        {t.title && (
-          <h2 className="text-3xl font-bold text-center mb-4">{t.title}</h2>
-        )}
-        {t.description && (
-          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-10">
-            {t.description}
-          </p>
-        )}
+    <section id={blockId} className="py-20 sm:py-28 px-6 bg-secondary/40">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex flex-col items-center text-center">
+          <span aria-hidden className="block h-1 w-12 rounded-full bg-primary mb-6" />
+          {t.title && (
+            <h2
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              {t.title}
+            </h2>
+          )}
+          {t.description && (
+            <p
+              className="mt-4 text-lg text-muted-foreground max-w-2xl leading-relaxed"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {t.description}
+            </p>
+          )}
+        </div>
+
         {hasDetails && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-5">
             {email && (
-              <div className="rounded-xs border border-border bg-card p-6 text-center">
-                <div className="text-2xl mb-2">✉</div>
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">
-                  Email
-                </h3>
-                <a
-                  href={`mailto:${email}`}
-                  className="text-sm text-primary hover:underline break-all"
-                >
-                  {email}
-                </a>
-              </div>
+              <ContactCard
+                icon={<Mail className="h-5 w-5" />}
+                label="Email"
+                href={`mailto:${email}`}
+                value={email}
+              />
             )}
             {phone && (
-              <div className="rounded-xs border border-border bg-card p-6 text-center">
-                <div className="text-2xl mb-2">📞</div>
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">
-                  Phone
-                </h3>
-                <a
-                  href={`tel:${phone}`}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {phone}
-                </a>
-              </div>
+              <ContactCard
+                icon={<Phone className="h-5 w-5" />}
+                label="Phone"
+                href={`tel:${phone}`}
+                value={phone}
+              />
             )}
             {address && (
-              <div className="rounded-xs border border-border bg-card p-6 text-center">
-                <div className="text-2xl mb-2">📍</div>
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-1">
-                  Address
-                </h3>
-                <p className="text-sm text-card-foreground">{address}</p>
-              </div>
+              <ContactCard
+                icon={<MapPin className="h-5 w-5" />}
+                label="Address"
+                value={address}
+              />
             )}
           </div>
         )}
       </div>
     </section>
+  );
+}
+
+function ContactCard({
+  icon,
+  label,
+  href,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  href?: string;
+  value: string;
+}) {
+  return (
+    <div className="group flex flex-col items-center gap-3 rounded-[var(--radius)] border border-border bg-card p-8 text-center transition-shadow hover:shadow-md">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+        {icon}
+      </span>
+      <span className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+        {label}
+      </span>
+      {href ? (
+        <a
+          href={href}
+          className="text-sm font-medium text-card-foreground hover:text-primary transition-colors break-words"
+        >
+          {value}
+        </a>
+      ) : (
+        <p className="text-sm font-medium text-card-foreground">{value}</p>
+      )}
+    </div>
   );
 }

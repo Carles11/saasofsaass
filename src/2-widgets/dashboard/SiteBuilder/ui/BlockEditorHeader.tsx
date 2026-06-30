@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import type { SupportedLocaleType } from "@/5-shared/types";
-import type { TranslationDict } from "@/5-shared/lib/translations/resolve";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { AutoTranslateButton } from "./AutoTranslateButton";
 import { LanguageSelector } from "./LanguageSelector";
 
 interface BlockEditorHeaderProps {
   tenantId: string;
   blockId: string;
+  blockType?: string;
   locales: string[];
   activeLocale: SupportedLocaleType;
   onLocaleChange: (locale: SupportedLocaleType) => void;
@@ -17,9 +18,12 @@ interface BlockEditorHeaderProps {
   translations?: TranslationDict;
 }
 
+const COLLECTION_BLOCKS = ["blog-feed", "podcast-feed", "awards", "testimonials"];
+
 export function BlockEditorHeader({
   tenantId,
   blockId,
+  blockType,
   locales,
   activeLocale,
   onLocaleChange,
@@ -34,6 +38,13 @@ export function BlockEditorHeader({
     onTranslate?.(v);
   }
 
+  // Image gallery captions auto-translate on save — no manual button needed.
+  const showTranslate = blockType !== "image-gallery";
+  const isCollection = !!blockType && COLLECTION_BLOCKS.includes(blockType);
+  const translateLabel = isCollection
+    ? resolveTranslation(translations, "settings.auto-translate.translate-all", "Translate all")
+    : undefined;
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 border-b border-border">
       <LanguageSelector
@@ -42,13 +53,16 @@ export function BlockEditorHeader({
         onChange={onLocaleChange}
         disabled={isTranslating}
       />
-      <AutoTranslateButton
-        tenantId={tenantId}
-        blockId={blockId}
-        defaultLocale={defaultLocale}
-        onTranslate={handleTranslate}
-        translations={translations}
-      />
+      {showTranslate && (
+        <AutoTranslateButton
+          tenantId={tenantId}
+          blockId={blockId}
+          defaultLocale={defaultLocale}
+          onTranslate={handleTranslate}
+          translations={translations}
+          label={translateLabel}
+        />
+      )}
     </div>
   );
 }

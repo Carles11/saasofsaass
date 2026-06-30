@@ -1,6 +1,7 @@
 import { getTenantByDomain } from '@/4-entities/tenant'
 import { getEntityBySlug } from '@/4-entities/entity'
 import { PodcastDetail } from '@/2-widgets/tenant/PodcastList'
+import { getPlatformTranslations, resolveTranslation } from '@/5-shared/lib/db/platform-translations'
 import type { PageContextTypes, SupportedLocaleType } from '@/5-shared/types'
 import type { PodcastEntity, PodcastEpisodePayload } from '@/5-shared/types/tenants/entities'
 import type { Metadata } from 'next'
@@ -84,6 +85,7 @@ export async function PodcastDetailPage({ context, slug }: PodcastDetailParams) 
   if (!row) notFound()
 
   const meta = row.entity.metadata as PodcastEntity['metadata'] | null
+  const navT = await getPlatformTranslations('tenant.nav', locale)
 
   return (
     <>
@@ -109,7 +111,13 @@ export async function PodcastDetailPage({ context, slug }: PodcastDetailParams) 
           }),
         }}
       />
-      <PodcastDetail data={row} locale={locale as SupportedLocaleType} tenant={tenant} />
+      <PodcastDetail
+        data={row}
+        locale={locale as SupportedLocaleType}
+        tenant={tenant}
+        backLabel={resolveTranslation(navT, 'back', 'Back')}
+        listenLabel={resolveTranslation(navT, 'listen', 'Listen')}
+      />
     </>
   )
 }

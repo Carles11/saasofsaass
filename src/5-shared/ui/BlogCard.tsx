@@ -54,8 +54,7 @@ export function BlogCard({
         </div>
         <a
           href={href}
-          className="mt-2 inline-block text-sm font-medium hover:underline"
-          style={{ color: 'hsl(var(--primary))' }}
+          className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
         >
           Read more &rarr;
         </a>

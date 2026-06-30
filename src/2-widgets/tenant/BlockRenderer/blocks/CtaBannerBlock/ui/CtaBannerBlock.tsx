@@ -19,23 +19,49 @@ export async function CtaBannerBlock({ config, t, locale, blockId }: BlockProps)
   const ctaLabel = t.ctaLabel || resolveTranslation(platformT, "learnMore", "Learn more");
 
   return (
-    <section id={blockId} className="py-16 px-6">
-      <div className="max-w-4xl mx-auto text-center">
-        {heading && (
-          <h2 className="text-3xl font-bold mb-4">{heading}</h2>
-        )}
-        {subtitle && (
-          <p className="text-muted-foreground max-w-2xl mx-auto mb-8">{subtitle}</p>
-        )}
-        {safeCtaUrl && (
-          <Button asChild tenantVariant="primary" className="px-6 py-3 text-white text-base font-medium">
-            {safeCtaUrl.startsWith("/") ? (
-              <Link href={safeCtaUrl}>{ctaLabel}</Link>
-            ) : (
-              <a href={safeCtaUrl}>{ctaLabel}</a>
-            )}
-          </Button>
-        )}
+    <section id={blockId} className="py-20 sm:py-28 px-6">
+      <div
+        className="relative max-w-6xl mx-auto overflow-hidden rounded-[var(--radius)] bg-primary px-6 py-16 sm:px-16 sm:py-20 text-center"
+      >
+        {/* soft decorative glow */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary-foreground/10 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-primary-foreground/10 blur-3xl"
+        />
+        <div className="relative">
+          {heading && (
+            <h2
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-primary-foreground"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              {heading}
+            </h2>
+          )}
+          {subtitle && (
+            <p
+              className="mt-4 mx-auto max-w-2xl text-lg leading-relaxed text-primary-foreground/80"
+              style={{ fontFamily: "var(--font-body)" }}
+            >
+              {subtitle}
+            </p>
+          )}
+          {safeCtaUrl && (
+            <Button
+              asChild
+              className="mt-8 rounded-[var(--radius)] bg-background px-7 py-3.5 text-base font-medium text-foreground shadow-sm hover:shadow-lg transition-shadow hover:bg-background"
+            >
+              {safeCtaUrl.startsWith("/") ? (
+                <Link href={safeCtaUrl}>{ctaLabel}</Link>
+              ) : (
+                <a href={safeCtaUrl}>{ctaLabel}</a>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
     </section>
   );

@@ -79,6 +79,33 @@ export function BlockCard({
     "testimonials",
   ].includes(block.type);
 
+  // ── Completeness: do all enabled languages have the required content? ──
+  const completeness: "complete" | "incomplete" = (() => {
+    const locales = tenant.locales as string[];
+    const defaultLocale = tenant.defaultLocale;
+    // Gallery content lives in its own tables — not assessable here.
+    if (block.type === "image-gallery") return "complete";
+    if (isCollectionBlock) {
+      const items = initialEntities.filter((r) => r.entity.blockId === block.id);
+      return items.length > 0 ? "complete" : "incomplete";
+    }
+    const fieldKeys = (BLOCK_CATALOG[block.type as BlockKind]?.fields ?? [])
+      .filter((f) => f.inputType !== "image")
+      .map((f) => f.key);
+    if (fieldKeys.length === 0) return "complete";
+    const trans = (block.translations ?? {}) as Record<string, Record<string, string>>;
+    const def = trans[defaultLocale] ?? {};
+    const required = fieldKeys.filter((k) => (def[k] ?? "").trim().length > 0);
+    if (required.length === 0) return "incomplete"; // no content in default language yet
+    for (const loc of locales) {
+      const lt = trans[loc] ?? {};
+      for (const k of required) if (!(lt[k] ?? "").trim()) return "incomplete";
+    }
+    return "complete";
+  })();
+  const completeLabel = resolveTranslation(translations, "status.complete", "Complete");
+  const incompleteLabel = resolveTranslation(translations, "status.incomplete", "Incomplete");
+
   const {
     attributes,
     listeners,
@@ -187,9 +214,28 @@ export function BlockCard({
               <GripVertical className="h-4 w-4" />
             </button>
           )}
-          <Badge variant="secondary" className="font-mono text-xs shrink-0">
-            {block.type}
+          <Badge variant="secondary" className="text-xs shrink-0">
+            {resolveTranslation(
+              translations,
+              `picker.${block.type}.name`,
+              BLOCK_CATALOG[block.type as BlockKind]?.name ?? block.type,
+            )}
           </Badge>
+          {completeness === "complete" ? (
+            <Badge
+              variant="outline"
+              className="text-xs shrink-0 border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+            >
+              {completeLabel}
+            </Badge>
+          ) : (
+            <Badge
+              variant="outline"
+              className="text-xs shrink-0 border-amber-500/50 text-amber-600 dark:text-amber-400"
+            >
+              {incompleteLabel}
+            </Badge>
+          )}
           {!block.isVisible && (
             <span className="text-xs text-muted-foreground italic truncate">
               {hiddenLabel}
@@ -288,6 +334,7 @@ export function BlockCard({
           <BlockEditorHeader
             tenantId={tenantId}
             blockId={block.id}
+            blockType={block.type}
             locales={tenant.locales}
             activeLocale={activeLocale}
             onLocaleChange={onLocaleChange ?? (() => {})}
@@ -353,6 +400,7 @@ export function BlockCard({
                   initialEntities={initialEntities}
                   blockType={block.type}
                   blockId={block.id}
+                  blockConfig={blockConfig}
                   translations={translations}
                 />
               </div>

@@ -1,4 +1,4 @@
-import { getTemplate, TenantTemplateId } from "@/5-shared/config/templates";
+import { getTemplate, resolveTemplateId, TEMPLATE_META, TenantTemplateId } from "@/5-shared/config/templates";
 import React from "react";
 
 interface TenantLayoutResolverProps {
@@ -27,6 +27,7 @@ export default function TenantLayoutResolver({
   bodyFont,
 }: TenantLayoutResolverProps) {
   const template = getTemplate(templateId);
+  const bgClass = TEMPLATE_META[resolveTemplateId(templateId)].bgClass ?? "";
 
   const inlineStyle: Record<string, string> = {
     "--radius": template.tokens.radius,
@@ -44,7 +45,7 @@ export default function TenantLayoutResolver({
   }
 
   return (
-    <div className={template.themeClass} style={inlineStyle as React.CSSProperties}>
+    <div className={`${template.themeClass} ${bgClass}`} style={inlineStyle as React.CSSProperties}>
       <main className={template.containerClass + " bentley-container"}>{children}</main>
     </div>
   );

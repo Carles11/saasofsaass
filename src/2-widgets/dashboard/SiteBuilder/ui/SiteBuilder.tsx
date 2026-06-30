@@ -1,7 +1,7 @@
 "use client";
 
 import TenantLayoutResolver from "@/2-widgets/tenant/ui/TenantLayoutResolver";
-import { updateTenantLocales } from "@/3-features/manage-site-blocks/actions/blockActions";
+import { updateTenantLocales, updateTenantDefaultLocale } from "@/3-features/manage-site-blocks/actions/blockActions";
 import { generatePreviewToken } from "@/3-features/manage-site-blocks/actions/generatePreviewToken";
 import { TEMPLATES, resolveTemplateId } from "@/5-shared/config/templates";
 import { SUPPORTED_LOCALES } from "@/5-shared/config/languages/supportedLanguages";
@@ -75,6 +75,7 @@ export function SiteBuilder({
     tenant.defaultLocale as SupportedLocaleType
   );
   const [locales, setLocales] = useState<string[]>(tenant.locales);
+  const [defaultLocale, setDefaultLocale] = useState<string>(tenant.defaultLocale);
   const [currentSlug, setCurrentSlug] = useState(tenant.slug);
   const [isSaving, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<string>("blocks");
@@ -324,6 +325,48 @@ export function SiteBuilder({
                   {isSaving && <span className="ml-2 text-blue-500">{savingLabel}</span>}
                 </p>
               </div>
+
+              {/* ── Default language ─────────────────────────────────── */}
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2">
+                  {resolveTranslation(translations, "settings.default-language", "Default Language")}
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {locales.map((locale) => (
+                    <Badge
+                      key={locale}
+                      variant={defaultLocale === locale ? "default" : "outline"}
+                      className={
+                        "cursor-pointer select-none" +
+                        (isSaving ? " opacity-60 pointer-events-none" : "")
+                      }
+                      onClick={() => {
+                        if (defaultLocale === locale) return;
+                        const prev = defaultLocale;
+                        setDefaultLocale(locale);
+                        startTransition(async () => {
+                          try {
+                            await updateTenantDefaultLocale(tenant.id, locale);
+                          } catch {
+                            setDefaultLocale(prev);
+                          }
+                        });
+                      }}
+                    >
+                      {locale}
+                      {defaultLocale === locale && " ★"}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {resolveTranslation(
+                    translations,
+                    "settings.default-language-hint",
+                    "The language your site falls back to and translates from.",
+                  )}
+                </p>
+              </div>
+
               <LogoSection
                 tenantId={tenant.id}
                 slug={currentSlug}

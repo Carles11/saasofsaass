@@ -56,12 +56,13 @@ export default async function DashboardLayout({
   }
 
   const upgradeTranslations = await getPlatformTranslations("upgrade", locale);
+  const sidebarTranslations = await getPlatformTranslations("dashboard.sidebar", locale);
 
   return (
     <div className="flex min-h-screen bg-background">
       <PendingInviteConsumer locale={locale} />
       <TranslationProgressBar />
-      <DashboardSidebar session={session} resolvedRoles={resolvedRoles} planLabel={planLabel} />
+      <DashboardSidebar session={session} resolvedRoles={resolvedRoles} planLabel={planLabel} translations={sidebarTranslations} />
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden pb-16 md:pb-0">
         <div className="flex items-center justify-end gap-2 px-6 pt-4">
           <LanguageSwitcher />
@@ -74,7 +75,7 @@ export default async function DashboardLayout({
           </UpgradeModalProvider>
         </div>
       </main>
-      <MobileBottomNav resolvedRoles={resolvedRoles} />
+      <MobileBottomNav resolvedRoles={resolvedRoles} translations={sidebarTranslations} />
     </div>
   );
 }

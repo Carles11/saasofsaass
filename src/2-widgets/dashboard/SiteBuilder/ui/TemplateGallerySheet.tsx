@@ -2,10 +2,17 @@
 
 import { useUpgradeModal } from "@/2-widgets/dashboard/UpgradeModal";
 import { updateTenantTemplate } from "@/3-features/manage-site-blocks/actions/tenantActions";
-import { TEMPLATES, TenantTemplateId } from "@/5-shared/config/templates";
+import {
+  TEMPLATE_META,
+  TEMPLATE_STYLE_TAGS,
+  TEMPLATES,
+  TenantTemplateId,
+  type TemplateStyleTag,
+} from "@/5-shared/config/templates";
 import { getNextPlan, hasFeature, type PlanId } from "@/5-shared/lib/billing/plans";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import { useStore } from "@/5-shared/store";
+import { cn } from "@/5-shared/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Check, Lock } from "lucide-react";
@@ -39,9 +46,18 @@ export function TemplateGallerySheet({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const canUsePremium = hasFeature(plan, "premiumTemplates");
+  const [styleFilter, setStyleFilter] = useState<TemplateStyleTag | null>(null);
+  const [noImageOnly, setNoImageOnly] = useState(false);
 
   const t = (key: string, fallback: string) =>
     resolveTranslation(translations, key, fallback);
+
+  const visibleIds = (Object.keys(TEMPLATES) as TenantTemplateId[]).filter((id) => {
+    const meta = TEMPLATE_META[id];
+    if (styleFilter && !meta.styleTags.includes(styleFilter)) return false;
+    if (noImageOnly && meta.heroHasImage) return false;
+    return true;
+  });
 
   const title = t("settings.template.gallery-title", "Choose a template");
   const description = t(
@@ -118,6 +134,37 @@ export function TemplateGallerySheet({
       onOpenChange={onOpenChange}
       title={title}
       description={description}
+      toolbar={
+        <div className="flex gap-2 overflow-x-auto">
+          {[null, ...TEMPLATE_STYLE_TAGS].map((tag) => (
+            <button
+              key={tag ?? "all"}
+              type="button"
+              onClick={() => setStyleFilter(tag)}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap capitalize transition-colors cursor-pointer",
+                styleFilter === tag
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+              )}
+            >
+              {tag ? t(`settings.template.style.${tag}`, tag) : t("settings.template.style.all", "All")}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setNoImageOnly((v) => !v)}
+            className={cn(
+              "px-3.5 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors cursor-pointer",
+              noImageOnly
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground",
+            )}
+          >
+            {t("settings.template.filter.no-hero-image", "Hero without image")}
+          </button>
+        </div>
+      }
       footer={
         <div className="flex items-center justify-end gap-4">
           {errorMsg && (
@@ -130,7 +177,7 @@ export function TemplateGallerySheet({
       }
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {(Object.keys(TEMPLATES) as TenantTemplateId[]).map((id) => {
+        {visibleIds.map((id) => {
           const tpl = TEMPLATES[id];
           const isActive = id === currentTemplateId;
           const isPreviewing = id === previewTemplateId;

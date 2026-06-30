@@ -77,22 +77,26 @@ export default async function TenantLayout({
       const entry = blockRegistry[b.type as keyof typeof blockRegistry];
       const t = resolveBlockT(b.translations, locale, defaultLocale);
       const label = resolveTranslation(navT, b.type, entry?.navLabel ?? "") || t.title || t.heading || "";
-      const href = entry?.archivePath ?? `#${b.id}`;
+      // Locale-aware hrefs: archive links keep the locale prefix; section anchors
+      // always point at the homepage so they work from archive routes too.
+      const href = entry?.archivePath
+        ? `/${locale}${entry.archivePath}`
+        : `/${locale}#${b.id}`;
       return { label, href };
     });
 
   return (
     <StoreHydrator tenant={tenant ?? null}>
-      {tenant && (
-        <UnifiedHeader
-          tenant={tenant}
-          navLinks={navLinks}
-          locale={locale}
-          isSubdomain={isSubdomain}
-          templateId={tenant.templateId ?? "default"}
-        />
-      )}
       <div className={`min-h-screen selection:bg-foreground selection:text-background theme-${palette}`}>
+        {tenant && (
+          <UnifiedHeader
+            tenant={tenant}
+            navLinks={navLinks}
+            locale={locale}
+            isSubdomain={isSubdomain}
+            templateId={tenant.templateId ?? "default"}
+          />
+        )}
         {children}
         {tenant && showsFooterBadge(plan) && (
           <PoweredByStrip href={brandingHref} label={poweredByLabel} />

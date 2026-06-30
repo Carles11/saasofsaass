@@ -369,3 +369,38 @@ export function resolveTemplateId(
 export function getTemplate(id: string | null | undefined): TemplateDefinition {
   return TEMPLATES[resolveTemplateId(id)];
 }
+
+// ── Picker metadata: style tags + whether the hero uses an image, plus an
+//    optional per-template signature background (layered over the palette). ──
+export type TemplateStyleTag = "clean" | "bold" | "editorial" | "minimal" | "warm" | "luxury";
+
+export interface TemplateMeta {
+  styleTags: TemplateStyleTag[];
+  heroHasImage: boolean;
+  /** Optional Tailwind background applied on the tenant layout wrapper. */
+  bgClass?: string;
+}
+
+export const TEMPLATE_META: Record<TenantTemplateId, TemplateMeta> = {
+  default: { styleTags: ["clean"], heroHasImage: true },
+  modern: { styleTags: ["bold"], heroHasImage: true, bgClass: "bg-linear-to-b from-background to-secondary/20" },
+  classic: { styleTags: ["editorial"], heroHasImage: true },
+  monoline: { styleTags: ["minimal", "clean"], heroHasImage: false, bgClass: "bg-background" },
+  canyon: { styleTags: ["warm"], heroHasImage: true, bgClass: "bg-linear-to-b from-secondary/20 to-background" },
+  atelier: { styleTags: ["editorial", "luxury"], heroHasImage: true, bgClass: "bg-linear-to-b from-background to-secondary/30" },
+  harbor: { styleTags: ["minimal", "bold"], heroHasImage: false },
+  garden: { styleTags: ["warm", "clean"], heroHasImage: true, bgClass: "bg-linear-to-b from-secondary/30 via-background to-background" },
+  journal: { styleTags: ["editorial"], heroHasImage: false },
+  loft: { styleTags: ["bold"], heroHasImage: true },
+  kiln: { styleTags: ["warm"], heroHasImage: true, bgClass: "bg-linear-to-b from-secondary/25 to-background" },
+};
+
+/** The set of style tags offered as picker filters (in display order). */
+export const TEMPLATE_STYLE_TAGS: TemplateStyleTag[] = [
+  "clean",
+  "bold",
+  "editorial",
+  "minimal",
+  "warm",
+  "luxury",
+];

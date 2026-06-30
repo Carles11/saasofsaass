@@ -1,8 +1,10 @@
 import type { BlockProps } from "../../../config/types";
 
-export function MapBlock({ t, blockId, locale }: BlockProps) {
+export function MapBlock({ t, config, blockId }: BlockProps) {
   const heading = t.heading;
-  const address = t.address;
+  // Address is shared across languages (a physical address doesn't translate),
+  // so it lives in config — not per-locale translations.
+  const address = (config.address as string) || (t.address as string) || "";
 
   if (!heading && !address) return null;
 

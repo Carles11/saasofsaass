@@ -9,6 +9,7 @@ export interface PodcastCardProps {
   durationSeconds?: number | null
   publishedAt?: Date | string | null
   locale: SupportedLocaleType
+  listenLabel?: string
 }
 
 function formatDate(date: Date | string, locale: SupportedLocaleType) {
@@ -34,6 +35,7 @@ export function PodcastCard({
   durationSeconds,
   publishedAt,
   locale,
+  listenLabel,
 }: PodcastCardProps) {
   return (
     <article className="rounded-xs border border-border overflow-hidden hover:shadow-md transition-shadow bg-card flex flex-col">
@@ -70,10 +72,9 @@ export function PodcastCard({
         </div>
         <a
           href={href}
-          className="mt-2 inline-block text-sm font-medium hover:underline"
-          style={{ color: 'hsl(var(--primary))' }}
+          className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
         >
-          Listen &rarr;
+          {listenLabel ?? 'Listen'} &rarr;
         </a>
       </div>
     </article>

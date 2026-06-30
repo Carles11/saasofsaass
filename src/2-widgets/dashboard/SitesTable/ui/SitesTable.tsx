@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { MoreHorizontal, Search } from "lucide-react";
 import {
@@ -22,9 +23,13 @@ import {
   Label,
 } from "@/components/ui";
 import {
+  parsePublishCapError,
   publishTenant,
   unpublishTenant,
+  type PublishCapInfo,
 } from "@/3-features/manage-tenants/actions/publishTenant";
+import { EXTRA_SITE } from "@/5-shared/lib/billing/plans";
+import { PublishCapDialog } from "@/2-widgets/dashboard/Billing/ui/PublishCapDialog";
 import {
   archiveTenant,
   restoreTenant,
@@ -187,6 +192,10 @@ export function SitesTable({
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [tenants, setTenants] = useState(userTenants);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const [capDialog, setCapDialog] = useState<
+    { info: PublishCapInfo; tenantId: string } | null
+  >(null);
 
   const domainMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -288,6 +297,11 @@ export function SitesTable({
           );
           toast.success("Site published");
         } catch (err: unknown) {
+          const cap = parsePublishCapError(err);
+          if (cap) {
+            setCapDialog({ info: cap, tenantId });
+            return;
+          }
           const message =
             err instanceof Error ? err.message : "Failed to publish";
           toast.error(message);
@@ -791,6 +805,21 @@ export function SitesTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {capDialog && (
+        <PublishCapDialog
+          open={capDialog !== null}
+          onOpenChange={(open) => !open && setCapDialog(null)}
+          plan={capDialog.info.plan}
+          addonSites={capDialog.info.addonSites}
+          softCap={EXTRA_SITE.softCap}
+          onExtraSiteAdded={() => {
+            const id = capDialog.tenantId;
+            setCapDialog(null);
+            router.refresh();
+            handlePublish(id);
+          }}
+        />
+      )}
     </div>
   );
 }

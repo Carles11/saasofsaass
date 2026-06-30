@@ -6,7 +6,9 @@ import { HeroBlock } from "../blocks/HeroBlock/ui/HeroBlock";
 import { ImageGalleryBlock } from "../blocks/ImageGallery";
 import { PodcastFeedBlock } from "../blocks/PodcastFeedBlock/ui/PodcastFeedBlock";
 import { CtaBannerBlock } from "../blocks/CtaBannerBlock/ui/CtaBannerBlock";
+import { CtaBannerImageBlock } from "../blocks/CtaBannerImageBlock/ui/CtaBannerImageBlock";
 import { TextContentBlock } from "../blocks/TextContentBlock/ui/TextContentBlock";
+import { RichContentBlock } from "../blocks/RichContentBlock/ui/RichContentBlock";
 import { MapBlock } from "../blocks/MapBlock/ui/MapBlock";
 import { FooterBlock } from "../blocks/FooterBlock/ui/FooterBlock";
 import { TestimonialsBlock } from "../blocks/TestimonialsBlock/ui/TestimonialsBlock";
@@ -30,7 +32,9 @@ const COMPONENTS: Record<BlockKind, BlockComponent> = {
   awards: AwardsBlock,
   contact: ContactBlock,
   "cta-banner": CtaBannerBlock,
+  "cta-banner-image": CtaBannerImageBlock,
   "text-content": TextContentBlock,
+  "rich-content": RichContentBlock,
   "image-gallery": adaptImageGalleryBlock,
   map: MapBlock,
   footer: FooterBlock,
@@ -55,7 +59,9 @@ export const blockRegistry: BlockRegistry = {
   awards: buildEntry("awards", AwardsBlock),
   contact: buildEntry("contact", ContactBlock),
   "cta-banner": buildEntry("cta-banner", CtaBannerBlock),
+  "cta-banner-image": buildEntry("cta-banner-image", CtaBannerImageBlock),
   "text-content": buildEntry("text-content", TextContentBlock),
+  "rich-content": buildEntry("rich-content", RichContentBlock),
   "image-gallery": buildEntry("image-gallery", adaptImageGalleryBlock),
   map: buildEntry("map", MapBlock),
   footer: buildEntry("footer", FooterBlock),

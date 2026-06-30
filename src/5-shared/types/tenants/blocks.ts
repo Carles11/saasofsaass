@@ -6,7 +6,9 @@ export type BlockKind =
   | "contact"
   | "image-gallery"
   | "text-content"
+  | "rich-content"
   | "cta-banner"
+  | "cta-banner-image"
   | "map"
   | "footer"
   | "testimonials";

@@ -20,10 +20,10 @@ export function SplitImageRight(props: BlockProps) {
       className={`flex flex-col md:flex-row items-center justify-between gap-8 px-6 py-24`}
       style={{ minHeight: "85vh" }}
     >
-      <div className="flex-1 flex flex-col items-start justify-center text-left px-6 py-24">
+      <div className="flex-1 flex flex-col items-start justify-center text-left px-6 gap-5">
         {t.title && (
           <h1
-            className="text-4xl sm:text-5xl font-bold leading-tight max-w-3xl text-primary"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.08] tracking-tight max-w-3xl text-primary"
             style={{ fontFamily: "var(--font-heading)" }}
           >
             {t.title}
@@ -31,7 +31,7 @@ export function SplitImageRight(props: BlockProps) {
         )}
         {t.subtitle && (
           <p
-            className="text-base text-muted-foreground max-w-2xl mt-2"
+            className="text-lg text-muted-foreground max-w-2xl leading-relaxed"
             style={{ fontFamily: "var(--font-body)" }}
           >
             {t.subtitle}
@@ -41,7 +41,7 @@ export function SplitImageRight(props: BlockProps) {
           <Button
             asChild
             tenantVariant="primary"
-            className={`mt-6 px-6 py-3 text-white text-base font-medium ${radiusClass}`}
+            className={`mt-1 px-7 py-3.5 text-white text-base font-medium shadow-sm hover:shadow-lg transition-shadow ${radiusClass}`}
           >
             <a href={safeCtaUrl}>{t.ctaLabel}</a>
           </Button>
@@ -62,10 +62,9 @@ export function SplitImageRight(props: BlockProps) {
           </div>
         ) : (
           <div
-            className={`w-48 h-32 md:w-64 md:h-48 rounded-xl bg-linear-to-tr from-primary/40 to-muted flex items-center justify-center`}
-          >
-            <span className="text-xs text-muted-foreground">Image</span>
-          </div>
+            className="w-full h-48 md:h-[70vh] md:w-[40vw] rounded-xl bg-linear-to-tr from-primary/30 via-secondary to-muted"
+            aria-hidden
+          />
         )}
       </div>
     </section>

@@ -71,7 +71,7 @@ export async function GET(
     const payload = translation?.payload as Record<string, unknown> | null
     const title = (payload?.title as string) ?? entity.slug ?? entity.id
     const description = (payload?.description as string) ?? ''
-    const slug = (payload?.localizedSlug as string) ?? entity.slug
+    const slug = entity.slug
     const meta = entity.metadata as Record<string, unknown> | null
     const durationSeconds = (meta?.durationSeconds as number) ?? 0
     const coverImageUrl = entity.coverImageUrl ?? ''

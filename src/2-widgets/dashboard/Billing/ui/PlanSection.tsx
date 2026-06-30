@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
-import { getEffectiveSiteLimit, isUnlimited, PLAN_LABELS, type PlanId, type PlanConfig } from "@/5-shared/lib/billing/plans";
+import { EXTRA_SITE, getEffectiveSiteLimit, isUnlimited, PLAN_LABELS, type PlanId, type PlanConfig } from "@/5-shared/lib/billing/plans";
 import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createCheckoutSession, createBillingPortalSession } from "@/3-features/manage-billing/actions/billingActions";
+import { AddExtraSiteButton } from "./AddExtraSiteButton";
 
 interface PlanSectionProps {
   workspace: {
@@ -34,8 +36,12 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "destructive" | "
 };
 
 export function PlanSection({ workspace, planConfig, nextPlan, currentSites, translations }: PlanSectionProps) {
+  const router = useRouter();
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const isPro = workspace.plan === "pro";
+  const atAddonCap = workspace.addonSites >= EXTRA_SITE.softCap;
 
   const effectiveLimit = getEffectiveSiteLimit(workspace.plan, workspace.addonSites);
   const sitesLabel = isUnlimited(effectiveLimit) ? "∞" : String(effectiveLimit);
@@ -106,7 +112,7 @@ export function PlanSection({ workspace, planConfig, nextPlan, currentSites, tra
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {workspace.stripeCustomerId && (
                 <Button
                   variant="outline"
@@ -118,6 +124,15 @@ export function PlanSection({ workspace, planConfig, nextPlan, currentSites, tra
                     ? section("opening", "Opening...")
                     : section("manage-subscription", "Manage Subscription")}
                 </Button>
+              )}
+              {isPro && !atAddonCap && (
+                <AddExtraSiteButton
+                  workspaceId={workspace.id}
+                  addonSites={workspace.addonSites}
+                  softCap={EXTRA_SITE.softCap}
+                  onAdded={() => router.refresh()}
+                  translations={translations}
+                />
               )}
               {nextPlan && (
                 <Button
@@ -133,6 +148,35 @@ export function PlanSection({ workspace, planConfig, nextPlan, currentSites, tra
               )}
             </div>
           </div>
+
+          {isPro && workspace.addonSites > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {section(
+                "addon-sites-active",
+                "{n} extra site{plural} active.",
+              )
+                .replace("{n}", String(workspace.addonSites))
+                .replace("{plural}", workspace.addonSites === 1 ? "" : "s")}{" "}
+              {workspace.stripeCustomerId && (
+                <button
+                  type="button"
+                  className="underline underline-offset-2 hover:text-foreground"
+                  onClick={handleManageBilling}
+                  disabled={actionLoading === "portal"}
+                >
+                  {section("manage-addons", "Manage add-ons")}
+                </button>
+              )}
+            </p>
+          )}
+          {isPro && atAddonCap && (
+            <p className="text-sm text-muted-foreground">
+              {section(
+                "addon-cap-reached",
+                "You've reached the add-on limit. Enterprise gives you unlimited sites at a lower total cost.",
+              )}
+            </p>
+          )}
 
           {actionError && (
             <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">

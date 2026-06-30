@@ -36,7 +36,7 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
   const logoLinkHref = tenantLogoLinkUrl || homeUrl;
 
   return (
-    <footer id={blockId} className="border-t border-border py-16 px-6">
+    <footer id={blockId} className="border-t border-border bg-secondary/20 py-16 px-6">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
         {/* ── Left column: Brand ───────────────────────────────────────── */}
         <div className="flex flex-col items-start gap-4">
