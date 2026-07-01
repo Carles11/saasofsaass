@@ -11,7 +11,7 @@ export async function updateTenantPalette(tenantId: string, paletteId: string) {
   await assertCanManageStructure(tenantId);
 
   if (!isValidPaletteId(paletteId)) {
-    throw new Error("Invalid palette selection");
+    throw new Error("errors.invalid-palette");
   }
 
   await db

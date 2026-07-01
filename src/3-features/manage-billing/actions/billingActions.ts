@@ -110,7 +110,7 @@ async function getOrCreateCustomer(workspaceId: string): Promise<string> {
     .where(eq(workspaces.id, workspaceId))
     .limit(1);
 
-  if (!ws) throw new Error("Workspace not found");
+  if (!ws) throw new Error("errors.workspace-not-found");
   if (ws.stripeCustomerId) return ws.stripeCustomerId;
 
   const stripe = getStripe();
@@ -147,8 +147,8 @@ export async function createCheckoutSession(
     .where(eq(workspaces.id, workspaceId))
     .limit(1);
 
-  if (!ws) throw new Error("Workspace not found");
-  if (ws.ownerProfileId !== profile.id) throw new Error("Not authorized");
+  if (!ws) throw new Error("errors.workspace-not-found");
+  if (ws.ownerProfileId !== profile.id) throw new Error("errors.not-authorized");
 
   // If already subscribed, redirect to portal
   if (ws.subscriptionStatus === "active") {
@@ -190,7 +190,7 @@ export async function createCheckoutSessionForCurrentUser(
     .where(eq(workspaces.ownerProfileId, profile.id))
     .limit(1);
 
-  if (!ws) throw new Error("No workspace found for current user");
+  if (!ws) throw new Error("errors.no-workspace-for-user");
 
   return createCheckoutSession(ws.id, plan, cadence);
 }
@@ -207,8 +207,8 @@ export async function createBillingPortalSession(workspaceId: string) {
     .where(eq(workspaces.id, workspaceId))
     .limit(1);
 
-  if (!ws) throw new Error("Workspace not found");
-  if (ws.ownerProfileId !== profile.id) throw new Error("Not authorized");
+  if (!ws) throw new Error("errors.workspace-not-found");
+  if (ws.ownerProfileId !== profile.id) throw new Error("errors.not-authorized");
 
   const stripe = getStripe();
 
@@ -251,8 +251,8 @@ export async function addExtraSite(workspaceId: string) {
     .where(eq(workspaces.id, workspaceId))
     .limit(1);
 
-  if (!ws) throw new Error("Workspace not found");
-  if (ws.ownerProfileId !== profile.id) throw new Error("Not authorized");
+  if (!ws) throw new Error("errors.workspace-not-found");
+  if (ws.ownerProfileId !== profile.id) throw new Error("errors.not-authorized");
 
   if (ws.plan !== "pro") {
     throw new AddExtraSiteError(
@@ -347,7 +347,7 @@ export async function addExtraSiteForCurrentUser() {
     .where(eq(workspaces.ownerProfileId, profile.id))
     .limit(1);
 
-  if (!ws) throw new Error("No workspace found for current user");
+  if (!ws) throw new Error("errors.no-workspace-for-user");
   return addExtraSite(ws.id);
 }
 
@@ -364,7 +364,7 @@ export async function addExtraSiteForCurrentUser() {
  */
 export async function stripeWebhook(rawBody: string, signature: string) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret) throw new Error("STRIPE_WEBHOOK_SECRET is not configured");
+  if (!secret) throw new Error("errors.stripe-secret-not-configured");
 
   const stripe = getStripe();
   let event: Stripe.Event;
@@ -372,7 +372,7 @@ export async function stripeWebhook(rawBody: string, signature: string) {
   try {
     event = stripe.webhooks.constructEvent(rawBody, signature, secret);
   } catch {
-    throw new Error("Invalid webhook signature");
+    throw new Error("errors.invalid-webhook-signature");
   }
 
   console.log(`[stripe-webhook] received ${event.type} (${event.id})`);

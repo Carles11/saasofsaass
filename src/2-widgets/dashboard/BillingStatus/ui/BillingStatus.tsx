@@ -10,6 +10,8 @@ import {
   PLAN_LABELS,
   type PlanId,
 } from "@/5-shared/lib/billing/plans";
+import { resolveTranslation } from "@/5-shared/lib/db/platform-translations";
+import type { TranslationDict } from "@/5-shared/lib/db/platform-translations";
 
 interface BillingStatusProps {
   workspaceId: string;
@@ -19,13 +21,23 @@ interface BillingStatusProps {
   subscriptionStatus: string | null;
   stripeCustomerId: string | null;
   nextPlan: string | null;
+  translations?: Record<string, TranslationDict>;
 }
 
-const STATUS_WARNING: Record<string, string> = {
-  past_due: "Your subscription is past due. Please update your billing information to continue.",
-  unpaid: "Your subscription is unpaid. Please update your billing information to continue.",
-  incomplete_expired: "Your subscription payment failed. Please upgrade again.",
+const STATUS_WARNING_KEYS: Record<string, string> = {
+  past_due: "status-warning.past-due",
+  unpaid: "status-warning.unpaid",
+  incomplete_expired: "status-warning.incomplete-expired",
 };
+
+function statusFallback(status: string): string {
+  const map: Record<string, string> = {
+    past_due: "Your subscription is past due. Please update your billing information to continue.",
+    unpaid: "Your subscription is unpaid. Please update your billing information to continue.",
+    incomplete_expired: "Your subscription payment failed. Please upgrade again.",
+  };
+  return map[status] ?? "";
+}
 
 export function BillingStatus({
   workspaceId,
@@ -35,11 +47,25 @@ export function BillingStatus({
   subscriptionStatus,
   stripeCustomerId,
   nextPlan,
+  translations,
 }: BillingStatusProps) {
+  const billingT = translations?.["dashboard.billing"];
+  const t = (key: string, fallback: string) => resolveTranslation(billingT, key, fallback);
+
+  const warningKey = subscriptionStatus ? STATUS_WARNING_KEYS[subscriptionStatus] : null;
+  const warning = warningKey
+    ? t(warningKey, statusFallback(subscriptionStatus!))
+    : null;
+
+  const sitesLabel = t("usage.sites.count", "{current} / {limit} published sites");
+  const upgradeLabel = nextPlan ? t("upgrade", "Upgrade to {plan}") : null;
+  const openingLabel = t("opening", "Opening...");
+  const manageBillingLabel = t("manage-subscription", "Manage Subscription");
+  const upgradeFailedLabel = t("error.upgrade-failed", "Failed to start upgrade.");
+  const portalFailedLabel = t("error.portal-failed", "Failed to open billing portal.");
   const [actionError, setActionError] = useState<string | null>(null);
   const [upgrading, setUpgrading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
-  const warning = subscriptionStatus ? STATUS_WARNING[subscriptionStatus] : null;
 
   const handleUpgrade = useCallback(async () => {
     if (!nextPlan) return;
@@ -50,12 +76,12 @@ export function BillingStatus({
       if (result.url) {
         window.location.href = result.url;
       }
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : "Failed to start upgrade.");
+    } catch {
+      setActionError(upgradeFailedLabel);
     } finally {
       setUpgrading(false);
     }
-  }, [workspaceId, nextPlan]);
+  }, [workspaceId, nextPlan, upgradeFailedLabel]);
 
   const handleManageBilling = useCallback(async () => {
     setPortalLoading(true);
@@ -65,15 +91,17 @@ export function BillingStatus({
       if (result.url) {
         window.location.href = result.url;
       }
-    } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : "Failed to open billing portal.");
+    } catch {
+      setActionError(portalFailedLabel);
     } finally {
       setPortalLoading(false);
     }
-  }, [workspaceId]);
+  }, [workspaceId, portalFailedLabel]);
 
   const planLabel = PLAN_LABELS[plan as PlanId] || plan;
   const nextPlanLabel = nextPlan ? PLAN_LABELS[nextPlan as PlanId] || nextPlan : null;
+
+  const renderedSiteLimit = siteLimit < 0 ? "∞" : String(siteLimit);
 
   return (
     <div className="bg-card border border-border rounded-xl p-6 mb-8 shadow-sm">
@@ -84,7 +112,7 @@ export function BillingStatus({
             {planLabel}
           </span>
           <span className="text-sm text-muted-foreground">
-            {currentSites} / {siteLimit < 0 ? "∞" : siteLimit} published sites
+            {sitesLabel.replace("{current}", String(currentSites)).replace("{limit}", renderedSiteLimit)}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -95,7 +123,7 @@ export function BillingStatus({
               disabled={upgrading}
               onClick={handleUpgrade}
             >
-              {upgrading ? "Opening..." : `Upgrade to ${nextPlanLabel}`}
+              {upgrading ? openingLabel : upgradeLabel?.replace("{plan}", nextPlanLabel ?? "")}
             </Button>
           )}
           {stripeCustomerId && (
@@ -105,7 +133,7 @@ export function BillingStatus({
               disabled={portalLoading}
               onClick={handleManageBilling}
             >
-              {portalLoading ? "Opening..." : "Manage Billing"}
+              {portalLoading ? openingLabel : manageBillingLabel}
             </Button>
           )}
         </div>

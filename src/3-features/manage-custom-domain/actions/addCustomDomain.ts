@@ -75,7 +75,7 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
       .update(tenantDomains)
       .set({ status: "error", lastError: apexResult.error ?? "Vercel error" })
       .where(eq(tenantDomains.id, row.id));
-    throw new Error(apexResult.error ?? "Failed to add domain to Vercel");
+    throw new Error(apexResult.error ?? "errors.vercel-add-domain-failed");
   }
 
   // ── 7. Add www redirect to Vercel ─────────────────────────────────────────
@@ -91,7 +91,7 @@ export async function addCustomDomain(tenantId: string, domainInput: string) {
       .update(tenantDomains)
       .set({ status: "error", lastError: wwwResult.error ?? "Vercel error" })
       .where(eq(tenantDomains.id, row.id));
-    throw new Error(`Failed to configure www redirect: ${wwwResult.error}`);
+    throw new Error("errors.vercel-www-redirect-failed");
   }
 
   // www already exists but needs redirect patched

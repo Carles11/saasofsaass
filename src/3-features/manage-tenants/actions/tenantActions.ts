@@ -59,7 +59,7 @@ export async function createTenant(raw: FormData | CreateTenantInput) {
     .limit(1);
 
   if (existing) {
-    throw new Error(`A tenant with slug "${slug}" already exists.`);
+    throw new Error("errors.slug-already-exists");
   }
 
   // Find or auto-create workspace for the profile.

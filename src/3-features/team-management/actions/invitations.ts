@@ -46,47 +46,47 @@ export async function createInvitation(input: CreateInvitationInput): Promise<vo
   const caller = await requireProfile();
   const callerRole = await getWorkspaceRoleForCaller(input.workspaceId, caller);
   if (callerRole !== "owner" && callerRole !== "webmaster") {
-    throw new Error("You don't have permission to invite members to this workspace");
+    throw new Error("errors.no-permission-invite");
   }
 
   if (input.role === "webmaster" && callerRole !== "owner") {
-    throw new Error("Only the workspace owner can invite web-masters");
+    throw new Error("errors.only-owner-can-invite-webmaster");
   }
 
   const siteScope = input.siteScope;
   const siteIds = input.siteIds ?? [];
 
   if (siteScope === "all" && callerRole !== "owner") {
-    throw new Error("Only the workspace owner can grant access to all sites");
+    throw new Error("errors.only-owner-can-grant-all-sites");
   }
 
   if (siteScope === "specific") {
-    if (siteIds.length === 0) throw new Error("Select at least one site");
+    if (siteIds.length === 0) throw new Error("errors.select-at-least-one-site");
     const valid = await db
       .select({ id: tenants.id })
       .from(tenants)
       .where(and(eq(tenants.workspaceId, input.workspaceId), inArray(tenants.id, siteIds)));
     const validIds = new Set(valid.map((v) => v.id));
     if (siteIds.some((id) => !validIds.has(id))) {
-      throw new Error("One or more selected sites are invalid");
+      throw new Error("errors.invalid-sites");
     }
     if (callerRole === "webmaster") {
       const accessible = new Set(
         await getWebmasterAccessibleTenantIds(input.workspaceId, caller.id),
       );
       if (siteIds.some((id) => !accessible.has(id))) {
-        throw new Error("You can only assign sites you have access to");
+        throw new Error("errors.cant-assign-unowned-sites");
       }
     }
   }
 
   const plan = await getPlanForWorkspace(input.workspaceId);
   if (!planAllowsTeam(plan)) {
-    throw new Error("Upgrade to Pro to invite team members");
+    throw new Error("errors.upgrade-to-pro-for-team");
   }
 
   const email = input.email.trim().toLowerCase();
-  if (!email) throw new Error("Email is required");
+  if (!email) throw new Error("errors.email-required");
 
   // The workspace owner can't be invited.
   const [wsOwner] = await db
@@ -96,7 +96,7 @@ export async function createInvitation(input: CreateInvitationInput): Promise<vo
     .where(eq(workspaces.id, input.workspaceId))
     .limit(1);
   if (wsOwner && wsOwner.ownerEmail.toLowerCase() === email) {
-    throw new Error("That person already owns this workspace");
+    throw new Error("errors.already-owns-workspace");
   }
 
   // Already an active member of this workspace?
@@ -112,7 +112,7 @@ export async function createInvitation(input: CreateInvitationInput): Promise<vo
     )
     .limit(1);
   if (existingMember.length > 0) {
-    throw new Error("That person is already on the team");
+    throw new Error("errors.already-on-team");
   }
 
   // Per-plan seat cap. Re-sending to an already-pending email doesn't take a new
@@ -141,8 +141,7 @@ export async function createInvitation(input: CreateInvitationInput): Promise<vo
       );
     const used = Number(memberCount?.n ?? 0) + Number(inviteCount?.n ?? 0);
     if (used >= seatLimit) {
-      const roleName = input.role === "webmaster" ? "web-master" : "editor";
-      throw new Error(`You've reached your ${roleName} seat limit for this plan.`);
+      throw new Error("errors.seat-limit-reached");
     }
   }
 
@@ -318,12 +317,12 @@ export async function revokeInvitation(invitationId: string): Promise<void> {
     .from(workspaceInvitations)
     .where(eq(workspaceInvitations.id, invitationId))
     .limit(1);
-  if (!inv) throw new Error("Invitation not found");
+  if (!inv) throw new Error("errors.invitation-not-found");
 
   const callerRole = await getWorkspaceRoleForCaller(inv.workspaceId, caller);
   const isCreator = inv.invitedByProfileId === caller.id;
   if (callerRole !== "owner" && !(callerRole === "webmaster" && isCreator)) {
-    throw new Error("You cannot revoke this invitation");
+    throw new Error("errors.cannot-revoke-invitation");
   }
 
   await db
@@ -342,13 +341,13 @@ export async function resendInvitation(invitationId: string, locale = "en"): Pro
     .from(workspaceInvitations)
     .where(eq(workspaceInvitations.id, invitationId))
     .limit(1);
-  if (!inv) throw new Error("Invitation not found");
-  if (inv.status !== "pending") throw new Error("Only pending invitations can be resent");
+  if (!inv) throw new Error("errors.invitation-not-found");
+  if (inv.status !== "pending") throw new Error("errors.only-pending-can-resend");
 
   const callerRole = await getWorkspaceRoleForCaller(inv.workspaceId, caller);
   const isCreator = inv.invitedByProfileId === caller.id;
   if (callerRole !== "owner" && !(callerRole === "webmaster" && isCreator)) {
-    throw new Error("You cannot resend this invitation");
+    throw new Error("errors.cannot-resend-invitation");
   }
 
   const token = generateInviteToken();

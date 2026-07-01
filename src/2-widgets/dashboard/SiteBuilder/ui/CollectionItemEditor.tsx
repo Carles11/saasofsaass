@@ -256,7 +256,7 @@ export function CollectionItemEditor({
         onOpenChange(false);
       } catch (err) {
         toast({
-          title: err instanceof Error ? err.message : t("editor.save-failed", "Could not save."),
+          title: err instanceof Error ? t(err.message, err.message) : t("editor.save-failed", "Could not save."),
           status: "error",
         });
       }
@@ -449,6 +449,7 @@ export function CollectionItemEditor({
                       value={value}
                       dir={dir}
                       resetKey={`${activeLocale}-${f.key}`}
+                      translations={translations}
                       onChange={(html) => setField(activeLocale, f.key, html)}
                     />
                   ) : (

@@ -73,7 +73,7 @@ export function PublishCapDialog({
     } catch (err: unknown) {
       toast.error(
         err instanceof Error
-          ? err.message
+          ? t(err.message, err.message)
           : t("add-extra-site.error", "Could not add an extra site."),
       );
     } finally {
@@ -90,7 +90,7 @@ export function PublishCapDialog({
     } catch (err: unknown) {
       toast.error(
         err instanceof Error
-          ? err.message
+          ? t(err.message, err.message)
           : t("upgrade.error", "Could not start checkout."),
       );
       setLoading(null);

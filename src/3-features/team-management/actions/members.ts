@@ -25,12 +25,12 @@ export async function removeMember(membershipId: string): Promise<void> {
     .from(workspaceMemberships)
     .where(eq(workspaceMemberships.id, membershipId))
     .limit(1);
-  if (!m) throw new Error("Member not found");
+  if (!m) throw new Error("errors.member-not-found");
 
   const callerRole = await getWorkspaceRoleForCaller(m.workspaceId, caller);
   const allowed =
     callerRole === "owner" || (callerRole === "webmaster" && m.role === "editor");
-  if (!allowed) throw new Error("You cannot remove this member");
+  if (!allowed) throw new Error("errors.cannot-remove-member");
 
   await db.delete(workspaceMemberships).where(eq(workspaceMemberships.id, membershipId));
   revalidatePath("/[locale]/team", "page");
@@ -47,7 +47,7 @@ export async function updateMemberRole(
     .from(workspaceMemberships)
     .where(eq(workspaceMemberships.id, membershipId))
     .limit(1);
-  if (!m) throw new Error("Member not found");
+  if (!m) throw new Error("errors.member-not-found");
 
   await assertWorkspaceOwner(m.workspaceId, caller.id);
 
@@ -70,18 +70,18 @@ export async function updateMemberSites(
     .from(workspaceMemberships)
     .where(eq(workspaceMemberships.id, membershipId))
     .limit(1);
-  if (!m) throw new Error("Member not found");
+  if (!m) throw new Error("errors.member-not-found");
 
   await assertWorkspaceOwner(m.workspaceId, caller.id);
 
   if (siteScope === "specific") {
-    if (siteIds.length === 0) throw new Error("Select at least one site");
+    if (siteIds.length === 0) throw new Error("errors.select-at-least-one-site");
     const valid = await db
       .select({ id: tenants.id })
       .from(tenants)
       .where(and(eq(tenants.workspaceId, m.workspaceId), inArray(tenants.id, siteIds)));
     if (valid.length !== siteIds.length) {
-      throw new Error("One or more selected sites are invalid");
+      throw new Error("errors.invalid-sites");
     }
     await db
       .update(workspaceMemberships)

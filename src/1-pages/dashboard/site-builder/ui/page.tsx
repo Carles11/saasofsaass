@@ -38,6 +38,7 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
         "dashboard.collection",
         "dashboard.block-edit",
         "dashboard.collaborators",
+        "errors",
       ],
       locale,
     ),
@@ -75,6 +76,7 @@ export async function SiteBuilderPage({ tenantId, locale }: SiteBuilderPageProps
     ...(namespacedTranslations["dashboard.blocks"] ?? {}),
     ...(namespacedTranslations["dashboard.collection"] ?? {}),
     ...(namespacedTranslations["dashboard.block-edit"] ?? {}),
+    ...(namespacedTranslations.errors ?? {}),
   };
 
   return (

@@ -57,7 +57,7 @@ export async function createEntity({
     .where(eq(tenants.id, tenantId))
     .limit(1)
 
-  if (!tenant) throw new Error('Tenant not found')
+  if (!tenant) throw new Error('errors.tenant-not-found')
 
   // Unique slug from title across this tenant's existing entities.
   const existing = await db

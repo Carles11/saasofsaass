@@ -51,7 +51,7 @@ export async function listTeam(workspaceId: string): Promise<TeamView> {
   const caller = await requireProfile();
   const callerRole = await getWorkspaceRoleForCaller(workspaceId, caller);
   if (callerRole !== "owner" && callerRole !== "webmaster") {
-    throw new Error("You don't have access to this team");
+    throw new Error("errors.no-team-access");
   }
 
   const [ws] = await db

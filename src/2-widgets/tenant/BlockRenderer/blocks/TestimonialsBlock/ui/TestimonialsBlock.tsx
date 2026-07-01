@@ -1,4 +1,5 @@
 import { getEntitiesByBlock } from "@/4-entities/tenant-content";
+import { getPlatformTranslations, resolveTranslation } from "@/5-shared/lib/db/platform-translations";
 import type { TestimonialWithTranslation } from "@/5-shared/types/tenants/entities";
 import type { BlockProps } from "../../../config/types";
 
@@ -21,12 +22,11 @@ function StarRating({ rating }: { rating: number }) {
 
 export async function TestimonialsBlock({ block, locale, blockId, t }: BlockProps) {
   const rows = (await getEntitiesByBlock(block.id, locale)) as TestimonialWithTranslation[];
-
+  const blocksT = await getPlatformTranslations("tenant.blocks", locale);
+  const emptyText = t.emptyState || resolveTranslation(blocksT, "testimonials.empty", "No testimonials to display yet.");
   const heading = t.heading;
 
   if (!rows.length && !heading) return null;
-
-  const emptyText = t.emptyState || "No testimonials to display yet.";
 
   return (
     <section id={blockId} className="py-20 sm:py-28 px-6 bg-secondary/30">

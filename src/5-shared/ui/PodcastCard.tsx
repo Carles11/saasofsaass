@@ -10,6 +10,8 @@ export interface PodcastCardProps {
   publishedAt?: Date | string | null
   locale: SupportedLocaleType
   listenLabel?: string
+  readMoreLabel?: string
+  byLabel?: string
 }
 
 function formatDate(date: Date | string, locale: SupportedLocaleType) {
@@ -36,6 +38,8 @@ export function PodcastCard({
   publishedAt,
   locale,
   listenLabel,
+  readMoreLabel = "Read more",
+  byLabel = "by",
 }: PodcastCardProps) {
   return (
     <article className="rounded-xs border border-border overflow-hidden hover:shadow-md transition-shadow bg-card flex flex-col">

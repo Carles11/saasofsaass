@@ -66,7 +66,7 @@ export async function triggerTenantTranslation(tenantId: string): Promise<Transl
     .where(eq(tenants.id, tenantId))
     .limit(1);
 
-  if (!tenant) throw new Error("Tenant not found");
+  if (!tenant) throw new Error("errors.tenant-not-found");
 
   const quota = await getAiQuota(tenantId);
   if (quota.remaining <= 0) {

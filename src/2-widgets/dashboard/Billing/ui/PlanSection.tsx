@@ -73,11 +73,11 @@ export function PlanSection({ workspace, planConfig, nextPlan, currentSites, tra
       const result = await createCheckoutSession(workspace.id, nextPlan);
       if (result.url) window.location.href = result.url;
     } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : "Failed to start upgrade.");
+      setActionError(err instanceof Error ? resolveTranslation(translations, err.message, err.message) : "Failed to start upgrade.");
     } finally {
       setActionLoading(null);
     }
-  }, [workspace.id, nextPlan]);
+  }, [workspace.id, nextPlan, translations]);
 
   const handleManageBilling = useCallback(async () => {
     setActionLoading("portal");
@@ -86,11 +86,11 @@ export function PlanSection({ workspace, planConfig, nextPlan, currentSites, tra
       const result = await createBillingPortalSession(workspace.id);
       if (result.url) window.location.href = result.url;
     } catch (err: unknown) {
-      setActionError(err instanceof Error ? err.message : "Failed to open billing portal.");
+      setActionError(err instanceof Error ? resolveTranslation(translations, err.message, err.message) : "Failed to open billing portal.");
     } finally {
       setActionLoading(null);
     }
-  }, [workspace.id]);
+  }, [workspace.id, translations]);
 
   const section = (key: string, fallback: string) =>
     resolveTranslation(translations, key, fallback);

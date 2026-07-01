@@ -9,6 +9,8 @@ export interface BlogCardProps {
   author?: string | null
   publishedAt?: Date | string | null
   locale: SupportedLocaleType
+  readMoreLabel?: string
+  byLabel?: string
 }
 
 function formatDate(date: Date | string, locale: SupportedLocaleType) {
@@ -24,6 +26,8 @@ export function BlogCard({
   author,
   publishedAt,
   locale,
+  readMoreLabel = "Read more",
+  byLabel = "by",
 }: BlogCardProps) {
   return (
     <article className="rounded-xs border border-border overflow-hidden hover:shadow-md transition-shadow bg-card flex flex-col">
@@ -49,14 +53,14 @@ export function BlogCard({
             </time>
           )}
           {author && (
-            <span className="truncate">by {author}</span>
+            <span className="truncate">{byLabel} {author}</span>
           )}
         </div>
         <a
           href={href}
           className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
         >
-          Read more &rarr;
+          {readMoreLabel} &rarr;
         </a>
       </div>
     </article>

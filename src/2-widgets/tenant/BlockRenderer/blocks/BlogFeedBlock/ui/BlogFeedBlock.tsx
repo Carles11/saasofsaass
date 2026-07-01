@@ -16,8 +16,11 @@ export async function BlogFeedBlock({ block, config, locale, blockId, t }: Block
   const rows = await getEntitiesByBlock(block.id, locale);
   const items = rows.slice(0, maxItems);
   const navT = await getPlatformTranslations("tenant.nav", locale);
+  const blocksT = await getPlatformTranslations("tenant.blocks", locale);
   const seeAllLabel = resolveTranslation(navT, "see-all", "See all");
   const heading = t.heading || resolveTranslation(navT, "blog", "Blog");
+  const readMoreLabel = resolveTranslation(blocksT, "read-more", "Read more");
+  const byLabel = resolveTranslation(blocksT, "by", "by");
 
   if (items.length === 0) return null;
 
@@ -37,6 +40,8 @@ export async function BlogFeedBlock({ block, config, locale, blockId, t }: Block
         author={meta?.author}
         publishedAt={entity.publishedAt}
         locale={locale}
+        readMoreLabel={readMoreLabel}
+        byLabel={byLabel}
       />
     );
   });

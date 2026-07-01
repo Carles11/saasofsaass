@@ -38,6 +38,11 @@ import {
 } from "@/3-features/manage-tenants/actions/archiveTenant";
 import { deleteTenant } from "@/3-features/manage-tenants/actions/deleteTenant";
 import type { Tenant } from "@/5-shared/lib/db/schema";
+import {
+  resolveTranslation,
+  type TranslationDict,
+  type TranslationParams,
+} from "@/5-shared/lib/translations/resolve";
 
 interface TenantDomain {
   tenantId: string;
@@ -51,28 +56,49 @@ interface SitesTableProps {
   manageableTenantIds: string[];
   locale: string;
   domains: TenantDomain[];
+  translations?: TranslationDict;
 }
 
-function roleLabel(role: string): string {
-  if (role === "owner") return "Owner";
-  if (role === "webmaster") return "Web-master";
-  return "Editor";
+type TrFn = (
+  key: string,
+  fallback: string,
+  params?: TranslationParams,
+) => string;
+
+function roleLabel(role: string, tr: TrFn): string {
+  if (role === "owner") return tr("role.owner", "Owner");
+  if (role === "webmaster") return tr("role.webmaster", "Web-master");
+  return tr("role.editor", "Editor");
 }
 
-function StatusPill({ status, compact = false }: { status: string; compact?: boolean }) {
-  const styles: Record<string, { label: string; pill: string; dot: string }> = {
+function StatusPill({
+  status,
+  tr,
+  compact = false,
+}: {
+  status: string;
+  tr: TrFn;
+  compact?: boolean;
+}) {
+  const styles: Record<
+    string,
+    { labelKey: string; fallback: string; pill: string; dot: string }
+  > = {
     published: {
-      label: "Published",
+      labelKey: "status.published",
+      fallback: "Published",
       pill: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
       dot: "bg-emerald-500",
     },
     archived: {
-      label: "Archived",
+      labelKey: "status.archived",
+      fallback: "Archived",
       pill: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
       dot: "bg-amber-500",
     },
     draft: {
-      label: "Draft",
+      labelKey: "status.draft",
+      fallback: "Draft",
       pill: "bg-muted text-muted-foreground",
       dot: "bg-muted-foreground",
     },
@@ -85,7 +111,7 @@ function StatusPill({ status, compact = false }: { status: string; compact?: boo
       } ${s.pill}`}
     >
       <span className={`rounded-full ${compact ? "size-1" : "size-1.5"} ${s.dot}`} />
-      {s.label}
+      {tr(s.labelKey, s.fallback)}
     </span>
   );
 }
@@ -98,6 +124,7 @@ interface RowActionsProps {
   isPublished: boolean;
   isArchived: boolean;
   isPending: boolean;
+  tr: TrFn;
   onPublish: (id: string) => void;
   onUnpublish: (id: string) => void;
   onArchive: (id: string) => void;
@@ -113,6 +140,7 @@ function RowActions({
   isPublished,
   isArchived,
   isPending,
+  tr,
   onPublish,
   onUnpublish,
   onArchive,
@@ -128,7 +156,9 @@ function RowActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuItem asChild>
-          <Link href={`/${locale}/dashboard/site-builder/${tenant.id}`}>Edit</Link>
+          <Link href={`/${locale}/dashboard/site-builder/${tenant.id}`}>
+            {tr("action.edit", "Edit")}
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {!isArchived && canManage && (
@@ -136,17 +166,19 @@ function RowActions({
             disabled={isPending}
             onSelect={() => (isPublished ? onUnpublish(tenant.id) : onPublish(tenant.id))}
           >
-            {isPublished ? "Unpublish" : "Publish"}
+            {isPublished
+              ? tr("action.unpublish", "Unpublish")
+              : tr("action.publish", "Publish")}
           </DropdownMenuItem>
         )}
         {!isArchived && isOwnerRow && (
           <DropdownMenuItem disabled={isPending} onSelect={() => onArchive(tenant.id)}>
-            Archive
+            {tr("action.archive", "Archive")}
           </DropdownMenuItem>
         )}
         {isArchived && isOwnerRow && (
           <DropdownMenuItem disabled={isPending} onSelect={() => onRestore(tenant.id)}>
-            Restore
+            {tr("action.restore", "Restore")}
           </DropdownMenuItem>
         )}
         {isArchived && isOwnerRow && (
@@ -155,7 +187,7 @@ function RowActions({
             onSelect={() => onDelete(tenant)}
             className="text-destructive focus:text-destructive"
           >
-            Delete permanently
+            {tr("action.delete-permanently", "Delete permanently")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -166,19 +198,21 @@ function RowActions({
 type FilterStatus = "all" | "published" | "draft" | "archived";
 type SortField = "name" | "status" | "updatedAt" | "locales";
 
-function timeAgo(date: Date): string {
+function timeAgo(date: Date, tr: TrFn): string {
   const diff = Date.now() - date.getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return tr("time.just-now", "Just now");
+  if (minutes < 60) return tr("time.minutes-ago", "{minutes}m ago", { minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return tr("time.hours-ago", "{hours}h ago", { hours });
   const days = Math.floor(hours / 24);
-  if (days === 1) return "Yesterday";
-  if (days < 30) return `${days}d ago`;
+  if (days === 1) return tr("time.yesterday", "Yesterday");
+  if (days < 30) return tr("time.days-ago", "{days}d ago", { days });
   const months = Math.floor(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.floor(months / 12)}y ago`;
+  if (months < 12) return tr("time.months-ago", "{months}mo ago", { months });
+  return tr("time.years-ago", "{years}y ago", {
+    years: Math.floor(months / 12),
+  });
 }
 
 export function SitesTable({
@@ -187,6 +221,7 @@ export function SitesTable({
   manageableTenantIds,
   locale,
   domains,
+  translations,
 }: SitesTableProps) {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -198,6 +233,12 @@ export function SitesTable({
   const [capDialog, setCapDialog] = useState<
     { info: PublishCapInfo; tenantId: string } | null
   >(null);
+
+  const tr: TrFn = useCallback(
+    (key: string, fallback: string, params?: TranslationParams) =>
+      resolveTranslation(translations, key, fallback, params),
+    [translations],
+  );
 
   const domainMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -297,7 +338,7 @@ export function SitesTable({
               t.id === tenantId ? { ...t, status: "published" } : t,
             ),
           );
-          toast.success("Site published");
+          toast.success(tr("toast.published", "Site published"));
         } catch (err: unknown) {
           const cap = parsePublishCapError(err);
           if (cap) {
@@ -305,12 +346,14 @@ export function SitesTable({
             return;
           }
           const message =
-            err instanceof Error ? err.message : "Failed to publish";
+            err instanceof Error
+              ? tr(err.message, err.message)
+              : tr("toast.publish-failed", "Failed to publish");
           toast.error(message);
         }
       });
     },
-    [],
+    [tr],
   );
 
   const handleUnpublish = useCallback(
@@ -323,44 +366,60 @@ export function SitesTable({
               t.id === tenantId ? { ...t, status: "draft" } : t,
             ),
           );
-          toast.success("Site unpublished");
+          toast.success(tr("toast.unpublished", "Site unpublished"));
         } catch (err: unknown) {
           const message =
-            err instanceof Error ? err.message : "Failed to unpublish";
+            err instanceof Error
+              ? tr(err.message, err.message)
+              : tr("toast.unpublish-failed", "Failed to unpublish");
           toast.error(message);
         }
       });
     },
-    [],
+    [tr],
   );
 
-  const handleArchive = useCallback((tenantId: string) => {
-    startTransition(async () => {
-      try {
-        await archiveTenant(tenantId);
-        setTenants((prev) =>
-          prev.map((t) => (t.id === tenantId ? { ...t, status: "archived" } : t)),
-        );
-        toast.success("Site archived");
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to archive");
-      }
-    });
-  }, []);
+  const handleArchive = useCallback(
+    (tenantId: string) => {
+      startTransition(async () => {
+        try {
+          await archiveTenant(tenantId);
+          setTenants((prev) =>
+            prev.map((t) => (t.id === tenantId ? { ...t, status: "archived" } : t)),
+          );
+          toast.success(tr("toast.archived", "Site archived"));
+        } catch (err) {
+          toast.error(
+            err instanceof Error
+              ? tr(err.message, err.message)
+              : tr("toast.archive-failed", "Failed to archive"),
+          );
+        }
+      });
+    },
+    [tr],
+  );
 
-  const handleRestore = useCallback((tenantId: string) => {
-    startTransition(async () => {
-      try {
-        await restoreTenant(tenantId);
-        setTenants((prev) =>
-          prev.map((t) => (t.id === tenantId ? { ...t, status: "draft" } : t)),
-        );
-        toast.success("Site restored");
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to restore");
-      }
-    });
-  }, []);
+  const handleRestore = useCallback(
+    (tenantId: string) => {
+      startTransition(async () => {
+        try {
+          await restoreTenant(tenantId);
+          setTenants((prev) =>
+            prev.map((t) => (t.id === tenantId ? { ...t, status: "draft" } : t)),
+          );
+          toast.success(tr("toast.restored", "Site restored"));
+        } catch (err) {
+          toast.error(
+            err instanceof Error
+              ? tr(err.message, err.message)
+              : tr("toast.restore-failed", "Failed to restore"),
+          );
+        }
+      });
+    },
+    [tr],
+  );
 
   const [deleteTarget, setDeleteTarget] = useState<Tenant | null>(null);
   const [confirmName, setConfirmName] = useState("");
@@ -372,11 +431,15 @@ export function SitesTable({
       try {
         await deleteTenant(target.id, confirmName);
         setTenants((prev) => prev.filter((t) => t.id !== target.id));
-        toast.success("Site deleted");
+        toast.success(tr("toast.deleted", "Site deleted"));
         setDeleteTarget(null);
         setConfirmName("");
       } catch (err) {
-        toast.error(err instanceof Error ? err.message : "Failed to delete");
+        toast.error(
+          err instanceof Error
+            ? tr(err.message, err.message)
+            : tr("toast.delete-failed", "Failed to delete"),
+        );
       }
     });
   }
@@ -387,22 +450,26 @@ export function SitesTable({
   const filterCards = [
     {
       key: "all" as FilterStatus,
-      label: "All",
+      labelKey: "filter.all",
+      labelFallback: "All",
       count: statusCounts.all,
     },
     {
       key: "published" as FilterStatus,
-      label: "Published",
+      labelKey: "filter.published",
+      labelFallback: "Published",
       count: statusCounts.published,
     },
     {
       key: "draft" as FilterStatus,
-      label: "Drafts",
+      labelKey: "filter.drafts",
+      labelFallback: "Drafts",
       count: statusCounts.draft,
     },
     {
       key: "archived" as FilterStatus,
-      label: "Archived",
+      labelKey: "filter.archived",
+      labelFallback: "Archived",
       count: statusCounts.archived,
     },
   ];
@@ -434,7 +501,7 @@ export function SitesTable({
               }`}
             >
               <p className="text-xs font-medium text-muted-foreground tracking-wide uppercase">
-                {card.label}
+                {tr(card.labelKey, card.labelFallback)}
               </p>
               <p className="text-3xl font-black text-foreground tracking-tighter mt-1">
                 {card.count}
@@ -449,7 +516,10 @@ export function SitesTable({
         <div className="relative mb-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name, subdomain, or custom domain..."
+            placeholder={tr(
+              "search.placeholder",
+              "Search by name, subdomain, or custom domain...",
+            )}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -463,10 +533,13 @@ export function SitesTable({
         {showInitialEmptyState && (
           <section className="bg-card p-12 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">
             <h3 className="text-xl font-bold text-card-foreground mb-2">
-              No Tenants Found
+              {tr("empty.title", "No Tenants Found")}
             </h3>
             <p className="text-muted-foreground max-w-sm mx-auto italic font-medium">
-              Your workshop is initialized. Awaiting the first deployment.
+              {tr(
+                "empty.description",
+                "Your workshop is initialized. Awaiting the first deployment.",
+              )}
             </p>
           </section>
         )}
@@ -476,21 +549,43 @@ export function SitesTable({
           <section className="bg-card p-12 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">
             <h3 className="text-xl font-bold text-card-foreground mb-2">
               {filterStatus !== "all" && searchQuery
-                ? `No ${filterStatus} sites match your search`
+                ? tr(
+                    "empty.filtered.search-and-filter",
+                    "No {status} sites match your search",
+                    { status: filterStatus },
+                  )
                 : filterStatus !== "all"
-                  ? `No ${filterStatus} sites`
-                  : "No sites match your search"}
+                  ? tr(
+                      `empty.filtered.${filterStatus}`,
+                      `No ${filterStatus} sites`,
+                    )
+                  : tr("empty.filtered.search", "No sites match your search")}
             </h3>
             <p className="text-muted-foreground max-w-sm mx-auto italic font-medium">
               {filterStatus !== "all" && searchQuery
-                ? "Try a different search or filter."
+                ? tr(
+                    "empty.filtered.hint.search-and-filter",
+                    "Try a different search or filter.",
+                  )
                 : filterStatus !== "all"
                   ? filterStatus === "published"
-                    ? "Publish a site to see it here."
+                    ? tr(
+                        "empty.filtered.hint.published",
+                        "Publish a site to see it here.",
+                      )
                     : filterStatus === "archived"
-                      ? "Archive a site to see it here."
-                      : "Create a site to see it here."
-                  : "Try a different search term."}
+                      ? tr(
+                          "empty.filtered.hint.archived",
+                          "Archive a site to see it here.",
+                        )
+                      : tr(
+                          "empty.filtered.hint.draft",
+                          "Create a site to see it here.",
+                        )
+                  : tr(
+                      "empty.filtered.hint.search",
+                      "Try a different search term.",
+                    )}
             </p>
           </section>
         )}
@@ -505,7 +600,7 @@ export function SitesTable({
                     className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 cursor-pointer hover:text-foreground select-none"
                     onClick={() => toggleSort("name")}
                   >
-                    Name
+                    {tr("col.name", "Name")}
                     <SortIndicator
                       field="name"
                       sortField={sortField}
@@ -516,7 +611,7 @@ export function SitesTable({
                     className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 cursor-pointer hover:text-foreground select-none"
                     onClick={() => toggleSort("status")}
                   >
-                    Status
+                    {tr("col.status", "Status")}
                     <SortIndicator
                       field="status"
                       sortField={sortField}
@@ -524,16 +619,16 @@ export function SitesTable({
                     />
                   </th>
                   <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3">
-                    Subdomain
+                    {tr("col.subdomain", "Subdomain")}
                   </th>
                   <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 hidden lg:table-cell">
-                    Custom Domain
+                    {tr("col.custom-domain", "Custom Domain")}
                   </th>
                   <th
                     className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 cursor-pointer hover:text-foreground select-none hidden lg:table-cell"
                     onClick={() => toggleSort("locales")}
                   >
-                    Languages
+                    {tr("col.languages", "Languages")}
                     <SortIndicator
                       field="locales"
                       sortField={sortField}
@@ -544,7 +639,7 @@ export function SitesTable({
                     className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 cursor-pointer hover:text-foreground select-none"
                     onClick={() => toggleSort("updatedAt")}
                   >
-                    Updated
+                    {tr("col.updated", "Updated")}
                     <SortIndicator
                       field="updatedAt"
                       sortField={sortField}
@@ -552,7 +647,7 @@ export function SitesTable({
                     />
                   </th>
                   <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider px-4 py-3 hidden sm:table-cell">
-                    Role
+                    {tr("col.role", "Role")}
                   </th>
                   <th className="w-10 px-4 py-3" />
                 </tr>
@@ -583,7 +678,7 @@ export function SitesTable({
 
                       {/* Status */}
                       <td className="px-4 py-3">
-                        <StatusPill status={tenant.status} />
+                        <StatusPill status={tenant.status} tr={tr} />
                       </td>
 
                       {/* Subdomain */}
@@ -619,7 +714,7 @@ export function SitesTable({
                           className="text-sm text-muted-foreground"
                           title={new Date(tenant.updatedAt).toLocaleString()}
                         >
-                          {timeAgo(new Date(tenant.updatedAt))}
+                          {timeAgo(new Date(tenant.updatedAt), tr)}
                         </span>
                       </td>
 
@@ -629,7 +724,7 @@ export function SitesTable({
                           variant={role === "editor" ? "secondary" : "default"}
                           className="text-[10px] uppercase tracking-wider font-semibold"
                         >
-                          {roleLabel(role)}
+                          {roleLabel(role, tr)}
                         </Badge>
                       </td>
 
@@ -643,6 +738,7 @@ export function SitesTable({
                           isPublished={isPublished}
                           isArchived={isArchived}
                           isPending={isPending}
+                          tr={tr}
                           onPublish={handlePublish}
                           onUnpublish={handleUnpublish}
                           onArchive={handleArchive}
@@ -664,10 +760,13 @@ export function SitesTable({
         {showInitialEmptyState && (
           <section className="bg-card p-12 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">
             <h3 className="text-xl font-bold text-card-foreground mb-2">
-              No Tenants Found
+              {tr("empty.title", "No Tenants Found")}
             </h3>
             <p className="text-muted-foreground max-w-sm mx-auto italic font-medium">
-              Your workshop is initialized. Awaiting the first deployment.
+              {tr(
+                "empty.description",
+                "Your workshop is initialized. Awaiting the first deployment.",
+              )}
             </p>
           </section>
         )}
@@ -675,12 +774,24 @@ export function SitesTable({
         {showEmptyState && (
           <section className="bg-card p-12 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center text-center">
             <h3 className="text-xl font-bold text-card-foreground mb-2">
-              {filterStatus !== "all"
-                ? `No ${filterStatus} sites`
-                : "No sites match your search"}
+              {filterStatus !== "all" && searchQuery
+                ? tr(
+                    "empty.filtered.search-and-filter",
+                    "No {status} sites match your search",
+                    { status: filterStatus },
+                  )
+                : filterStatus !== "all"
+                  ? tr(
+                      `empty.filtered.${filterStatus}`,
+                      `No ${filterStatus} sites`,
+                    )
+                  : tr("empty.filtered.search", "No sites match your search")}
             </h3>
             <p className="text-muted-foreground max-w-sm mx-auto italic font-medium">
-              Try adjusting your search or filter.
+              {tr(
+                "empty.filtered.hint.search-and-filter",
+                "Try a different search or filter.",
+              )}
             </p>
           </section>
         )}
@@ -713,6 +824,7 @@ export function SitesTable({
                   isPublished={isPublished}
                   isArchived={isArchived}
                   isPending={isPending}
+                  tr={tr}
                   onPublish={handlePublish}
                   onUnpublish={handleUnpublish}
                   onArchive={handleArchive}
@@ -722,31 +834,33 @@ export function SitesTable({
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2 items-center">
-                <StatusPill status={tenant.status} compact />
+                <StatusPill status={tenant.status} compact tr={tr} />
                 <Badge
                   variant={role === "editor" ? "secondary" : "default"}
                   className="text-[10px] uppercase tracking-wider font-semibold"
                 >
-                  {roleLabel(role)}
+                  {roleLabel(role, tr)}
                 </Badge>
               </div>
 
               <div className="mt-2 text-xs text-muted-foreground space-y-0.5">
                 <p>
-                  Subdomain:{" "}
+                  {tr("mobile.subdomain", "Subdomain")}:{" "}
                   <span className="font-mono">
                     {tenant.slug}.{rootDomain}
                   </span>
                 </p>
                 {customDomain && (
                   <p>
-                    Domain:{" "}
+                    {tr("mobile.domain", "Domain")}:{" "}
                     <span className="font-mono">{customDomain}</span>
                   </p>
                 )}
                 <p>
-                  Languages: {tenant.locales?.length ?? 0} | Updated:{" "}
-                  {timeAgo(new Date(tenant.updatedAt))}
+                  {tr("mobile.languages", "Languages")}:{" "}
+                  {tenant.locales?.length ?? 0} |{" "}
+                  {tr("mobile.updated", "Updated")}:{" "}
+                  {timeAgo(new Date(tenant.updatedAt), tr)}
                 </p>
               </div>
             </div>
@@ -766,17 +880,22 @@ export function SitesTable({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete site permanently?</DialogTitle>
+            <DialogTitle>
+              {tr("dialog.delete.title", "Delete site permanently?")}
+            </DialogTitle>
             <DialogDescription>
-              This permanently deletes{" "}
-              <span className="font-semibold text-foreground">{deleteTarget?.name}</span>{" "}
-              and all of its content, languages, domains, and images. This cannot be
-              undone.
+              {tr(
+                "dialog.delete.description",
+                "This permanently deletes {name} and all of its content, languages, domains, and images. This cannot be undone.",
+                { name: deleteTarget?.name ?? "" },
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label htmlFor="confirm-delete">
-              Type <span className="font-semibold">{deleteTarget?.name}</span> to confirm
+              {tr("dialog.delete.confirm-hint", "Type {name} to confirm", {
+                name: deleteTarget?.name ?? "",
+              })}
             </Label>
             <Input
               id="confirm-delete"
@@ -795,14 +914,14 @@ export function SitesTable({
               }}
               disabled={isPending}
             >
-              Cancel
+              {tr("dialog.delete.cancel", "Cancel")}
             </Button>
             <Button
               variant="destructive"
               onClick={handleDelete}
               disabled={isPending || confirmName.trim() !== (deleteTarget?.name ?? "")}
             >
-              Delete permanently
+              {tr("dialog.delete.confirm", "Delete permanently")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -820,6 +939,7 @@ export function SitesTable({
             router.refresh();
             handlePublish(id);
           }}
+          translations={translations}
         />
       )}
     </div>

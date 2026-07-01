@@ -120,7 +120,7 @@ export function TemplateGallerySheet({
         setTenant({ ...tenant, templateId: previewTemplateId });
         onOpenChange(false);
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Could not apply template.";
+        const msg = err instanceof Error ? t(err.message, err.message) : t("errors.unknown-error", "Could not apply template.");
         setErrorMsg(msg);
       }
     });

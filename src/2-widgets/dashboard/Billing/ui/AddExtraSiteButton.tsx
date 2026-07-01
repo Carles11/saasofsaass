@@ -52,7 +52,7 @@ export function AddExtraSiteButton({
     } catch (err: unknown) {
       const msg =
         err instanceof Error
-          ? err.message
+          ? resolveTranslation(translations, err.message, err.message)
           : resolveTranslation(
               translations,
               "add-extra-site.error",

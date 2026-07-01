@@ -35,7 +35,7 @@ export async function generatePreviewToken(
     .where(eq(tenants.id, tenantId))
     .limit(1);
 
-  if (!row) throw new Error("Tenant not found");
+  if (!row) throw new Error("errors.tenant-not-found");
 
   // Determine expiry seconds
   let expiresInSeconds: number;
@@ -47,9 +47,9 @@ export async function generatePreviewToken(
     // Share link with a chosen duration — validate against the plan's ceiling.
     const workspacePlan = await getWorkspacePlan(row.workspaceId);
     const maxDays = getPlan(workspacePlan).features.previewLinkMaxDays;
-    if (maxDays === null) throw new Error("Share Preview Link requires Pro or higher");
+    if (maxDays === null) throw new Error("errors.preview-pro-required");
     if (expiresInDays < 1 || expiresInDays > maxDays) {
-      throw new Error(`Your plan allows a maximum of ${maxDays} days`);
+      throw new Error("errors.preview-max-days");
     }
     expiresInSeconds = expiresInDays * 24 * 60 * 60;
   }

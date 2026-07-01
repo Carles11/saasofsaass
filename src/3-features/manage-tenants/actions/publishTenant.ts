@@ -6,7 +6,7 @@ import { tenants, workspaces } from "@/5-shared/lib/db/schema";
 import { and, eq, ne, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { tenantCache } from "@/5-shared/lib/next/tenant-cache";
-import { getEffectiveSiteLimit, isUnlimited, PLAN_LABELS, type PlanId } from "@/5-shared/lib/billing/plans";
+import { getEffectiveSiteLimit, isUnlimited } from "@/5-shared/lib/billing/plans";
 import { PUBLISH_CAP_SENTINEL } from "@/5-shared/lib/tenants/publish-cap";
 
 async function getTenantWithWorkspace(tenantId: string) {
@@ -32,16 +32,16 @@ export async function publishTenant(tenantId: string) {
   await assertCanManageStructure(tenantId);
 
   const t = await getTenantWithWorkspace(tenantId);
-  if (!t) throw new Error("Tenant not found");
+  if (!t) throw new Error("errors.tenant-not-found");
   if (t.status === "published") return { status: "published" as const };
-  if (!t.workspaceId || !t.plan) throw new Error("Tenant has no workspace");
+  if (!t.workspaceId || !t.plan) throw new Error("errors.tenant-no-workspace");
 
   if (
     t.subscriptionStatus === "past_due" ||
     t.subscriptionStatus === "unpaid" ||
     t.subscriptionStatus === "incomplete_expired"
   ) {
-    throw new Error("Your subscription is past due. Please update your billing information to publish.");
+    throw new Error("errors.subscription-past-due");
   }
 
   const limit = getEffectiveSiteLimit(t.plan, t.addonSites ?? 0);
@@ -58,10 +58,8 @@ export async function publishTenant(tenantId: string) {
       );
 
     if (Number(count) >= limit) {
-      const planLabel = PLAN_LABELS[t.plan as PlanId] ?? t.plan;
-      const human = `Your ${planLabel} plan allows ${limit} published site${limit === 1 ? "" : "s"}. Unpublish another site or upgrade to publish more.`;
       throw new Error(
-        `${PUBLISH_CAP_SENTINEL}:${t.plan}:${limit}:${t.addonSites ?? 0}: ${human}`,
+        `${PUBLISH_CAP_SENTINEL}:${t.plan}:${limit}:${t.addonSites ?? 0}:errors.publish-cap-reached`,
       );
     }
   }
@@ -82,7 +80,7 @@ export async function unpublishTenant(tenantId: string) {
     .from(tenants)
     .where(eq(tenants.id, tenantId))
     .limit(1);
-  if (!t) throw new Error("Tenant not found");
+  if (!t) throw new Error("errors.tenant-not-found");
 
   await db.update(tenants).set({ status: "draft" }).where(eq(tenants.id, tenantId));
   await tenantCache.delete(`slug:${t.slug}`);

@@ -22,10 +22,10 @@ export async function updateTenantFonts(
   const bodyVar = getFontVariable(bodyFontId);
 
   if (!titleVar || !AVAILABLE_TITLE_FONTS.some((f) => f.id === titleFontId)) {
-    throw new Error("Invalid title font selection");
+    throw new Error("errors.invalid-title-font");
   }
   if (!bodyVar || !AVAILABLE_BODY_FONTS.some((f) => f.id === bodyFontId)) {
-    throw new Error("Invalid body font selection");
+    throw new Error("errors.invalid-body-font");
   }
 
   const fontHeading = `var(${titleVar})`;

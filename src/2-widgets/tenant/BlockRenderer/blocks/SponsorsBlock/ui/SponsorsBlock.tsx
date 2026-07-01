@@ -1,13 +1,15 @@
 import { getEntitiesByBlock } from "@/4-entities/tenant-content";
+import { getPlatformTranslations, resolveTranslation } from "@/5-shared/lib/db/platform-translations";
 import type { SponsorWithTranslation } from "@/5-shared/types/tenants/entities";
 import type { BlockProps } from "../../../config/types";
 
-const TYPE_LABELS: Record<string, string> = {
-  sponsor: "Sponsors",
-  collaborator: "Collaborators",
-  partner: "Partners",
-  media: "Media Partners",
-  supporter: "Supporters",
+const TYPE_ORDER = ["sponsor", "collaborator", "partner", "media", "supporter"] as const;
+const TYPE_KEYS: Record<string, string> = {
+  sponsor: "sponsor.sponsors",
+  collaborator: "sponsor.collaborators",
+  partner: "sponsor.partners",
+  media: "sponsor.media-partners",
+  supporter: "sponsor.supporters",
 };
 
 function groupByType(
@@ -20,17 +22,24 @@ function groupByType(
     if (!groups.has(type)) groups.set(type, []);
     groups.get(type)!.push(row);
   }
-  const order = ["sponsor", "collaborator", "partner", "media", "supporter"];
-  return order
+  return TYPE_ORDER
     .filter((t) => groups.has(t))
     .map((t) => [t, groups.get(t)!]);
 }
 
 export async function SponsorsBlock({ block, locale, blockId, t }: BlockProps) {
   const rows = (await getEntitiesByBlock(block.id, locale)) as SponsorWithTranslation[];
+  const blocksT = await getPlatformTranslations("tenant.blocks", locale);
+  const sponsorLabels: Record<string, string> = {};
+  for (const typeKey of TYPE_ORDER) {
+    const seedKey = TYPE_KEYS[typeKey];
+    sponsorLabels[typeKey] = resolveTranslation(blocksT, seedKey, typeKey);
+  }
+  const emptyCtaLabel = resolveTranslation(blocksT, "sponsor.empty-cta", "Want to support us?");
+  const emptyContactLabel = resolveTranslation(blocksT, "sponsor.empty-contact", "Get in touch");
 
   if (!rows.length) return null;
-  const heading = t.heading || "Our Sponsors & Partners";
+  const heading = t.heading;
 
   const grouped = groupByType(rows);
 
@@ -51,18 +60,18 @@ export async function SponsorsBlock({ block, locale, blockId, t }: BlockProps) {
 
         {grouped.length === 0 ? (
           <p className="text-muted-foreground text-sm text-center">
-            Want to support us?{" "}
+            {emptyCtaLabel}{" "}
             <a
               href="#contact"
               className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
             >
-              Get in touch
+              {emptyContactLabel}
             </a>
           </p>
         ) : (
           <div className="flex flex-col gap-14">
             {grouped.map(([typeKey, items]) => {
-              const sectionLabel = TYPE_LABELS[typeKey] ?? typeKey;
+              const sectionLabel = sponsorLabels[typeKey] ?? typeKey;
               return (
                 <div key={typeKey}>
                   <h3 className="text-sm font-semibold text-center text-muted-foreground mb-8 uppercase tracking-widest">

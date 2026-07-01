@@ -71,7 +71,7 @@ export async function deleteGalleryImage(
 ): Promise<GalleryImage[]> {
   await assertCanEditContent(tenantId);
   if (!s3Key.startsWith(`${tenantId}/`)) {
-    throw new Error("This image does not belong to this site.");
+    throw new Error("errors.image-not-belong");
   }
   try {
     await deleteS3Object(s3Key);

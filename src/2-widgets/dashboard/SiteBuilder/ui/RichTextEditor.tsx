@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/5-shared/lib/utils";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 import Link from "@tiptap/extension-link";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -25,9 +26,10 @@ interface RichTextEditorProps {
   /** Re-mount key (e.g. active locale) so switching tabs resets content. */
   resetKey?: string;
   dir?: "ltr" | "rtl";
+  translations?: TranslationDict;
 }
 
-export function RichTextEditor({ value, onChange, resetKey, dir = "ltr" }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, resetKey, dir = "ltr", translations }: RichTextEditorProps) {
   const editor = useEditor({
     immediatelyRender: false, // avoid SSR hydration mismatch in Next
     extensions: [
@@ -55,17 +57,19 @@ export function RichTextEditor({ value, onChange, resetKey, dir = "ltr" }: RichT
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetKey, editor]);
 
+  const t = (key: string, fallback: string) => resolveTranslation(translations, key, fallback);
+
   if (!editor) return null;
 
   return (
     <div className="rounded-[var(--radius)] border border-input bg-background overflow-hidden">
-      <Toolbar editor={editor} />
+      <Toolbar editor={editor} t={t} />
       <EditorContent editor={editor} />
     </div>
   );
 }
 
-function Toolbar({ editor }: { editor: Editor }) {
+function Toolbar({ editor, t }: { editor: Editor; t: (key: string, fallback: string) => string }) {
   const btn = (active: boolean) =>
     cn(
       "flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors",
@@ -74,7 +78,7 @@ function Toolbar({ editor }: { editor: Editor }) {
 
   function setLink() {
     const prev = editor.getAttributes("link").href as string | undefined;
-    const url = window.prompt("Link URL", prev ?? "https://");
+    const url = window.prompt(t("link-url", "Link URL"), prev ?? t("link-placeholder", "https://"));
     if (url === null) return;
     if (url === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
@@ -85,37 +89,37 @@ function Toolbar({ editor }: { editor: Editor }) {
 
   return (
     <div className="flex flex-wrap items-center gap-0.5 border-b border-border bg-muted/40 px-1.5 py-1">
-      <button type="button" className={btn(editor.isActive("bold"))} onClick={() => editor.chain().focus().toggleBold().run()} title="Bold">
+      <button type="button" className={btn(editor.isActive("bold"))} onClick={() => editor.chain().focus().toggleBold().run()} title={t("bold", "Bold")}>
         <Bold className="h-4 w-4" />
       </button>
-      <button type="button" className={btn(editor.isActive("italic"))} onClick={() => editor.chain().focus().toggleItalic().run()} title="Italic">
+      <button type="button" className={btn(editor.isActive("italic"))} onClick={() => editor.chain().focus().toggleItalic().run()} title={t("italic", "Italic")}>
         <Italic className="h-4 w-4" />
       </button>
       <span className="mx-1 h-5 w-px bg-border" />
-      <button type="button" className={btn(editor.isActive("heading", { level: 2 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title="Heading 2">
+      <button type="button" className={btn(editor.isActive("heading", { level: 2 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} title={t("heading-2", "Heading 2")}>
         <Heading2 className="h-4 w-4" />
       </button>
-      <button type="button" className={btn(editor.isActive("heading", { level: 3 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} title="Heading 3">
+      <button type="button" className={btn(editor.isActive("heading", { level: 3 }))} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} title={t("heading-3", "Heading 3")}>
         <Heading3 className="h-4 w-4" />
       </button>
       <span className="mx-1 h-5 w-px bg-border" />
-      <button type="button" className={btn(editor.isActive("bulletList"))} onClick={() => editor.chain().focus().toggleBulletList().run()} title="Bullet list">
+      <button type="button" className={btn(editor.isActive("bulletList"))} onClick={() => editor.chain().focus().toggleBulletList().run()} title={t("bullet-list", "Bullet list")}>
         <List className="h-4 w-4" />
       </button>
-      <button type="button" className={btn(editor.isActive("orderedList"))} onClick={() => editor.chain().focus().toggleOrderedList().run()} title="Numbered list">
+      <button type="button" className={btn(editor.isActive("orderedList"))} onClick={() => editor.chain().focus().toggleOrderedList().run()} title={t("numbered-list", "Numbered list")}>
         <ListOrdered className="h-4 w-4" />
       </button>
-      <button type="button" className={btn(editor.isActive("blockquote"))} onClick={() => editor.chain().focus().toggleBlockquote().run()} title="Quote">
+      <button type="button" className={btn(editor.isActive("blockquote"))} onClick={() => editor.chain().focus().toggleBlockquote().run()} title={t("quote", "Quote")}>
         <Quote className="h-4 w-4" />
       </button>
-      <button type="button" className={btn(editor.isActive("link"))} onClick={setLink} title="Link">
+      <button type="button" className={btn(editor.isActive("link"))} onClick={setLink} title={t("link", "Link")}>
         <LinkIcon className="h-4 w-4" />
       </button>
       <span className="mx-1 h-5 w-px bg-border" />
-      <button type="button" className={btn(false)} onClick={() => editor.chain().focus().undo().run()} title="Undo">
+      <button type="button" className={btn(false)} onClick={() => editor.chain().focus().undo().run()} title={t("undo", "Undo")}>
         <Undo2 className="h-4 w-4" />
       </button>
-      <button type="button" className={btn(false)} onClick={() => editor.chain().focus().redo().run()} title="Redo">
+      <button type="button" className={btn(false)} onClick={() => editor.chain().focus().redo().run()} title={t("redo", "Redo")}>
         <Redo2 className="h-4 w-4" />
       </button>
     </div>

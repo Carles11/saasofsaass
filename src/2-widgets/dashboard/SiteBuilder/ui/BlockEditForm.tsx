@@ -216,6 +216,7 @@ export function BlockEditForm({
                   value={current[field.key] ?? ""}
                   resetKey={`${activeLocale}-${field.key}`}
                   dir={dir}
+                  translations={translations}
                   onChange={(html) => setField(field.key, html)}
                 />
               ) : (

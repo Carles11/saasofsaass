@@ -1,4 +1,5 @@
 import { SocialMediaRow } from "@/5-shared/ui/SocialMediaRow";
+import { getPlatformTranslations, resolveTranslation } from "@/5-shared/lib/db/platform-translations";
 import Image from "next/image";
 import type { BlockProps } from "../../../config/types";
 
@@ -10,7 +11,7 @@ function normalizeUrl(url: string): string {
   return `https://${trimmed}`;
 }
 
-export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
+export async function FooterBlock({ t, config, blockId, tenant, locale }: BlockProps) {
   const rawSocialLinks =
     (config.socialLinks as Array<{ label: string; url: string }>) ?? [];
   const socialLinks = rawSocialLinks.map((l) => ({
@@ -21,6 +22,12 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
   const copyright = `${tenant.name} © ${new Date().getFullYear()}`;
   const email = (config.email as string) ?? "";
   const phone = (config.phone as string) ?? "";
+
+  const blocksT = await getPlatformTranslations("tenant.blocks", locale);
+  const contactLabel = resolveTranslation(blocksT, "footer.contact", "Contact");
+  const socialLabel = resolveTranslation(blocksT, "footer.social", "Social");
+  const comingSoonLabel = resolveTranslation(blocksT, "footer.coming-soon", "Coming soon");
+  const noLinksYetLabel = resolveTranslation(blocksT, "footer.no-links-yet", "No links yet");
 
   const branding = (tenant.branding ?? {}) as Record<string, unknown>;
   const logoData = branding.logo as
@@ -76,7 +83,7 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
 
         {/* ── Center column: Contact ──────────────────────────────────── */}
         <div className="flex flex-col items-start gap-4">
-          <h3 className="text-sm font-semibold text-foreground">Contact</h3>
+          <h3 className="text-sm font-semibold text-foreground">{contactLabel}</h3>
           {email && (
             <a
               href={`mailto:${email}`}
@@ -94,15 +101,15 @@ export function FooterBlock({ t, config, blockId, tenant }: BlockProps) {
             </a>
           )}
           {!email && !phone && (
-            <p className="text-sm text-muted-foreground italic">Coming soon</p>
+            <p className="text-sm text-muted-foreground italic">{comingSoonLabel}</p>
           )}
         </div>
 
         {/* ── Right column: Social links ──────────────────────────────── */}
         <div className="flex flex-col items-start gap-4">
-          <h3 className="text-sm font-semibold text-foreground">Social</h3>
+          <h3 className="text-sm font-semibold text-foreground">{socialLabel}</h3>
           {socialLinks.length === 0 ? (
-            <p className="text-sm text-muted-foreground italic">No links yet</p>
+            <p className="text-sm text-muted-foreground italic">{noLinksYetLabel}</p>
           ) : (
             <SocialMediaRow links={socialLinks} />
           )}

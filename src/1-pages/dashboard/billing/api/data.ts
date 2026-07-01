@@ -71,7 +71,7 @@ export async function getBillingPageData(locale: string) {
   }
 
   const namespaced = await getPlatformTranslationsByNamespaces(
-    ["dashboard.billing"],
+    ["dashboard.billing", "errors"],
     locale,
   );
 
@@ -82,6 +82,9 @@ export async function getBillingPageData(locale: string) {
     nextPlan,
     currentSites,
     invoices,
-    translations: namespaced["dashboard.billing"],
+    translations: {
+      ...(namespaced["dashboard.billing"] ?? {}),
+      ...(namespaced.errors ?? {}),
+    },
   };
 }

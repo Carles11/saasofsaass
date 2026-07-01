@@ -17,7 +17,7 @@ export async function archiveTenant(tenantId: string) {
     .from(tenants)
     .where(eq(tenants.id, tenantId))
     .limit(1);
-  if (!t) throw new Error("Tenant not found");
+  if (!t) throw new Error("errors.tenant-not-found");
 
   await db.update(tenants).set({ status: "archived" }).where(eq(tenants.id, tenantId));
   await tenantCache.delete(`slug:${t.slug}`);
@@ -35,7 +35,7 @@ export async function restoreTenant(tenantId: string) {
     .from(tenants)
     .where(eq(tenants.id, tenantId))
     .limit(1);
-  if (!t) throw new Error("Tenant not found");
+  if (!t) throw new Error("errors.tenant-not-found");
 
   await db.update(tenants).set({ status: "draft" }).where(eq(tenants.id, tenantId));
   await tenantCache.delete(`slug:${t.slug}`);

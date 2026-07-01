@@ -14,7 +14,7 @@ import { getSiteLimit, PLAN_ORDER, type PlanId } from "@/5-shared/lib/billing/pl
  */
 export async function setWorkspacePlan(workspaceId: string, plan: string): Promise<void> {
   await assertSuperAdmin();
-  if (!PLAN_ORDER.includes(plan as PlanId)) throw new Error("Unknown plan");
+  if (!PLAN_ORDER.includes(plan as PlanId)) throw new Error("errors.unknown-plan");
 
   await db
     .update(workspaces)

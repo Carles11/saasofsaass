@@ -38,7 +38,7 @@ export async function DashboardPage({ locale }: { locale?: string }) {
     : [];
 
   const translations = await getPlatformTranslationsByNamespaces(
-    ["dashboard.page", "dashboard.create-tenant"],
+    ["dashboard.page", "dashboard.create-tenant", "dashboard.billing", "errors"],
     locale ?? "en",
   );
 
@@ -56,6 +56,11 @@ export async function DashboardPage({ locale }: { locale?: string }) {
     { count: userTenants.length },
   );
   const createTenantTranslations = translations["dashboard.create-tenant"];
+  const siteTableTranslations = {
+    ...(translations["dashboard.page"] ?? {}),
+    ...(translations["dashboard.billing"] ?? {}),
+    ...(translations.errors ?? {}),
+  };
 
   return (
     <main className="min-h-screen bg-background p-6 md:p-12">
@@ -88,6 +93,7 @@ export async function DashboardPage({ locale }: { locale?: string }) {
             subscriptionStatus={workspace.subscriptionStatus}
             stripeCustomerId={workspace.stripeCustomerId}
             nextPlan={getNextPlan(workspace.plan)}
+            translations={translations}
           />
         )}
         <SitesTable
@@ -96,6 +102,7 @@ export async function DashboardPage({ locale }: { locale?: string }) {
           manageableTenantIds={manageableTenantIds}
           locale={locale ?? "en"}
           domains={domains}
+          translations={siteTableTranslations}
         />
       </div>
     </main>

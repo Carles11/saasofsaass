@@ -142,7 +142,7 @@ export async function addBlock(tenantId: string, type: BlockKind) {
       .limit(1)
 
     if (existing) {
-      throw new Error(`A ${type} section already exists and cannot be duplicated.`)
+      throw new Error("errors.block-already-exists")
     }
   }
 
@@ -184,7 +184,7 @@ export async function deleteBlock(blockId: string, tenantId: string) {
     .limit(1)
 
   if (block && (block.type === "hero" || block.type === "footer")) {
-    throw new Error("Hero and Footer sections cannot be removed.")
+    throw new Error("errors.block-cannot-remove-hero-footer")
   }
 
   await db.delete(blocks).where(eq(blocks.id, blockId))
@@ -203,9 +203,9 @@ export async function updateTenantDefaultLocale(tenantId: string, locale: string
     .from(tenants)
     .where(eq(tenants.id, tenantId))
     .limit(1)
-  if (!tenant) throw new Error("Tenant not found")
+  if (!tenant) throw new Error("errors.tenant-not-found")
   if (!tenant.locales.includes(locale)) {
-    throw new Error("The default language must be one of the enabled languages.")
+    throw new Error("errors.default-language-invalid")
   }
 
   await db
@@ -235,7 +235,7 @@ export async function updateTenantLocales(
   const langLimit = getLimit(plan, "languagesPerSite")
   if (!isUnlimited(langLimit) && locales.length > langLimit && locales.length > prevLocales.length) {
     throw new Error(
-      `Your plan allows ${langLimit} languages per site. Upgrade to add more.`,
+      "errors.language-limit-reached",
     )
   }
 

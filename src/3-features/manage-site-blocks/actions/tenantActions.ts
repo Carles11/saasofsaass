@@ -13,7 +13,7 @@ export async function updateTenantTemplate(tenantId: string, templateId: TenantT
 
   const template = TEMPLATES[templateId];
   if (!template) {
-    throw new Error(`Unknown template "${templateId}".`);
+    throw new Error("errors.unknown-template");
   }
 
   if (template.gating.isPremium) {
@@ -25,7 +25,7 @@ export async function updateTenantTemplate(tenantId: string, templateId: TenantT
     const plan = await getPlanForWorkspace(row?.workspaceId ?? null);
     if (!hasFeature(plan, "premiumTemplates")) {
       throw new Error(
-        `This template requires a paid plan. Upgrade to use "${template.meta.id}".`,
+        "errors.template-requires-paid",
       );
     }
   }

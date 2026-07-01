@@ -17,7 +17,7 @@ export async function updateTenantSeo(tenantId: string, seoEnabled: boolean) {
     .where(eq(tenants.id, tenantId))
     .limit(1);
 
-  if (!tenant) throw new Error("Tenant not found");
+  if (!tenant) throw new Error("errors.tenant-not-found");
 
   const [workspace] = tenant.workspaceId
     ? await db
@@ -32,7 +32,7 @@ export async function updateTenantSeo(tenantId: string, seoEnabled: boolean) {
   // Plan gate: only plans eligible for indexing can control it. Free sites are
   // never indexed, so the toggle is meaningless for them.
   if (!hasFeature(plan, "searchIndexing")) {
-    throw new Error("Search engine indexing is available on Pro and Enterprise plans.");
+    throw new Error("errors.seo-pro-required");
   }
 
   await db

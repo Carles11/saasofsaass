@@ -24,10 +24,10 @@ export async function deleteTenant(tenantId: string, confirmName: string) {
     .from(tenants)
     .where(eq(tenants.id, tenantId))
     .limit(1);
-  if (!t) throw new Error("Tenant not found");
+  if (!t) throw new Error("errors.tenant-not-found");
 
   if (confirmName.trim() !== t.name) {
-    throw new Error("The name you typed doesn't match the site name.");
+    throw new Error("errors.name-mismatch");
   }
 
   // Collect S3 keys (image tables aren't FK-cascaded).

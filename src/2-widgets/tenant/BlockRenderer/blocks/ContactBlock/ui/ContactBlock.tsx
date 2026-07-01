@@ -1,4 +1,5 @@
 import { Mail, MapPin, Phone } from "lucide-react";
+import { getPlatformTranslations, resolveTranslation } from "@/5-shared/lib/db/platform-translations";
 import type { BlockProps } from "../../../config/types";
 
 interface ContactConfig {
@@ -7,9 +8,13 @@ interface ContactConfig {
   address?: string;
 }
 
-export function ContactBlock({ config, t, blockId }: BlockProps) {
+export async function ContactBlock({ config, t, blockId, locale }: BlockProps) {
   const { email, phone, address } = config as ContactConfig;
   const hasDetails = email || phone || address;
+  const blocksT = await getPlatformTranslations("tenant.blocks", locale);
+  const emailLabel = resolveTranslation(blocksT, "contact.email", "Email");
+  const phoneLabel = resolveTranslation(blocksT, "contact.phone", "Phone");
+  const addressLabel = resolveTranslation(blocksT, "contact.address", "Address");
 
   return (
     <section id={blockId} className="py-20 sm:py-28 px-6 bg-secondary/40">
@@ -39,7 +44,7 @@ export function ContactBlock({ config, t, blockId }: BlockProps) {
             {email && (
               <ContactCard
                 icon={<Mail className="h-5 w-5" />}
-                label="Email"
+                label={emailLabel}
                 href={`mailto:${email}`}
                 value={email}
               />
@@ -47,7 +52,7 @@ export function ContactBlock({ config, t, blockId }: BlockProps) {
             {phone && (
               <ContactCard
                 icon={<Phone className="h-5 w-5" />}
-                label="Phone"
+                label={phoneLabel}
                 href={`tel:${phone}`}
                 value={phone}
               />
@@ -55,7 +60,7 @@ export function ContactBlock({ config, t, blockId }: BlockProps) {
             {address && (
               <ContactCard
                 icon={<MapPin className="h-5 w-5" />}
-                label="Address"
+                label={addressLabel}
                 value={address}
               />
             )}
