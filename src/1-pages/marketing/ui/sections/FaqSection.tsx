@@ -60,7 +60,7 @@ export function FaqSection({ translations }: FaqSectionProps) {
       a: resolveTranslation(
         translations,
         "q1.answer",
-        "Not at all. If you can use a word processor, you can use SofS. You set up the site structure once using our visual builder, and your client handles everything after that.",
+        "Not at all. If you can use a word processor, you can use SoSs. You set up the site structure once using our visual builder, and your client handles everything after that.",
       ),
     },
     {

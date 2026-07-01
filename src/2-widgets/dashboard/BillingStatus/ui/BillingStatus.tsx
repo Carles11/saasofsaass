@@ -10,8 +10,7 @@ import {
   PLAN_LABELS,
   type PlanId,
 } from "@/5-shared/lib/billing/plans";
-import { resolveTranslation } from "@/5-shared/lib/db/platform-translations";
-import type { TranslationDict } from "@/5-shared/lib/db/platform-translations";
+import { resolveTranslation, type TranslationDict } from "@/5-shared/lib/translations/resolve";
 
 interface BillingStatusProps {
   workspaceId: string;
